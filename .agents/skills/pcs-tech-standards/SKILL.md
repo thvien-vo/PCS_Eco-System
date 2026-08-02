@@ -61,3 +61,57 @@ Required pattern: either (a) create the store with `persist(..., { skipHydration
 b. Chart Libraries (Recharts or equivalent): any file in `app/` is a Server Component by default and cannot run Recharts, which depends on client-only hooks and DOM measurement (`window`, `ResizeObserver`). Any component using Recharts MUST:
   - start with `'use client';` as the first line, AND
   - when the chart is wrapped by `ResponsiveContainer` and rendered on a route where initial layout width matters (Module 4 Green Wallet, Module 8 B2B Insight), import it via `next/dynamic` with `{ ssr: false }` to avoid a 0-width flash on first paint — this is a rendering-quality fix, not a crash-prevention fix; the `'use client'` directive alone is what prevents the hard crash, the dynamic import only prevents the visual flicker.
+
+## 11. DEV SERVER EXECUTION RULES (CRITICAL — NEVER VIOLATE)
+
+`npm run dev` is a long-running, non-terminating process. It will NEVER exit on its own. Invoking it as a blocking terminal call causes an infinite hang. The following rules are MANDATORY for every session:
+
+### 11a. Always check the port is free first
+Before starting the dev server, always run:
+```powershell
+netstat -ano | findstr :3000
+```
+- If the output is empty (exit code 1 / no matches): port is free, proceed.
+- If any PID is listed as LISTENING: report the PID and STOP — do not start until the user confirms it is cleared.
+
+### 11b. Start the server in background (non-blocking) mode
+OPTION 1 — PREFERRED: Use the terminal tool's native `IsDaemon: true` flag. This returns control immediately and keeps the process running in the background:
+```
+run_command(CommandLine="npm run dev", IsDaemon=true, WaitMsBeforeAsync=3000)
+```
+The tool returns a background task ID. Use `manage_task(Action="kill", TaskId=...)` to terminate it when done.
+
+OPTION 2 — FALLBACK (only if IsDaemon is unavailable): Start as a detached Windows process:
+```powershell
+$proc = Start-Process -FilePath "npm.cmd" -ArgumentList "run","dev" `
+  -RedirectStandardOutput "dev.log" -RedirectStandardError "dev-error.log" `
+  -WindowStyle Hidden -PassThru
+$proc.Id | Out-File "dev-server.pid"
+```
+This returns immediately. Kill later with: `taskkill /PID (Get-Content dev-server.pid) /F`
+
+### 11c. Verify readiness with bounded polling (never open-ended)
+After starting the server, verify it is ready using at most 5 attempts with a timeout per attempt:
+```powershell
+$maxAttempts = 5; $attempt = 0; $success = $false
+while ($attempt -lt $maxAttempts -and -not $success) {
+    $attempt++
+    try {
+        $res = Invoke-WebRequest -Uri "http://localhost:3000" -UseBasicParsing -TimeoutSec 5
+        Write-Host "Attempt ${attempt} - HTTP $($res.StatusCode) - UP"; $success = $true
+    } catch {
+        Write-Host "Attempt ${attempt} - Not ready - $($_.Exception.Message)"
+        if ($attempt -lt $maxAttempts) { Start-Sleep -Seconds 4 }
+    }
+}
+if (-not $success) { Write-Host "FAILED — report log contents and stop." }
+```
+- Only proceed once a successful HTTP response is received.
+- If still failing after 5 attempts (~25-30s total): STOP and report the log. Do not retry indefinitely.
+
+### 11d. Always clean up the background server
+When verification work for a turn is complete, explicitly kill the background server:
+- IsDaemon approach: `manage_task(Action="kill", TaskId="<task-id>")`
+- Detached process approach: `taskkill /PID (Get-Content dev-server.pid) /F`
+
+Exception: leave the server running only when the user explicitly says "leave it running for me to test."
