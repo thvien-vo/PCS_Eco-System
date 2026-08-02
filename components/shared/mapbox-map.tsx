@@ -1,0 +1,285 @@
+'use client';
+
+/**
+ * MapboxMap — Mapbox GL JS map component for Module 2.
+ *
+ * CRITICAL SAFEGUARDS:
+ * - Must be loaded via next/dynamic({ ssr: false }) — Mapbox uses window/DOM APIs.
+ * - ResizeObserver on the container calls map.resize() when phone-frame layout shifts.
+ * - Popup content uses NO sensor-related technical terminology (per pcs-design-system §9).
+ */
+
+import { useEffect, useRef, useCallback } from 'react';
+import mapboxgl from 'mapbox-gl';
+import { useTheme } from 'next-themes';
+import type { Station } from '@/types';
+
+// ── Status helpers (NO sensor jargon — user-facing labels only) ──
+const STATUS_CONFIG = {
+  green: {
+    color: '#22C55E',
+    glowColor: 'rgba(34,197,94,0.5)',
+    label: 'Hoạt động tốt',
+    labelEn: 'green',
+  },
+  yellow: {
+    color: '#F59E0B',
+    glowColor: 'rgba(245,158,11,0.5)',
+    label: 'Sắp đầy / Ít phần thưởng',
+    labelEn: 'yellow',
+  },
+  red: {
+    color: '#EF4444',
+    glowColor: 'rgba(239,68,68,0.5)',
+    label: 'Tạm ngưng hoạt động',
+    labelEn: 'red',
+  },
+} as const;
+
+interface MapboxMapProps {
+  stations: Station[];
+  center?: [number, number];
+  zoom?: number;
+}
+
+function formatDistance(km: number): string {
+  if (km < 1) return `${Math.round(km * 1000)}m`;
+  return `${km.toFixed(1)}km`;
+}
+
+export function MapboxMap({ stations, center = [106.7009, 10.7769], zoom = 12 }: MapboxMapProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const popupsRef = useRef<mapboxgl.Popup[]>([]);
+  const { resolvedTheme } = useTheme();
+
+  const getMapStyle = useCallback((currentTheme: string | undefined) => {
+    const isDark = currentTheme === 'dark';
+    return isDark
+      ? 'mapbox://styles/mapbox/dark-v11'
+      : 'mapbox://styles/mapbox/light-v11';
+  }, []);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+
+    if (!token) {
+      // No token — render a placeholder instead of crashing
+      return;
+    }
+
+    mapboxgl.accessToken = token;
+
+    const map = new mapboxgl.Map({
+      container: containerRef.current,
+      style: getMapStyle(resolvedTheme),
+      center,
+      zoom,
+      attributionControl: false,
+    });
+
+    mapRef.current = map;
+
+    map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right');
+    map.addControl(
+      new mapboxgl.AttributionControl({ compact: true }),
+      'bottom-left'
+    );
+
+    map.on('load', () => {
+      stations.forEach((station) => {
+        const cfg = STATUS_CONFIG[station.status];
+
+        // Create glowing pin element
+        const el = document.createElement('div');
+        el.className = 'pcs-station-pin';
+        el.setAttribute('aria-label', `Trạm PCS: ${station.name}`);
+        el.style.cssText = `
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background-color: ${cfg.color};
+          border: 3px solid white;
+          box-shadow: 0 0 0 2px ${cfg.color}, 0 0 12px ${cfg.glowColor};
+          cursor: pointer;
+          position: relative;
+        `;
+
+        // Pulse ring
+        const ring = document.createElement('div');
+        ring.style.cssText = `
+          position: absolute;
+          inset: -6px;
+          border-radius: 50%;
+          background-color: ${cfg.glowColor};
+          animation: pin-pulse 2s ease-in-out infinite;
+        `;
+        el.appendChild(ring);
+
+        // Build popup HTML (no sensor jargon per design system §9)
+        const rewardText =
+          station.rewardsRemaining > 0
+            ? `<span style="color: #22C55E; font-weight: 600;">${station.rewardsRemaining} phần thưởng còn lại</span>`
+            : `<span style="color: #EF4444; font-weight: 600;">Hết phần thưởng</span>`;
+
+        const popupHTML = `
+          <div style="
+            font-family: Inter, sans-serif;
+            min-width: 220px;
+            padding: 4px;
+          ">
+            <div style="
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              margin-bottom: 10px;
+            ">
+              <div style="
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background-color: ${cfg.color};
+                box-shadow: 0 0 6px ${cfg.glowColor};
+                flex-shrink: 0;
+              "></div>
+              <span style="
+                font-size: 11px;
+                font-weight: 600;
+                color: ${cfg.color};
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+              ">${cfg.label}</span>
+            </div>
+
+            <h3 style="
+              font-size: 14px;
+              font-weight: 700;
+              margin: 0 0 4px;
+              color: inherit;
+              line-height: 1.3;
+            ">${station.name}</h3>
+
+            <p style="
+              font-size: 12px;
+              color: #64748B;
+              margin: 0 0 12px;
+            ">${station.address}</p>
+
+            <div style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              padding: 8px 10px;
+              background: rgba(16,185,129,0.08);
+              border-radius: 8px;
+              margin-bottom: 10px;
+              font-size: 12px;
+            ">
+              <span style="color: #64748B;">📍 ${formatDistance(station.distanceKm)} từ bạn</span>
+              <span>${rewardText}</span>
+            </div>
+
+            <a
+              href="https://maps.google.com/?q=${station.coordinates[1]},${station.coordinates[0]}"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="
+                display: block;
+                text-align: center;
+                background: #059669;
+                color: white;
+                text-decoration: none;
+                padding: 9px;
+                border-radius: 8px;
+                font-size: 12px;
+                font-weight: 600;
+                transition: background 0.15s;
+              "
+              onmouseover="this.style.background='#047857'"
+              onmouseout="this.style.background='#059669'"
+            >
+              🧭 Chỉ đường
+            </a>
+          </div>
+        `;
+
+        const popup = new mapboxgl.Popup({
+          offset: 20,
+          maxWidth: '280px',
+          className: 'pcs-mapbox-popup',
+        }).setHTML(popupHTML);
+
+        popupsRef.current.push(popup);
+
+        new mapboxgl.Marker({ element: el })
+          .setLngLat(station.coordinates)
+          .setPopup(popup)
+          .addTo(map);
+      });
+    });
+
+    // ResizeObserver to handle phone-frame layout shifts
+    const observer = new ResizeObserver(() => {
+      map.resize();
+    });
+    observer.observe(containerRef.current);
+
+    return () => {
+      observer.disconnect();
+      popupsRef.current.forEach((p) => p.remove());
+      popupsRef.current = [];
+      map.remove();
+      mapRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Swap map style when theme changes (without full remount)
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const newStyle = getMapStyle(resolvedTheme);
+    try {
+      map.setStyle(newStyle);
+    } catch {
+      // Ignore if map is not yet loaded
+    }
+  }, [resolvedTheme, getMapStyle]);
+
+  const hasToken = Boolean(process.env.NEXT_PUBLIC_MAPBOX_TOKEN);
+
+  if (!hasToken) {
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-card to-background p-6 text-center">
+        <div className="text-4xl">🗺️</div>
+        <h3 className="font-semibold text-foreground">Bản đồ cần cấu hình</h3>
+        <p className="max-w-xs text-xs text-muted-foreground leading-relaxed">
+          Thêm <code className="rounded bg-border px-1 py-0.5 font-mono">NEXT_PUBLIC_MAPBOX_TOKEN</code>{' '}
+          vào <code className="rounded bg-border px-1 py-0.5 font-mono">.env.local</code> để xem bản đồ tương tác.
+        </p>
+        <div className="mt-2 w-full max-w-xs space-y-2 rounded-xl border border-border bg-card p-3">
+          <p className="text-xs font-semibold text-foreground">Vị trí trạm (demo):</p>
+          {stations.map((s) => {
+            const cfg = STATUS_CONFIG[s.status];
+            return (
+              <div key={s.id} className="flex items-center gap-2 text-xs">
+                <span
+                  className="h-2.5 w-2.5 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: cfg.color }}
+                />
+                <span className="truncate text-muted-foreground">{s.name}</span>
+                <span className="ml-auto text-[10px]" style={{ color: cfg.color }}>
+                  {cfg.label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  return <div ref={containerRef} className="h-full w-full" />;
+}

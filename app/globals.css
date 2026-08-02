@@ -1,0 +1,204 @@
+@import 'mapbox-gl/dist/mapbox-gl.css';
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   PCS DESIGN TOKENS — CSS Custom Properties
+   Source of truth for the entire color system.
+   Light mode defaults; .dark class overrides below.
+   ============================================================ */
+@layer base {
+  :root {
+    /* ── Semantic layout colors (theme-aware) ── */
+    --background: #f8fafc;
+    --foreground: #0f172a;
+    --card: #ffffff;
+    --card-foreground: #0f172a;
+    --border: #e2e8f0;
+    --muted-foreground: #64748b;
+    --text-muted: #64748b;
+
+    /* ── Brand & accent ── */
+    --primary-emerald: #059669;
+    --emerald-hover: #047857;
+    --neon-mint: #10b981;
+
+    /* ── Dedicated state colors ── */
+    --kiosk-pass: #22c55e;
+    --warning-amber: #f59e0b;
+    --error-rose: #ef4444;
+
+    /* ── Spacing / radius ── */
+    --radius: 1rem;
+
+    /* ── Phone frame shell (desktop bezel) ── */
+    --frame-bezel: #1c1c1e;
+  }
+
+  .dark {
+    /* ── Dark mode overrides — same variable names, different values ── */
+    --background: #0f172a;
+    --foreground: #f8fafc;
+    --card: #1e293b;
+    --card-foreground: #f8fafc;
+    --border: #334155;
+    --muted-foreground: #94a3b8;
+    --text-muted: #94a3b8;
+  }
+}
+
+/* ============================================================
+   GLOBAL BASE STYLES
+   ============================================================ */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    @apply border-border box-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+
+  /* Typography scale (per pcs-design-system §5) */
+  h1 {
+    @apply text-2xl font-bold leading-tight tracking-tight;
+  }
+  h2 {
+    @apply text-lg font-semibold leading-snug;
+  }
+  h3 {
+    @apply text-base font-semibold;
+  }
+  p,
+  li {
+    @apply text-sm leading-relaxed;
+  }
+  small,
+  caption {
+    @apply text-xs text-muted-foreground;
+  }
+}
+
+/* ============================================================
+   UTILITY CLASSES
+   ============================================================ */
+@layer utilities {
+  /* Safe area inset for iOS bottom bar */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Gradient text utility */
+  .text-gradient {
+    background: linear-gradient(135deg, var(--primary-emerald) 0%, var(--neon-mint) 60%, #34d399 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Glowing neon card border on hover */
+  .glow-border {
+    box-shadow: 0 0 0 1px var(--neon-mint), 0 0 16px rgba(16, 185, 129, 0.25);
+  }
+
+  /* Shimmer animation for skeleton loading */
+  .shimmer {
+    background: linear-gradient(90deg, var(--border) 25%, var(--card) 50%, var(--border) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  /* Station pin pulse ring animation */
+  @keyframes pin-pulse {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 0.8;
+    }
+    50% {
+      transform: scale(1.6);
+      opacity: 0;
+    }
+  }
+
+  .animate-pin-pulse {
+    animation: pin-pulse 2s ease-in-out infinite;
+  }
+
+  /* Counter increment animation */
+  @keyframes count-up {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-count-up {
+    animation: count-up 0.6s ease-out both;
+  }
+
+  /* Scrollbar hide for filter pill rows */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ============================================================
+   MAPBOX GL JS — Popup overrides (theme-aware)
+   ============================================================ */
+.pcs-mapbox-popup .mapboxgl-popup-content {
+  background: var(--card);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.16);
+}
+
+.dark .pcs-mapbox-popup .mapboxgl-popup-content {
+  background: var(--card);
+  border-color: var(--border);
+}
+
+.pcs-mapbox-popup .mapboxgl-popup-tip {
+  border-top-color: var(--card);
+}
+
+.dark .pcs-mapbox-popup .mapboxgl-popup-tip {
+  border-top-color: var(--card);
+}
+
+/* PCS station pin pulse ring (defined here so it's available in JS-created DOM nodes) */
+@keyframes pin-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(2.2); opacity: 0; }
+}
