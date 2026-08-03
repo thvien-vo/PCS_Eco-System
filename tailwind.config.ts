@@ -46,7 +46,10 @@ const config: Config = {
         'pin-glow-green': '0 0 12px rgba(34,197,94,0.7)',
         'pin-glow-yellow': '0 0 12px rgba(245,158,11,0.7)',
         'pin-glow-red': '0 0 12px rgba(239,68,68,0.7)',
-        card: '0 2px 12px rgba(0,0,0,0.06)',
+        card: '0 4px 20px rgba(0,0,0,0.05)',
+      },
+      backgroundImage: {
+        'mint-pop': 'linear-gradient(135deg, var(--primary-emerald) 0%, var(--neon-mint) 50%, #22d3ee 100%)',
       },
       animation: {
         'spin-slow': 'spin 3s linear infinite',

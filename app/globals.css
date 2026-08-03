@@ -13,9 +13,9 @@
 @layer base {
   :root {
     /* ── Semantic layout colors (theme-aware) ── */
-    --background: #f8fafc;
+    --background: #ffffff;
     --foreground: #0f172a;
-    --card: #ffffff;
+    --card: #f8fafc;
     --card-foreground: #0f172a;
     --border: #e2e8f0;
     --muted-foreground: #64748b;
@@ -100,9 +100,9 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
-  /* Gradient text utility */
+  /* Gradient text utility (Mint Pop signature) */
   .text-gradient {
-    background: linear-gradient(135deg, var(--primary-emerald) 0%, var(--neon-mint) 60%, #34d399 100%);
+    background: linear-gradient(135deg, var(--primary-emerald) 0%, var(--neon-mint) 50%, #22d3ee 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;

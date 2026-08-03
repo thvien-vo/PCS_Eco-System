@@ -24,15 +24,17 @@ description: Design system, UI/UX rules, the 8-module structure, the Vietnamese/
 - Charts: Recharts (MUST use `'use client'` + `next/dynamic` with `{ ssr: false }`).
 - QR Generation: `qrcode.react`.
 
-## 4. The FULL color table
+## 4. The FULL color table (Mint Pop Direction)
+*Approved Direction:* "Mint Pop" (Clean, crisp, playful, social-app-like). Pure white background, subtle cool-gray cards, neon-mint highlights, and cyan-infused emerald gradients.
+
 | Variable Name | Hex Code | Usage Role |
 | --- | --- | --- |
-| `--primary-emerald` | `#059669` | Primary brand green, key CTAs, active states |
+| `--primary-emerald` | `#059669` | Primary brand green, key CTAs, typography |
 | `--emerald-hover` | `#047857` | Hover state for primary buttons |
-| `--neon-mint` | `#10B981` | Accent highlights, secondary badges |
-| `--bg-light` | `#F8FAFC` | Light mode global background |
+| `--neon-mint` | `#10B981` | Accent highlights, active states, glowing badges |
+| `--bg-light` | `#FFFFFF` | Light mode global background (Mint Pop base) |
 | `--bg-dark` | `#0F172A` | Dark mode global background |
-| `--card-light` | `#FFFFFF` | Light mode card background |
+| `--card-light` | `#F8FAFC` | Light mode card background (subtle depth) |
 | `--card-dark` | `#1E293B` | Dark mode card background |
 | `--text-primary-light` | `#0F172A` | Light mode primary text |
 | `--text-primary-dark` | `#F8FAFC` | Dark mode primary text |
@@ -42,6 +44,8 @@ description: Design system, UI/UX rules, the 8-module structure, the Vietnamese/
 | `--kiosk-pass` | `#22C55E` | SUCCESS state strictly inside Module 7 Kiosk |
 | `--warning-amber` | `#F59E0B` | Warning state, medium severity REJECT |
 | `--error-rose` | `#EF4444` | High severity REJECT, error messages |
+
+*Signature Gradient:* `.bg-gradient-mint-pop` / `bg-gradient-to-br from-emerald via-mint to-cyan-400` used for hero banners and gamification elements.
 
 ## 5. Layout & Typography rules
 - Layout Structure: Simulated mobile phone-frame mockup on desktop view (auto-hidden on real mobile screens <= 480px via CSS media query). Bottom navigation bar fixed at the bottom.
