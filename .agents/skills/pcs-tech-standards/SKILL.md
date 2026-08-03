@@ -45,9 +45,9 @@ description: Technical standards, folder structure, coding conventions, Design T
 - The agent must run lint before declaring any module "complete".
 
 ## 8. Git Workflow
-- Use one branch per module: `feature/module-N-module-name`.
 - Commit messages in the format: `feat(module-N): short description`.
-- Only merge into `main` after a module has passed its own QA review.
+- For this solo project, push directly to `main` and skip feature branches.
+- IMMEDIATELY after a module commit instruction says `feat(module-N): ...`, the agent MUST run `git push origin main` to sync the work to the remote repository.
 
 ## 9. Root README.md
 - Must include a project description.

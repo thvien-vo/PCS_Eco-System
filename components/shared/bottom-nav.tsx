@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Map, Rss, Wallet, Trophy, Gift } from 'lucide-react';
+import { Map, Rss, Wallet, Trophy, Gift, ScanLine } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
@@ -15,6 +15,7 @@ const tabs = [
   { name: 'Cộng đồng', href: '/feed', icon: Rss },
   { name: 'Ví Xanh', href: '/wallet', icon: Wallet },
   { name: 'Thử thách', href: '/challenge', icon: Trophy },
+  { name: 'Kiosk', href: '/kiosk', icon: ScanLine },
   { name: 'Đổi quà', href: '/marketplace', icon: Gift },
 ] as const;
 
