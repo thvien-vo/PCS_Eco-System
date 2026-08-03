@@ -104,7 +104,7 @@ export default function LandingPage() {
       {/* ── HERO SECTION ── */}
       <section className="relative overflow-hidden">
         {/* Gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#064e3b] via-[#065f46] to-[#047857]" />
+        <div className="absolute inset-0 bg-mint-pop" />
         {/* Decorative circles */}
         <div className="absolute -right-24 -top-24 h-96 w-96 rounded-full bg-white/5 blur-3xl" />
         <div className="absolute -bottom-16 -left-16 h-72 w-72 rounded-full bg-[var(--neon-mint)]/10 blur-3xl" />
@@ -280,7 +280,7 @@ export default function LandingPage() {
 
       {/* ── CTA BANNER ── */}
       <section className="relative overflow-hidden py-20">
-        <div className="absolute inset-0 bg-gradient-to-r from-[var(--primary-emerald)] to-[var(--neon-mint)]" />
+        <div className="absolute inset-0 bg-mint-pop" />
         <div className="absolute inset-0 bg-[url('https://picsum.photos/seed/green-bg/1200/400')] bg-cover bg-center opacity-10" />
 
         <motion.div

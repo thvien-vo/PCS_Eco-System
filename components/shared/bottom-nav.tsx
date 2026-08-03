@@ -5,6 +5,11 @@ import { usePathname } from 'next/navigation';
 import { Map, Rss, Wallet, Trophy, Gift } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+/**
+ * BottomNav — Module 2–6 navigation only.
+ * Module 1 (Landing/Team) is a full-width route, NOT in this nav.
+ * Per pcs-design-system §5 and §9.
+ */
 const tabs = [
   { name: 'Bản đồ', href: '/map', icon: Map },
   { name: 'Cộng đồng', href: '/feed', icon: Rss },

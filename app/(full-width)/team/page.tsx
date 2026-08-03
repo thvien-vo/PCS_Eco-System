@@ -114,23 +114,21 @@ function TeamCard({ member, index }: { member: TeamMember; index: number }) {
       <div className="flex flex-col items-center text-center">
         <div
           className={[
-            'relative mb-4 overflow-hidden rounded-full',
-            isAdvisor ? 'h-24 w-24 ring-4 ring-[var(--neon-mint)]/40' : 'h-20 w-20',
-            member.isUiDesigner ? 'ring-4 ring-purple-400/40' : '',
+            'relative mb-4 rounded-full',
+            isAdvisor ? 'h-24 w-24' : 'h-20 w-20',
           ].join(' ')}
         >
-          {/* Gradient ring for advisor */}
-          {isAdvisor && (
-            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[var(--primary-emerald)] to-[var(--neon-mint)] p-0.5">
-              <div className="h-full w-full rounded-full bg-card" />
-            </div>
-          )}
+          {/* Mint Pop Story Ring for all members */}
+          <div className="absolute inset-0 rounded-full bg-mint-pop p-[3px] shadow-sm">
+            <div className="h-full w-full rounded-full bg-card" />
+          </div>
+          
           <Image
             src={member.avatarUrl}
             alt={`Ảnh đại diện của ${member.name}`}
             width={isAdvisor ? 96 : 80}
             height={isAdvisor ? 96 : 80}
-            className="relative z-10 rounded-full object-cover"
+            className="relative z-10 h-full w-full rounded-full object-cover p-1.5"
           />
         </div>
 
