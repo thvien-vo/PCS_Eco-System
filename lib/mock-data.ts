@@ -1,4 +1,13 @@
-import type { Station, Voucher, FeedPost, LeaderboardEntry, ChallengeCard } from '@/types';
+import type {
+  Station,
+  Voucher,
+  FeedPost,
+  LeaderboardEntry,
+  ChallengeCard,
+  GreenStory,
+  MemberTierInfo,
+  FriendForGifting,
+} from '@/types';
 
 // ---------------------------------------------------------------------------
 // Module 2 — PCS Station Map
@@ -71,92 +80,309 @@ export const MOCK_STATIONS: Station[] = [
 
 // ---------------------------------------------------------------------------
 // Module 3 & 6 — Vouchers
+// Flash sale `expiresAt` is set ~48 hours from a reference point so the
+// countdown is always meaningful in demo mode.
 // ---------------------------------------------------------------------------
+
+/** Returns ISO string N hours from now, anchored to call time. */
+function hoursFromNow(h: number): string {
+  return new Date(Date.now() + h * 3_600_000).toISOString();
+}
+
 export const MOCK_VOUCHERS: Voucher[] = [
   {
     id: 'v1',
-    sponsorName: 'The Coffee House',
+    sponsorName: 'Đối Tác Cà Phê A',
     title: 'Giảm 20% Thức Uống',
     pointsCost: 150,
-    imageUrl: 'https://picsum.photos/seed/tch/400/200',
+    imageUrl: 'https://picsum.photos/seed/voucher-coffee/400/200',
     isFlashSale: false,
   },
   {
     id: 'v2',
-    sponsorName: 'Highlands Coffee',
-    title: 'Mua 1 Tặng 1',
+    sponsorName: 'Đối Tác Đồ Uống B',
+    title: 'Mua 1 Tặng 1 (Flash Sale)',
     pointsCost: 200,
-    imageUrl: 'https://picsum.photos/seed/highlands/400/200',
+    imageUrl: 'https://picsum.photos/seed/voucher-drink/400/200',
     isFlashSale: true,
-    expiresAt: '2026-08-05T00:00:00Z',
+    expiresAt: hoursFromNow(3.5), // Flash sale ends in 3h30m from page load
   },
   {
     id: 'v3',
     sponsorName: 'Cửa hàng Xanh',
     title: 'Túi Tote Sinh Thái',
     pointsCost: 500,
-    imageUrl: 'https://picsum.photos/seed/tote/400/200',
+    imageUrl: 'https://picsum.photos/seed/voucher-tote/400/200',
     isFlashSale: false,
   },
   {
     id: 'v4',
-    sponsorName: 'Circle K',
-    title: 'Giảm 10k Đơn hàng',
+    sponsorName: 'Đối Tác Chuỗi Tiện Lợi C',
+    title: 'Giảm 10.000đ Đơn hàng',
     pointsCost: 80,
-    imageUrl: 'https://picsum.photos/seed/circlek/400/200',
+    imageUrl: 'https://picsum.photos/seed/voucher-store/400/200',
     isFlashSale: false,
   },
   {
     id: 'v5',
-    sponsorName: 'Bách Hóa Xanh',
-    title: 'Giảm 15% Thực phẩm',
+    sponsorName: 'Siêu thị Sinh Thái D',
+    title: 'Giảm 15% Thực phẩm Hữu cơ',
     pointsCost: 300,
-    imageUrl: 'https://picsum.photos/seed/bhx/400/200',
+    imageUrl: 'https://picsum.photos/seed/voucher-organic/400/200',
     isFlashSale: true,
-    expiresAt: '2026-08-06T00:00:00Z',
+    expiresAt: hoursFromNow(1.25), // Flash sale ends in 1h15m from page load
+  },
+  {
+    id: 'v6',
+    sponsorName: 'Thương Hiệu Xanh E',
+    title: 'Ưu đãi Tái chế 30%',
+    pointsCost: 400,
+    imageUrl: 'https://picsum.photos/seed/voucher-green/400/200',
+    isFlashSale: false,
   },
 ];
 
 // ---------------------------------------------------------------------------
-// Module 3 — Feed Posts
+// Module 3 — Flash Sale anchor (independent of MOCK_VOUCHERS so the bar
+// always shows a live countdown even if vouchers change).
+// Stored as a fixed epoch ms so it doesn't drift across re-renders.
+// ---------------------------------------------------------------------------
+export const FLASH_SALE_ENDS_AT: number = Date.now() + 3.5 * 3_600_000;
+
+// ---------------------------------------------------------------------------
+// Module 3 — Green Stories (6 mock stories)
+// ---------------------------------------------------------------------------
+export const MOCK_STORIES: GreenStory[] = [
+  {
+    id: 'story-1',
+    authorName: 'Minh Anh',
+    authorAvatar: 'https://picsum.photos/seed/avatar-1/80/80',
+    stationName: 'Trạm Quận 1',
+    isViewed: false,
+  },
+  {
+    id: 'story-2',
+    authorName: 'Thu Hà',
+    authorAvatar: 'https://picsum.photos/seed/avatar-2/80/80',
+    stationName: 'Trạm Bình Thạnh',
+    isViewed: false,
+  },
+  {
+    id: 'story-3',
+    authorName: 'Đức Anh',
+    authorAvatar: 'https://picsum.photos/seed/avatar-3/80/80',
+    stationName: 'Trạm Phú Nhuận',
+    isViewed: false,
+  },
+  {
+    id: 'story-4',
+    authorName: 'Lan Hương',
+    authorAvatar: 'https://picsum.photos/seed/avatar-4/80/80',
+    stationName: 'Trạm Tân Bình',
+    isViewed: true,
+  },
+  {
+    id: 'story-5',
+    authorName: 'Quốc Bảo',
+    authorAvatar: 'https://picsum.photos/seed/avatar-5/80/80',
+    stationName: 'Trạm Gò Vấp',
+    isViewed: false,
+  },
+  {
+    id: 'story-6',
+    authorName: 'Ngọc Mai',
+    authorAvatar: 'https://picsum.photos/seed/avatar-6/80/80',
+    stationName: 'Trạm Quận 7',
+    isViewed: true,
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Module 3 — Member tier info
+// ---------------------------------------------------------------------------
+export const MEMBER_TIER_INFO: MemberTierInfo = {
+  current: 'Green Member',
+  next: 'Green Star',
+  currentPoints: 500,
+  pointsForNext: 1000,
+  color: '#10B981',
+};
+
+// ---------------------------------------------------------------------------
+// Module 3 — Friends for gifting
+// ---------------------------------------------------------------------------
+export const MOCK_FRIENDS: FriendForGifting[] = [
+  {
+    id: 'friend-1',
+    name: 'Minh Tuấn',
+    avatarUrl: 'https://picsum.photos/seed/friend-1/60/60',
+    isOnline: true,
+  },
+  {
+    id: 'friend-2',
+    name: 'Thu Hà',
+    avatarUrl: 'https://picsum.photos/seed/friend-2/60/60',
+    isOnline: true,
+  },
+  {
+    id: 'friend-3',
+    name: 'Đức Anh',
+    avatarUrl: 'https://picsum.photos/seed/friend-3/60/60',
+    isOnline: false,
+  },
+  {
+    id: 'friend-4',
+    name: 'Lan Hương',
+    avatarUrl: 'https://picsum.photos/seed/friend-4/60/60',
+    isOnline: true,
+  },
+  {
+    id: 'friend-5',
+    name: 'Ngọc Mai',
+    avatarUrl: 'https://picsum.photos/seed/friend-5/60/60',
+    isOnline: false,
+  },
+  {
+    id: 'friend-6',
+    name: 'Quốc Bảo',
+    avatarUrl: 'https://picsum.photos/seed/friend-6/60/60',
+    isOnline: true,
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Module 3 — Feed Posts (8 posts)
 // ---------------------------------------------------------------------------
 export const MOCK_POSTS: FeedPost[] = [
   {
     id: 'p1',
     author: 'Nguyễn Văn An',
+    authorAvatar: 'https://picsum.photos/seed/user-an/60/60',
     content:
-      'Vừa tái chế 5 chai nhựa PET thành công tại trạm Quận 1! Cảm giác thật tuyệt vời khi đóng góp cho môi trường. 🌿',
-    likes: 12,
-    comments: 2,
-    imageUrl: 'https://picsum.photos/seed/post1/400/300',
-    hashtags: ['#TáiChế', '#SốngXanh'],
-    hyperLocalTag: 'Quận 1, TP.HCM',
+      'Vừa tái chế 5 chai nhựa PET thành công tại trạm Quận 1! Cảm giác thật tuyệt vời khi đóng góp cho môi trường xanh sạch. Mỗi chai nhựa là một bước tiến nhỏ, cộng lại sẽ thành cuộc cách mạng xanh! 🌿♻️',
+    likes: 24,
+    comments: 5,
+    gifts: 2,
+    imageUrl: 'https://picsum.photos/seed/feed-pet-recycle/400/300',
+    hashtags: ['#TáiChế', '#SốngXanh', '#PCS'],
+    hyperLocalTag: 'Katinat – 200m',
+    timestamp: '5 phút trước',
+    attachedVoucherId: 'v1',
     isLikedByCurrentUser: false,
     isSavedByCurrentUser: false,
   },
   {
     id: 'p2',
     author: 'Trần Thị Bình',
+    authorAvatar: 'https://picsum.photos/seed/user-binh/60/60',
     content:
-      'Wow, mình vừa đổi được voucher The Coffee House từ điểm thưởng. Mọi người mau thu gom nhựa nhé! ☕',
-    likes: 25,
-    comments: 5,
-    imageUrl: 'https://picsum.photos/seed/post2/400/300',
-    hashtags: ['#Voucher', '#PhầnThưởng'],
-    attachedVoucherId: 'v1',
-    isLikedByCurrentUser: true,
+      'Wow, mình vừa đổi được voucher giảm giá đồ uống từ điểm thưởng sau 2 tuần tích lũy. Mọi người mau thu gom nhựa nhé! Cách đổi thưởng siêu đơn giản, chỉ cần quét mã QR tại trạm PCS gần nhất ☕✨',
+    likes: 47,
+    comments: 12,
+    gifts: 6,
+    imageUrl: 'https://picsum.photos/seed/feed-voucher-redeem/400/300',
+    hashtags: ['#Voucher', '#PhầnThưởng', '#XanhHơnMỗiNgày'],
+    hyperLocalTag: 'Highlands – 350m',
+    attachedVoucherId: 'v2',
+    timestamp: '12 phút trước',
+    isLikedByCurrentUser: false,
     isSavedByCurrentUser: false,
   },
   {
     id: 'p3',
     author: 'Lê Minh Châu',
+    authorAvatar: 'https://picsum.photos/seed/user-chau/60/60',
     content:
-      'Mỗi tuần tui tích lũy được khoảng 200 điểm xanh từ việc tái chế. Thử thách tuần này: 10 chai nhựa! 💪',
-    likes: 18,
-    comments: 3,
-    imageUrl: 'https://picsum.photos/seed/post3/400/300',
-    hashtags: ['#ĐiểmXanh', '#ThửThách'],
-    hyperLocalTag: 'Bình Thạnh, TP.HCM',
+      'Mỗi tuần tui tích lũy được khoảng 200 điểm xanh từ việc tái chế nhựa. Thử thách tuần này: 10 chai nhựa mỗi ngày! Ai cùng thử không? 💪🏆',
+    likes: 35,
+    comments: 8,
+    gifts: 1,
+    imageUrl: 'https://picsum.photos/seed/feed-challenge/400/300',
+    hashtags: ['#ĐiểmXanh', '#ThửThách', '#GreenHero'],
+    hyperLocalTag: 'The Coffee House – 150m',
+    timestamp: '28 phút trước',
+    isLikedByCurrentUser: false,
+    isSavedByCurrentUser: false,
+  },
+  {
+    id: 'p4',
+    author: 'Phạm Quốc Bảo',
+    authorAvatar: 'https://picsum.photos/seed/user-bao/60/60',
+    content:
+      'Trạm PCS Bình Thạnh vừa ra mắt tính năng nhận diện nhựa siêu nhanh! Chỉ 3 giây là biết ngay chai của bạn có phải PET không. Công nghệ FTIR thật sự ấn tượng 🔬🌱',
+    likes: 89,
+    comments: 23,
+    gifts: 11,
+    imageUrl: 'https://picsum.photos/seed/feed-kiosk-scan/400/300',
+    hashtags: ['#CôngNghệXanh', '#FTIR', '#TươngLaiTáiChế'],
+    hyperLocalTag: 'Trạm PCS Bình Thạnh – 80m',
+    timestamp: '1 giờ trước',
+    isLikedByCurrentUser: false,
+    isSavedByCurrentUser: false,
+  },
+  {
+    id: 'p5',
+    author: 'Nguyễn Thị Lan',
+    authorAvatar: 'https://picsum.photos/seed/user-lan/60/60',
+    content:
+      'Hôm nay cả gia đình mình cùng đến trạm PCS tái chế! Con bé nhà mình 7 tuổi mà đã biết phân loại nhựa rồi. Giáo dục xanh từ nhỏ là điều tuyệt vời nhất ba mẹ có thể làm 👨‍👩‍👧💚',
+    likes: 156,
+    comments: 34,
+    gifts: 18,
+    imageUrl: 'https://picsum.photos/seed/feed-family-recycle/400/300',
+    hashtags: ['#GiaDìnhXanh', '#TươngLaiXanh', '#GiáoDụcMôiTrường'],
+    hyperLocalTag: 'Cộng Cà Phê – 400m',
+    timestamp: '2 giờ trước',
+    isLikedByCurrentUser: false,
+    isSavedByCurrentUser: false,
+  },
+  {
+    id: 'p6',
+    author: 'Trần Đức Anh',
+    authorAvatar: 'https://picsum.photos/seed/user-duc-anh/60/60',
+    content:
+      'Flash Sale hôm nay quá hời! Mình vừa lưu được voucher giảm 15% thực phẩm hữu cơ chỉ với 300 điểm thôi. Deal này chỉ có hôm nay thôi nhé mọi người! ⚡🛒',
+    likes: 203,
+    comments: 56,
+    gifts: 24,
+    imageUrl: 'https://picsum.photos/seed/feed-flash-sale/400/300',
+    hashtags: ['#FlashSale', '#ThựcPhẩmXanh', '#ĐiểmThưởng'],
+    hyperLocalTag: 'GS25 – 120m',
+    attachedVoucherId: 'v5',
+    timestamp: '3 giờ trước',
+    isLikedByCurrentUser: false,
+    isSavedByCurrentUser: false,
+  },
+  {
+    id: 'p7',
+    author: 'Võ Ngọc Mai',
+    authorAvatar: 'https://picsum.photos/seed/user-mai/60/60',
+    content:
+      'Tháng này mình đã giảm được 2.4 kg CO₂ nhờ tái chế nhựa qua PCS! Nhìn vào báo cáo carbon trong ví xanh thấy tự hào lắm. Cùng nhau làm cho Sài Gòn xanh hơn nha mọi người 🌍💨',
+    likes: 78,
+    comments: 19,
+    gifts: 7,
+    imageUrl: 'https://picsum.photos/seed/feed-carbon-report/400/300',
+    hashtags: ['#CO2', '#BáoCáoXanh', '#SàiGònXanh'],
+    hyperLocalTag: 'Phúc Long – 250m',
+    timestamp: '5 giờ trước',
+    isLikedByCurrentUser: false,
+    isSavedByCurrentUser: false,
+  },
+  {
+    id: 'p8',
+    author: 'Hoàng Minh Tuấn',
+    authorAvatar: 'https://picsum.photos/seed/user-tuan/60/60',
+    content:
+      'Dùng túi tote sinh thái đã được 3 tháng, giảm được khoảng 90 túi nilon rồi! Đổi từ điểm Green Hero, cảm thấy rất xứng đáng. Ai muốn tham gia cộng đồng xanh thì ping mình nhé 🌿👜',
+    likes: 112,
+    comments: 41,
+    gifts: 15,
+    imageUrl: 'https://picsum.photos/seed/feed-eco-bag/400/300',
+    hashtags: ['#TúiTote', '#KhôngTúiNilon', '#GreenHero'],
+    hyperLocalTag: 'Nhà sách Fahasa – 300m',
+    attachedVoucherId: 'v3',
+    timestamp: '8 giờ trước',
     isLikedByCurrentUser: false,
     isSavedByCurrentUser: false,
   },

@@ -207,8 +207,8 @@ export function QrDisplayModule({ renderTarget = 'screen' }: QrDisplayModuleProp
                   opacity: [1, 1, 0, 0, 1],
                 }}
                 transition={{
-                  duration: 2, // explicit 2s for continuous mechanical scan feeling
-                  ease: 'easeInOut',
+                  duration: MOTION_TOKENS.durations.ambient,
+                  ease: MOTION_TOKENS.easing.standard,
                   repeat: Infinity,
                 }}
               />

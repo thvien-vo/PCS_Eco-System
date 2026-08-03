@@ -8,12 +8,12 @@
  */
 
 export const MOTION_TOKENS = {
-  /** Duration values in seconds (Framer Motion convention) */
   durations: {
     fast: 0.15, // Micro-interactions: button presses, icon transitions
     base: 0.25, // Standard transitions: page fades, card reveals
     slow: 0.4, // Modals, overlays, full-screen animations
     verySlow: 0.7, // Particle bursts, celebration animations
+    ambient: 2, // Continuous, looping animations (e.g. laser scan)
   },
 
   /** Consistent cubic-bezier easing curve */

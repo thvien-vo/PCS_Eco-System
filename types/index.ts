@@ -43,15 +43,63 @@ export interface Voucher {
 export interface FeedPost {
   id: string;
   author: string;
+  authorAvatar: string;
   content: string;
   likes: number;
   comments: number;
+  gifts: number;
   imageUrl: string;
   hashtags: string[];
   hyperLocalTag?: string;
   attachedVoucherId?: string;
   isLikedByCurrentUser: boolean;
   isSavedByCurrentUser: boolean;
+  timestamp: string;
+}
+
+// ---------------------------------------------------------------------------
+// Module 3 — Green Feed specific types
+// ---------------------------------------------------------------------------
+export interface GreenStory {
+  id: string;
+  authorName: string;
+  authorAvatar: string;
+  stationName: string;
+  isViewed: boolean;
+}
+
+export interface QuickAction {
+  id: string;
+  label: string;
+  icon: string;
+  href: string;
+  color: string;
+}
+
+export type MemberTier = 'Green Member' | 'Green Star' | 'Green Hero';
+
+export interface MemberTierInfo {
+  current: MemberTier;
+  next: MemberTier | null;
+  currentPoints: number;
+  pointsForNext: number;
+  color: string;
+}
+
+export interface FriendForGifting {
+  id: string;
+  name: string;
+  avatarUrl: string;
+  isOnline: boolean;
+}
+
+export interface SavedVoucherDetail {
+  id: string;
+  title: string;
+  sponsorName: string;
+  code: string;
+  savedAt: string;
+  imageUrl: string;
 }
 
 // ---------------------------------------------------------------------------
