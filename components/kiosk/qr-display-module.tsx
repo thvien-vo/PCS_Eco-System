@@ -198,9 +198,19 @@ export function QrDisplayModule({ renderTarget = 'screen' }: QrDisplayModuleProp
 
             {/* Laser scan line — runs continuously, symbolises optical sensor */}
             {!isRefreshing && (
-              <div
+              <motion.div
                 aria-hidden="true"
-                className="kiosk-laser-scan pointer-events-none absolute left-0 right-0 h-0.5 bg-[var(--kiosk-pass)]"
+                className="pointer-events-none absolute left-0 right-0 h-0.5 bg-[var(--kiosk-pass)]"
+                style={{ boxShadow: '0 0 8px 2px rgba(34, 197, 94, 0.7)' }}
+                animate={{
+                  top: ['0%', '100%', '100%', '0%', '0%'],
+                  opacity: [1, 1, 0, 0, 1],
+                }}
+                transition={{
+                  duration: 2, // explicit 2s for continuous mechanical scan feeling
+                  ease: 'easeInOut',
+                  repeat: Infinity,
+                }}
               />
             )}
           </motion.div>
