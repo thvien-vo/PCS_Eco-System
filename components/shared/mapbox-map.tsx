@@ -9,7 +9,7 @@
  * - Popup content uses NO sensor-related technical terminology (per pcs-design-system §9).
  */
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { useTheme } from 'next-themes';
 import type { Station } from '@/types';
@@ -53,11 +53,20 @@ export function MapboxMap({ stations, center = [106.7009, 10.7769], zoom = 12 }:
   const popupsRef = useRef<mapboxgl.Popup[]>([]);
   const { resolvedTheme } = useTheme();
 
+  /**
+   * Bug fix: runtime detection of auth failure.
+   * The demo/placeholder token is non-empty so `Boolean(token)` passes, but
+   * Mapbox GL JS returns 401 Unauthorized on every tile/style fetch, leaving
+   * a solid gray canvas. We detect this at runtime and fall back to the
+   * station-list UI — same component already rendered for the no-token case.
+   */
+  const [tokenFailed, setTokenFailed] = useState(false);
+
   const getMapStyle = useCallback((currentTheme: string | undefined) => {
     const isDark = currentTheme === 'dark';
     return isDark
       ? 'mapbox://styles/mapbox/dark-v11'
-      : 'mapbox://styles/mapbox/light-v11';
+      : 'mapbox://styles/mapbox/streets-v12';
   }, []);
 
   useEffect(() => {
@@ -87,6 +96,24 @@ export function MapboxMap({ stations, center = [106.7009, 10.7769], zoom = 12 }:
       new mapboxgl.AttributionControl({ compact: true }),
       'bottom-left'
     );
+
+    // Detect auth failures (401 Unauthorized / invalid/expired token)
+    map.on('error', (e) => {
+      const msg = (e?.error?.message ?? '').toLowerCase();
+      const status = (e?.error as { status?: number } | undefined)?.status;
+      const isAuthError =
+        status === 401 ||
+        msg.includes('unauthorized') ||
+        msg.includes('invalid token') ||
+        msg.includes('401');
+
+      if (isAuthError) {
+        // Token is invalid — tear down the map and show the station-list fallback
+        map.remove();
+        mapRef.current = null;
+        setTokenFailed(true);
+      }
+    });
 
     map.on('load', () => {
       stations.forEach((station) => {
@@ -250,7 +277,8 @@ export function MapboxMap({ stations, center = [106.7009, 10.7769], zoom = 12 }:
 
   const hasToken = Boolean(process.env.NEXT_PUBLIC_MAPBOX_TOKEN);
 
-  if (!hasToken) {
+  // Show station-list fallback when: no token at all, OR token present but rejected by Mapbox (401)
+  if (!hasToken || tokenFailed) {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-card to-background p-6 text-center">
         <div className="text-4xl">🗺️</div>

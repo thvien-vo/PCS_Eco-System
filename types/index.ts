@@ -76,7 +76,7 @@ export interface QuickAction {
   color: string;
 }
 
-export type MemberTier = 'Green Member' | 'Green Star' | 'Green Hero';
+export type MemberTier = 'Green Member' | 'Green Hero';
 
 export interface MemberTierInfo {
   current: MemberTier;

@@ -31,6 +31,11 @@ export function PhoneFrame({ children, className, ...props }: PhoneFrameProps) {
           'sm:border-[10px] sm:border-[var(--frame-bezel)]',
           // Inner notch simulation via top padding (desktop only)
           'sm:ring-1 sm:ring-white/10',
+          // Bug fix: establish a CSS containing block so that position:absolute
+          // children (BottomNav, FAB) are positioned relative to this div on
+          // both desktop (phone-frame) and mobile (h-screen full-bleed).
+          // translateZ(0) is visually inert — no rendering side-effects.
+          '[transform:translateZ(0)]',
           className
         )}
         {...props}

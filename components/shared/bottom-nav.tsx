@@ -24,7 +24,11 @@ export function BottomNav() {
   return (
     <nav
       className={cn(
-        'fixed bottom-0 z-50 h-[72px] w-full',
+        // Bug fix: was `fixed` — caused nav to escape to the viewport on desktop.
+        // Now `absolute` so it's positioned relative to the phone-frame's inner div,
+        // which establishes a CSS containing block via translateZ(0).
+        // On mobile (full-screen h-screen), absolute bottom-0 = same as fixed bottom-0.
+        'absolute bottom-0 z-50 h-[72px] w-full',
         'flex items-center justify-around px-2 pb-safe',
         'border-t border-border bg-card/95 backdrop-blur-sm',
         'sm:w-[374px] sm:rounded-b-[32px]'

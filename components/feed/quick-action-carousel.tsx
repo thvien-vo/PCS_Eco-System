@@ -4,7 +4,7 @@
  * QuickActionCarousel — Module 3 horizontal quick-action strip + tier progress bar.
  *
  * Actions: Scan, Giới thiệu, Thử thách, Bảng xếp hạng, Ví xanh.
- * Membership progress: Green Member → Green Star → Green Hero.
+ * Membership progress: Green Member → Green Hero.
  */
 
 import { motion } from 'framer-motion';
@@ -15,12 +15,12 @@ import {
   Trophy,
   Wallet,
   Star,
-  Zap,
   Gift,
 } from 'lucide-react';
 import Link from 'next/link';
 import { MEMBER_TIER_INFO } from '@/lib/mock-data';
 import { MOTION_TOKENS } from '@/lib/motion-tokens';
+import { useDragScroll } from '@/hooks/use-drag-scroll';
 
 const QUICK_ACTIONS = [
   {
@@ -75,7 +75,6 @@ const QUICK_ACTIONS = [
 
 const TIER_LABELS: Record<string, { label: string; icon: typeof Star }> = {
   'Green Member': { label: 'Thành Viên Xanh', icon: Star },
-  'Green Star': { label: 'Ngôi Sao Xanh', icon: Zap },
   'Green Hero': { label: 'Anh Hùng Xanh', icon: Trophy },
 };
 
@@ -89,6 +88,21 @@ export function QuickActionCarousel() {
   const currentTierMeta = TIER_LABELS[tier.current];
   const nextTierMeta = tier.next ? TIER_LABELS[tier.next] : null;
   const CurrentIcon = currentTierMeta.icon;
+
+  /**
+   * Bug fix: mouse click-drag horizontal scrolling.
+   * Per pcs-tech-standards §12 — mandatory for all horizontal carousel strips.
+   * useDragScroll handles the 5px threshold and click-suppression so Link
+   * navigation continues to work on plain clicks.
+   */
+  const {
+    ref: dragRef,
+    onMouseDown: onDragMouseDown,
+    onMouseMove: onDragMouseMove,
+    onMouseUp: onDragMouseUp,
+    onMouseLeave: onDragMouseLeave,
+    onClickCapture: onDragClickCapture,
+  } = useDragScroll();
 
   return (
     <div className="px-4 py-3 space-y-4">
@@ -158,7 +172,15 @@ export function QuickActionCarousel() {
         <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-0.5">
           Thao tác nhanh
         </p>
-        <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
+        <div
+          ref={dragRef as React.RefObject<HTMLDivElement>}
+          onMouseDown={onDragMouseDown}
+          onMouseMove={onDragMouseMove}
+          onMouseUp={onDragMouseUp}
+          onMouseLeave={onDragMouseLeave}
+          onClickCapture={onDragClickCapture}
+          className="flex gap-3 overflow-x-auto scrollbar-hide cursor-grab pb-1"
+        >
           {QUICK_ACTIONS.map((action, index) => {
             const Icon = action.icon;
             return (

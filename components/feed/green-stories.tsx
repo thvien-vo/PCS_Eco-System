@@ -18,6 +18,7 @@ import { useHasMounted } from '@/hooks/use-has-mounted';
 import { useFeedStore } from '@/store/feed-store';
 import { MOCK_STORIES } from '@/lib/mock-data';
 import { MOTION_TOKENS } from '@/lib/motion-tokens';
+import { useDragScroll } from '@/hooks/use-drag-scroll';
 
 interface StoryViewerProps {
   story: (typeof MOCK_STORIES)[number];
@@ -83,6 +84,21 @@ export function GreenStories() {
   const { viewedStories, markStoryViewed } = useFeedStore();
   const [activeStory, setActiveStory] = useState<string | null>(null);
 
+  /**
+   * Bug fix: mouse click-drag horizontal scrolling.
+   * Per pcs-tech-standards §12 — mandatory for all horizontal carousel strips.
+   * Story-tap onClick handlers still fire on plain clicks (<5px movement);
+   * drag gestures (≥5px) suppress the click via capture-phase interception.
+   */
+  const {
+    ref: dragRef,
+    onMouseDown: onDragMouseDown,
+    onMouseMove: onDragMouseMove,
+    onMouseUp: onDragMouseUp,
+    onMouseLeave: onDragMouseLeave,
+    onClickCapture: onDragClickCapture,
+  } = useDragScroll();
+
   function handleStoryClick(storyId: string) {
     markStoryViewed(storyId);
     setActiveStory(storyId);
@@ -99,7 +115,15 @@ export function GreenStories() {
   return (
     <>
       <div className="px-4">
-        <div className="flex gap-3 overflow-x-auto scrollbar-hide py-1">
+        <div
+          ref={dragRef as React.RefObject<HTMLDivElement>}
+          onMouseDown={onDragMouseDown}
+          onMouseMove={onDragMouseMove}
+          onMouseUp={onDragMouseUp}
+          onMouseLeave={onDragMouseLeave}
+          onClickCapture={onDragClickCapture}
+          className="flex gap-3 overflow-x-auto scrollbar-hide cursor-grab py-1"
+        >
           {/* "Tin của bạn" — add story CTA */}
           <motion.div
             className="flex flex-col items-center gap-1.5 flex-shrink-0"

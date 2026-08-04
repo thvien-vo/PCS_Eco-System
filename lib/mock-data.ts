@@ -7,6 +7,7 @@ import type {
   GreenStory,
   MemberTierInfo,
   FriendForGifting,
+  Transaction,
 } from '@/types';
 
 // ---------------------------------------------------------------------------
@@ -84,10 +85,7 @@ export const MOCK_STATIONS: Station[] = [
 // countdown is always meaningful in demo mode.
 // ---------------------------------------------------------------------------
 
-/** Returns ISO string N hours from now, anchored to call time. */
-function hoursFromNow(h: number): string {
-  return new Date(Date.now() + h * 3_600_000).toISOString();
-}
+// Using fixed timestamps so the flash sale doesn't drift or freeze at build time.
 
 export const MOCK_VOUCHERS: Voucher[] = [
   {
@@ -105,7 +103,7 @@ export const MOCK_VOUCHERS: Voucher[] = [
     pointsCost: 200,
     imageUrl: 'https://picsum.photos/seed/voucher-drink/400/200',
     isFlashSale: true,
-    expiresAt: hoursFromNow(3.5), // Flash sale ends in 3h30m from page load
+    expiresAt: '2026-08-10T20:00:00+07:00', // Fixed absolute timestamp
   },
   {
     id: 'v3',
@@ -130,7 +128,7 @@ export const MOCK_VOUCHERS: Voucher[] = [
     pointsCost: 300,
     imageUrl: 'https://picsum.photos/seed/voucher-organic/400/200',
     isFlashSale: true,
-    expiresAt: hoursFromNow(1.25), // Flash sale ends in 1h15m from page load
+    expiresAt: '2026-08-10T20:00:00+07:00', // Fixed absolute timestamp
   },
   {
     id: 'v6',
@@ -147,7 +145,7 @@ export const MOCK_VOUCHERS: Voucher[] = [
 // always shows a live countdown even if vouchers change).
 // Stored as a fixed epoch ms so it doesn't drift across re-renders.
 // ---------------------------------------------------------------------------
-export const FLASH_SALE_ENDS_AT: number = Date.now() + 3.5 * 3_600_000;
+export const FLASH_SALE_ENDS_AT: number = new Date('2026-08-10T20:00:00+07:00').getTime();
 
 // ---------------------------------------------------------------------------
 // Module 3 — Green Stories (6 mock stories)
@@ -202,7 +200,7 @@ export const MOCK_STORIES: GreenStory[] = [
 // ---------------------------------------------------------------------------
 export const MEMBER_TIER_INFO: MemberTierInfo = {
   current: 'Green Member',
-  next: 'Green Star',
+  next: 'Green Hero',
   currentPoints: 500,
   pointsForNext: 1000,
   color: '#10B981',
@@ -421,4 +419,29 @@ export const MOCK_CHALLENGES: ChallengeCard[] = [
     deadline: '7 ngày',
     rewardPoints: 1200,
   },
+];
+
+// ---------------------------------------------------------------------------
+// Module 4 — Wallet Demo Transactions
+// 12 transactions spanning the past 7 days to populate the weekly chart
+// ---------------------------------------------------------------------------
+const getPastDate = (daysAgo: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  return d.toISOString();
+};
+
+export const MOCK_TRANSACTIONS: Transaction[] = [
+  { id: 'tx-12', type: 'earn', amount: 25, date: getPastDate(0), description: 'Tái chế 5 chai PET tại Trạm Quận 1' },
+  { id: 'tx-11', type: 'earn', amount: 15, date: getPastDate(0), description: 'Tái chế 3 chai PET tại Trạm Bình Thạnh' },
+  { id: 'tx-10', type: 'redeem', amount: 150, date: getPastDate(1), description: 'Đổi voucher Giảm 20% Thức Uống' },
+  { id: 'tx-9', type: 'earn', amount: 40, date: getPastDate(1), description: 'Tái chế 8 chai PET tại Trạm Gò Vấp' },
+  { id: 'tx-8', type: 'earn', amount: 10, date: getPastDate(2), description: 'Tái chế 2 chai PET tại Trạm Phú Nhuận' },
+  { id: 'tx-7', type: 'earn', amount: 30, date: getPastDate(3), description: 'Tái chế 6 chai PET tại Trạm Tân Bình' },
+  { id: 'tx-6', type: 'earn', amount: 25, date: getPastDate(3), description: 'Tái chế 5 chai PET tại Trạm Quận 3' },
+  { id: 'tx-5', type: 'redeem', amount: 200, date: getPastDate(4), description: 'Đổi voucher Mua 1 Tặng 1' },
+  { id: 'tx-4', type: 'earn', amount: 50, date: getPastDate(4), description: 'Tái chế 10 chai PET tại Trạm Quận 7' },
+  { id: 'tx-3', type: 'earn', amount: 20, date: getPastDate(5), description: 'Tái chế 4 chai PET tại Trạm Quận 1' },
+  { id: 'tx-2', type: 'earn', amount: 35, date: getPastDate(6), description: 'Tái chế 7 chai PET tại Trạm Gò Vấp' },
+  { id: 'tx-1', type: 'earn', amount: 15, date: getPastDate(6), description: 'Tái chế 3 chai PET tại Trạm Bình Thạnh' },
 ];

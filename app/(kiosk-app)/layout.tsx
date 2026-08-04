@@ -10,7 +10,10 @@ export default function KioskAppLayout({
 }) {
   return (
     <PhoneFrame>
-      <div className="relative w-full h-full pb-[72px] overflow-y-auto">
+      {/* Bug fix: added scrollbar-hide — the vertical scrollbar was visible on the
+          feed page. scrollbar-hide is defined in globals.css (§ UTILITY CLASSES)
+          and hides the scrollbar chrome while keeping scroll functionality intact. */}
+      <div className="relative w-full h-full pb-[72px] overflow-y-auto scrollbar-hide">
         {children}
       </div>
       

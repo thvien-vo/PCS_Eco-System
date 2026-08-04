@@ -43,6 +43,7 @@ description: Technical standards, folder structure, coding conventions, Design T
 ## 7. Code Quality
 - Configure ESLint + Prettier from day one.
 - The agent must run lint before declaring any module "complete".
+- CONFIRMATION RULE: If a new prompt's instructions conflict with a previously approved plan or an established rule, ask for confirmation before proceeding, rather than silently complying and explaining only when questioned. This applies symmetrically — whether the deviation originates from you or from the user.
 
 ## 8. Git Workflow
 - Commit messages in the format: `feat(module-N): short description`.
@@ -115,3 +116,35 @@ When verification work for a turn is complete, explicitly kill the background se
 - Detached process approach: `taskkill /PID (Get-Content dev-server.pid) /F`
 
 Exception: leave the server running only when the user explicitly says "leave it running for me to test."
+
+## 12. Horizontal Carousel / Drag-Scroll Pattern (MANDATORY)
+
+Any component rendering a horizontal scrollable strip (e.g., quick-action carousels, story rings, voucher grids, leaderboard chips) MUST use the `useDragScroll` hook from `hooks/use-drag-scroll.ts` to support desktop mouse-drag navigation.
+
+**Why:** `overflow-x: auto` containers respond to trackpad two-finger swipe and sometimes Shift+scroll-wheel, but NEVER to mouse click-drag on desktop. Without this hook, items that overflow off-screen are unreachable with a standard mouse.
+
+**Required pattern:**
+```tsx
+import { useDragScroll } from '@/hooks/use-drag-scroll';
+
+const drag = useDragScroll();
+
+<div
+  ref={drag.ref as React.RefObject<HTMLDivElement>}
+  onMouseDown={drag.onMouseDown}
+  onMouseMove={drag.onMouseMove}
+  onMouseUp={drag.onMouseUp}
+  onMouseLeave={drag.onMouseLeave}
+  onClickCapture={drag.onClickCapture}
+  className="flex gap-3 overflow-x-auto scrollbar-hide cursor-grab pb-1"
+>
+  {/* items with their own onClick handlers still work correctly */}
+</div>
+```
+
+**Click/drag disambiguation rules (built into the hook):**
+- A gesture is a **click** if total horizontal movement < 5 px.
+- A gesture is a **drag** if movement ≥ 5 px — child `onClick` events are suppressed via capture-phase interception so accidental navigation/overlay-open doesn't occur.
+- `cursor: grabbing` applies during the drag for visual affordance; the consumer sets `cursor-grab` at rest via className.
+
+**DO NOT** add custom pointer/touch drag logic in individual components — always import and use the shared hook.
