@@ -392,9 +392,13 @@ export const MOCK_POSTS: FeedPost[] = [
 export const MOCK_LEADERBOARD: LeaderboardEntry[] = [
   { rank: 1, username: 'Lan Hương', points: 4500 },
   { rank: 2, username: 'Minh Tuấn', points: 4200 },
+  // rank 3 is a placeholder — replaced at runtime with live wallet-store `points`.
   { rank: 3, username: 'Bạn', points: 3100, isCurrentUser: true },
   { rank: 4, username: 'Đức Anh', points: 2800 },
   { rank: 5, username: 'Thu Hà', points: 2400 },
+  { rank: 6, username: 'Quốc Bảo', points: 1950 },
+  { rank: 7, username: 'Ngọc Mai', points: 1600 },
+  { rank: 8, username: 'Văn An', points: 1100 },
 ];
 
 export const MOCK_CHALLENGES: ChallengeCard[] = [
@@ -418,6 +422,41 @@ export const MOCK_CHALLENGES: ChallengeCard[] = [
     imageUrl: 'https://picsum.photos/seed/challenge3/300/400',
     deadline: '7 ngày',
     rewardPoints: 1200,
+  },
+  {
+    id: 'c4',
+    name: 'Tuần Lễ Không Rác',
+    imageUrl: 'https://picsum.photos/seed/challenge4/300/400',
+    deadline: '7 ngày',
+    rewardPoints: 1500,
+  },
+  {
+    id: 'c5',
+    name: 'Hành Tinh Xanh',
+    imageUrl: 'https://picsum.photos/seed/challenge5/300/400',
+    deadline: '10 ngày',
+    rewardPoints: 2000,
+  },
+  {
+    id: 'c6',
+    name: 'Siêu Anh Hùng Nhựa',
+    imageUrl: 'https://picsum.photos/seed/challenge6/300/400',
+    deadline: '5 ngày',
+    rewardPoints: 700,
+  },
+  {
+    id: 'c7',
+    name: 'Thành Phố Sạch',
+    imageUrl: 'https://picsum.photos/seed/challenge7/300/400',
+    deadline: '14 ngày',
+    rewardPoints: 2500,
+  },
+  {
+    id: 'c8',
+    name: 'Vòng Tròn Xanh',
+    imageUrl: 'https://picsum.photos/seed/challenge8/300/400',
+    deadline: '4 ngày',
+    rewardPoints: 600,
   },
 ];
 
