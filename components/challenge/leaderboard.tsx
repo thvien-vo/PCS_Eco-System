@@ -13,14 +13,19 @@
  *   for a mobile gamification UI and avoids a heavy dependency.
  * - Locked badges (rank 4+): dimmed (opacity 0.3) + grayscale filter.
  *   They remain VISIBLE as silhouettes — never hidden.
+ * - Rank-change animations: each row carries a stable `layoutId` equal to the
+ *   user's username. When `liveUserPoints` shifts the sort order, Framer Motion
+ *   FLIP-animates every row to its new position using MOTION_TOKENS.spring.gentle
+ *   — no instant jump, no custom numbers defined inline.
  *
  * Current user's points: injected from live wallet-store, NOT a mock.
  * The caller passes `liveUserPoints` which replaces the MOCK_LEADERBOARD placeholder.
  *
  * Per pcs-design-system §2 (100% Vietnamese UI text).
+ * Per pcs-tech-standards §4 (all motion values from motion-tokens.ts).
  */
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Crown, Medal, Star, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { MOCK_LEADERBOARD } from '@/lib/mock-data';
@@ -68,7 +73,6 @@ function buildLiveLeaderboard(liveUserPoints: number): LeaderboardEntry[] {
  *   - `transform: rotateX(12deg)` on the medal face
  *   - Layered `box-shadow` for depth/thickness illusion
  *   - `conic-gradient` for the metallic sheen
- *   - A bottom "thickness" pseudo-element simulated with a sibling div
  *
  * This approach is intentional: zero runtime cost, no canvas, works on all devices.
  */
@@ -78,21 +82,18 @@ function Badge({ rank, locked = false }: { rank: 1 | 2 | 3; locked?: boolean }) 
       label: '🥇',
       gradient: 'conic-gradient(from 0deg, #ffd700, #fffacd, #ffd700, #b8860b, #ffd700)',
       shadow: '0 4px 0 #b8860b, 0 6px 12px rgba(255,215,0,0.5)',
-      glow: 'rgba(255,215,0,0.6)',
       size: 64,
     },
     2: {
       label: '🥈',
       gradient: 'conic-gradient(from 0deg, #c0c0c0, #f8f8ff, #c0c0c0, #808080, #c0c0c0)',
       shadow: '0 4px 0 #808080, 0 6px 10px rgba(192,192,192,0.5)',
-      glow: 'rgba(192,192,192,0.5)',
       size: 52,
     },
     3: {
       label: '🥉',
       gradient: 'conic-gradient(from 0deg, #cd7f32, #f4a460, #cd7f32, #8b4513, #cd7f32)',
       shadow: '0 4px 0 #8b4513, 0 6px 10px rgba(205,127,50,0.5)',
-      glow: 'rgba(205,127,50,0.4)',
       size: 52,
     },
   } as const;
@@ -140,6 +141,13 @@ function Badge({ rank, locked = false }: { rank: 1 | 2 | 3; locked?: boolean }) 
 }
 
 // ── Podium Card ───────────────────────────────────────────────────────────────
+/**
+ * Uses `motion.div` with `layout` + stable `layoutId` (username) so that
+ * if the top-3 composition changes (e.g. user earns enough points to jump
+ * from rank 3 to rank 1), Framer Motion FLIP-animates the podium card to
+ * its new position rather than blinking instantly.
+ * Transition uses MOTION_TOKENS.spring.gentle — no one-off numbers.
+ */
 function PodiumCard({
   entry,
   elevated,
@@ -150,9 +158,12 @@ function PodiumCard({
   const rank = entry.rank as 1 | 2 | 3;
 
   return (
-    <div
+    <motion.div
+      layout
+      layoutId={`leaderboard-row-${entry.username}`}
+      transition={MOTION_TOKENS.spring.gentle}
       className={cn(
-        'flex flex-col items-center gap-2 rounded-2xl border px-3 transition-transform',
+        'flex flex-col items-center gap-2 rounded-2xl border px-3 transition-[border-color,background-color]',
         elevated ? 'py-5' : 'py-4',
         entry.isCurrentUser
           ? 'border-[var(--neon-mint)]/50 bg-[var(--neon-mint)]/8 shadow-md'
@@ -178,16 +189,25 @@ function PodiumCard({
           {entry.points.toLocaleString('vi-VN')} điểm
         </p>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
 // ── Row for rank 4+ ───────────────────────────────────────────────────────────
+/**
+ * Each row carries `layout` + a stable `layoutId` tied to the user's username.
+ * When `buildLiveLeaderboard` re-sorts (because wallet points changed), all rows
+ * animate to their new vertical positions via Framer Motion's FLIP algorithm.
+ * Transition uses MOTION_TOKENS.spring.gentle (no inline numbers) per §4.
+ */
 function RankRow({ entry }: { entry: LeaderboardEntry }) {
   const isLocked = entry.rank > 3;
 
   return (
-    <div
+    <motion.div
+      layout
+      layoutId={`leaderboard-row-${entry.username}`}
+      transition={MOTION_TOKENS.spring.gentle}
       className={cn(
         'flex items-center gap-3 rounded-2xl border px-4 py-3',
         entry.isCurrentUser
@@ -195,7 +215,7 @@ function RankRow({ entry }: { entry: LeaderboardEntry }) {
           : 'border-border bg-card/40'
       )}
     >
-      {/* Rank number or locked icon */}
+      {/* Rank number */}
       <div
         className={cn(
           'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold',
@@ -249,7 +269,7 @@ function RankRow({ entry }: { entry: LeaderboardEntry }) {
           />
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
 
@@ -304,12 +324,16 @@ export function Leaderboard({ liveUserPoints, activeTab, onTabChange }: Leaderbo
           <Crown className="h-4 w-4 text-[var(--warning-amber)]" fill="currentColor" />
           <h3 className="text-sm font-bold text-foreground">Top 3 Huyền Thoại</h3>
         </div>
-        {/* Flexbox podium — NOT a vertical list (per Senior Engineer requirement #2) */}
-        <div className="flex items-end gap-2">
+        {/*
+         * Flexbox podium — NOT a vertical list (per Senior Engineer requirement #2).
+         * motion.div with `layout` on each PodiumCard handles FLIP animation
+         * if the composition of top-3 changes.
+         */}
+        <motion.div layout className="flex items-end gap-2">
           <PodiumCard entry={podiumOrder[0]} elevated={false} />
           <PodiumCard entry={podiumOrder[1]} elevated={true} />
           <PodiumCard entry={podiumOrder[2]} elevated={false} />
-        </div>
+        </motion.div>
       </div>
 
       {/* ── Rankings 4+ ──────────────────────────────────────────────── */}
@@ -318,11 +342,18 @@ export function Leaderboard({ liveUserPoints, activeTab, onTabChange }: Leaderbo
           <TrendingUp className="h-4 w-4 text-muted-foreground" />
           <h3 className="text-sm font-semibold text-muted-foreground">Bảng xếp hạng đầy đủ</h3>
         </div>
-        <div className="flex flex-col gap-2">
-          {rest.map((entry) => (
-            <RankRow key={entry.rank} entry={entry} />
-          ))}
-        </div>
+        {/*
+         * AnimatePresence wraps the list so entries can animate in/out if they
+         * cross the top-3 boundary (e.g., user jumps from rank 4 to rank 3).
+         * Each RankRow has layout + layoutId for position-change FLIP animation.
+         */}
+        <AnimatePresence>
+          <motion.div layout className="flex flex-col gap-2">
+            {rest.map((entry) => (
+              <RankRow key={entry.username} entry={entry} />
+            ))}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );

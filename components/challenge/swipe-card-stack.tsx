@@ -26,6 +26,25 @@ const SWIPE_THRESHOLD = 100;
 const CARD_WIDTH = 280;
 const CARD_HEIGHT = 380;
 
+// ── Queue Position Badge ─────────────────────────────────────────────────────
+/**
+ * Renders a frosted-glass pill at the top-left of a card showing:
+ *   "#1 · Chiến Binh Rác Thải"
+ *
+ * Purpose: lets the tester verify queue order at a glance during Test 2
+ * (skip wrap-around) without having to guess card positions.
+ * The name is truncated to 14 chars to fit on the pill width.
+ */
+function QueuePositionBadge({ position, name }: { position: number; name: string }) {
+  const short = name.length > 14 ? name.slice(0, 13) + '…' : name;
+  return (
+    <div className="absolute left-3 top-3 z-10 flex items-center gap-1 rounded-full bg-black/50 px-2.5 py-1 backdrop-blur-sm">
+      <span className="text-[10px] font-black text-[var(--neon-mint)]">#{position}</span>
+      <span className="text-[10px] font-medium text-white/90">{short}</span>
+    </div>
+  );
+}
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface SwipeCardStackProps {
   /** Ordered queue of cards; index 0 = top of stack (front). */
@@ -124,7 +143,10 @@ export function SwipeCardStack({ cards, onSwipeRight, onSwipeLeft }: SwipeCardSt
           initial={{ scale: 0.94, y: 12, opacity: 0.65 }}
           animate={{ scale: 0.94, y: 12, opacity: 0.65 }}
           transition={MOTION_TOKENS.spring.gentle}
-        />
+        >
+          {/* Queue position badge on background card — shows its queue position (#2) */}
+          <QueuePositionBadge position={2} name={secondCard.name} />
+        </motion.div>
       )}
 
       {/* ── Top card (draggable) ────────────────────────────────────────── */}
@@ -155,6 +177,9 @@ export function SwipeCardStack({ cards, onSwipeRight, onSwipeLeft }: SwipeCardSt
           transition={MOTION_TOKENS.spring.bouncy}
           whileTap={{ cursor: 'grabbing' }}
         >
+          {/* Queue position badge — top card is always position #1 */}
+          <QueuePositionBadge position={1} name={topCard.name} />
+
           {/* Card image */}
           <div
             className="absolute inset-0"
