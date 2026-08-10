@@ -8,6 +8,7 @@ import type {
   MemberTierInfo,
   FriendForGifting,
   Transaction,
+  MarketplaceCatalogItem,
 } from '@/types';
 
 // ---------------------------------------------------------------------------
@@ -80,12 +81,122 @@ export const MOCK_STATIONS: Station[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// Module 3 & 6 — Vouchers
+// Module 3 & 6 — Vouchers (feed-attached)
 // Flash sale `expiresAt` is set ~48 hours from a reference point so the
 // countdown is always meaningful in demo mode.
 // ---------------------------------------------------------------------------
 
 // Using fixed timestamps so the flash sale doesn't drift or freeze at build time.
+
+export const MOCK_CATALOG_ITEMS: MarketplaceCatalogItem[] = [
+  // ── Vouchers (mã giảm giá) ───────────────────────────────────────
+  {
+    id: 'cat-v1',
+    category: 'voucher',
+    partnerName: 'Highlands Coffee',
+    title: 'Giảm 20% hóa đơn',
+    description: 'Giảm 20% cho mọi đồ uống tại Highlands Coffee. Áp dụng tất cả chi nhánh toàn quốc.',
+    pointsCost: 80,
+    imageUrl: 'https://picsum.photos/seed/cat-highland-coffee/400/220',
+    isFlashSale: false,
+    tag: 'Mã giảm giá',
+  },
+  {
+    id: 'cat-v2',
+    category: 'voucher',
+    partnerName: 'The Coffee House',
+    title: 'Mua 1 Tặng 1 – Flash Sale',
+    description: 'Mua 1 bất kỳ đồ uống size L, tặng ngay 1 đồ uống size M. Giới hạn 2 lần/người.',
+    pointsCost: 150,
+    imageUrl: 'https://picsum.photos/seed/cat-tchouse/400/220',
+    isFlashSale: true,
+    expiresAt: '2026-08-12T20:00:00+07:00',
+    tag: 'Mã giảm giá',
+  },
+  {
+    id: 'cat-v3',
+    category: 'voucher',
+    partnerName: 'Circle K Việt Nam',
+    title: 'Giảm 15.000đ đơn hàng',
+    description: 'Giảm 15.000đ cho đơn hàng tối thiểu 50.000đ tại bất kỳ cửa hàng Circle K.',
+    pointsCost: 120,
+    imageUrl: 'https://picsum.photos/seed/cat-circlek/400/220',
+    isFlashSale: false,
+    tag: 'Mã giảm giá',
+  },
+  // ── Gifts (quà tặng vật lý) ───────────────────────────────────────
+  {
+    id: 'cat-g1',
+    category: 'gift',
+    partnerName: 'PCS Eco-Store',
+    title: 'Túi Tote Tái Chế',
+    description: 'Túi tote thành phẩm làm từ 5 chai nhựa PET tái chế. Khiến việc mua sắm trở nên xanh hơn mỗi ngày.',
+    pointsCost: 350,
+    imageUrl: 'https://picsum.photos/seed/cat-tote-bag/400/220',
+    isFlashSale: false,
+    tag: 'Quà tặng',
+  },
+  {
+    id: 'cat-g2',
+    category: 'gift',
+    partnerName: 'PCS Eco-Store',
+    title: 'Bình Giữ Nhiệt Inox',
+    description: 'Bình giữ nhiệt 500ml có logo PCS, giữ lạnh 24h và nóng 12h. Chất liệu Inox 304 an toàn cho sức khỏe.',
+    pointsCost: 600,
+    imageUrl: 'https://picsum.photos/seed/cat-thermos/400/220',
+    isFlashSale: false,
+    tag: 'Quà tặng',
+  },
+  {
+    id: 'cat-g3',
+    category: 'gift',
+    partnerName: 'Xanh Đồng Hành',
+    title: 'Bộ Dụng Cụ Cà Phê Organic',
+    description: 'Bộ gồm hộp cà phê hạt rang xay và phễu pha thủ công từ thủy tinh tái chế. Quà ý nghĩa cho người yêu thiên nhiên.',
+    pointsCost: 800,
+    imageUrl: 'https://picsum.photos/seed/cat-coffee-kit/400/220',
+    isFlashSale: true,
+    expiresAt: '2026-08-13T23:59:00+07:00',
+    tag: 'Quà tặng',
+  },
+  // ── Cashback (hoàn tiền) ───────────────────────────────────────
+  {
+    id: 'cat-c1',
+    category: 'cashback',
+    partnerName: 'MoMo × PCS',
+    title: 'Hoàn 10.000đ vào Ví MoMo',
+    description: 'Nhận ngay 10.000đ hoàn vào ví điện tử MoMo của bạn trong vòng 24 giờ sau khi đổi điểm.',
+    pointsCost: 200,
+    imageUrl: 'https://picsum.photos/seed/cat-momo-cash/400/220',
+    isFlashSale: false,
+    tag: 'Hoàn tiền',
+  },
+  {
+    id: 'cat-c2',
+    category: 'cashback',
+    partnerName: 'ZaloPay × PCS',
+    title: 'Hoàn 25.000đ – Flash Deal',
+    description: 'Chương trình đặc biệt: đổi điểm lấy 25.000đ vào ZaloPay với chỉ 450 điểm. Giới hạn 200 lượt/ngày.',
+    pointsCost: 450,
+    imageUrl: 'https://picsum.photos/seed/cat-zalopay-cash/400/220',
+    isFlashSale: true,
+    expiresAt: '2026-08-11T12:00:00+07:00',
+    tag: 'Hoàn tiền',
+  },
+  {
+    id: 'cat-c3',
+    category: 'cashback',
+    partnerName: 'Shopee × PCS',
+    title: 'Coin Shopee 50.000đ',
+    description: 'Quy đổi điểm xanh lấy 50.000 Shopee Coin dùng cho đơn hàng thương mại điện tử tiếp theo của bạn.',
+    pointsCost: 900,
+    imageUrl: 'https://picsum.photos/seed/cat-shopee-coin/400/220',
+    isFlashSale: false,
+    tag: 'Hoàn tiền',
+  },
+];
+
+// ---------------------------------------------------------------------------
 
 export const MOCK_VOUCHERS: Voucher[] = [
   {

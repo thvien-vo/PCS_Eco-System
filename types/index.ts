@@ -27,7 +27,7 @@ export interface Station {
 }
 
 // ---------------------------------------------------------------------------
-// Module 3 & 6 — Vouchers / Marketplace
+// Module 3 — Feed Vouchers (attached to feed posts, saved via "Lưu mã")
 // ---------------------------------------------------------------------------
 export interface Voucher {
   id: string;
@@ -38,6 +38,36 @@ export interface Voucher {
   isFlashSale: boolean;
   /** ISO 8601 datetime string — present only when isFlashSale is true */
   expiresAt?: string;
+}
+
+// ---------------------------------------------------------------------------
+// Module 6 — Green Marketplace Redemption Catalog
+// DISTINCT from Module 3 Voucher and Module 4 SavedVoucherDetail.
+// These are items in a spend-points redemption catalog, not feed-attached vouchers.
+// ---------------------------------------------------------------------------
+export type CatalogCategory = 'voucher' | 'gift' | 'cashback';
+
+export interface MarketplaceCatalogItem {
+  /** Unique catalog item ID */
+  id: string;
+  /** Category for filtering and badge display */
+  category: CatalogCategory;
+  /** Partner/brand name */
+  partnerName: string;
+  /** Short display title */
+  title: string;
+  /** Longer Vietnamese description (1–2 sentences) */
+  description: string;
+  /** Points required to redeem — REQUIRED field, unlike feed Voucher */
+  pointsCost: number;
+  /** picsum.photos URL */
+  imageUrl: string;
+  /** If true, show a flash-sale badge */
+  isFlashSale: boolean;
+  /** Absolute ISO expiry — only when isFlashSale is true */
+  expiresAt?: string;
+  /** Tag shown on the card (e.g. "Mã giảm giá", "Quà tặng", "Hoàn tiền") */
+  tag: string;
 }
 
 export interface FeedPost {
