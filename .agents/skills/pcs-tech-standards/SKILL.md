@@ -63,6 +63,8 @@ b. Chart Libraries (Recharts or equivalent): any file in `app/` is a Server Comp
   - start with `'use client';` as the first line, AND
   - when the chart is wrapped by `ResponsiveContainer` and rendered on a route where initial layout width matters (Module 4 Green Wallet, Module 8 B2B Insight), import it via `next/dynamic` with `{ ssr: false }` to avoid a 0-width flash on first paint — this is a rendering-quality fix, not a crash-prevention fix; the `'use client'` directive alone is what prevents the hard crash, the dynamic import only prevents the visual flicker.
 
+  **⚠️ BREAKING CHANGE — Next.js 16 (Turbopack):** `ssr: false` is NOT allowed with `next/dynamic` directly inside a Server Component. The Turbopack compiler rejects it at build time with error: `` `ssr: false` is not allowed with `next/dynamic` in Server Components ``. The fix: move all `dynamic(... { ssr: false })` calls into a dedicated `'use client'` wrapper file (e.g. `components/b2b/ChartWrappers.tsx`), then import the resulting component into the Server Component page. This is the correct pattern for Next.js 16+.
+
 ## 11. DEV SERVER EXECUTION RULES (CRITICAL — NEVER VIOLATE)
 
 `npm run dev` is a long-running, non-terminating process. It will NEVER exit on its own. Invoking it as a blocking terminal call causes an infinite hang. The following rules are MANDATORY for every session:

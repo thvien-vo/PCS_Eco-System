@@ -572,6 +572,46 @@ export const MOCK_CHALLENGES: ChallengeCard[] = [
 ];
 
 // ---------------------------------------------------------------------------
+// Module 8 — B2B Insight Snapshot mock data
+// ---------------------------------------------------------------------------
+
+/** Weekly sorted plastic totals — last 8 weeks (kg) */
+export const MOCK_WEEKLY_PLASTIC: { week: string; kgSorted: number }[] = [
+  { week: 'T1', kgSorted: 620 },
+  { week: 'T2', kgSorted: 745 },
+  { week: 'T3', kgSorted: 810 },
+  { week: 'T4', kgSorted: 690 },
+  { week: 'T5', kgSorted: 930 },
+  { week: 'T6', kgSorted: 1050 },
+  { week: 'T7', kgSorted: 980 },
+  { week: 'T8', kgSorted: 1140 },
+];
+
+/** PASS/REJECT breakdown per plastic type (scan counts) */
+export const MOCK_PASS_REJECT: {
+  plasticType: string;
+  pass: number;
+  reject: number;
+}[] = [
+  { plasticType: 'PET', pass: 412, reject: 38 },
+  { plasticType: 'PE', pass: 287, reject: 63 },
+  { plasticType: 'PP', pass: 194, reject: 46 },
+  { plasticType: 'PS', pass: 88, reject: 52 },
+  { plasticType: 'PVC', pass: 45, reject: 97 },
+];
+
+/** Station activity heatmap — scans this week per station (reuses station IDs from Module 2) */
+export const MOCK_STATION_ACTIVITY: { stationId: string; stationName: string; scansThisWeek: number }[] = [
+  { stationId: 'st-01', stationName: 'Quận 1 – Bến Nghé', scansThisWeek: 214 },
+  { stationId: 'st-04', stationName: 'Bình Thạnh – Ung Văn Khiêm', scansThisWeek: 187 },
+  { stationId: 'st-06', stationName: 'Gò Vấp – Quang Trung', scansThisWeek: 163 },
+  { stationId: 'st-02', stationName: 'Phú Nhuận – Phan Xích Long', scansThisWeek: 141 },
+  { stationId: 'st-05', stationName: 'Tân Bình – Cộng Hòa', scansThisWeek: 119 },
+  { stationId: 'st-07', stationName: 'Quận 3 – Võ Văn Tần', scansThisWeek: 94 },
+  { stationId: 'st-03', stationName: 'Quận 7 – Phú Mỹ Hưng', scansThisWeek: 58 },
+];
+
+// ---------------------------------------------------------------------------
 // Module 4 — Wallet Demo Transactions
 // 12 transactions spanning the past 7 days to populate the weekly chart
 // ---------------------------------------------------------------------------

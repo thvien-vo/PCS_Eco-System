@@ -47,6 +47,14 @@ description: Design system, UI/UX rules, the 8-module structure, the Vietnamese/
 
 *Signature Gradient:* `.bg-gradient-mint-pop` / `bg-gradient-to-br from-emerald via-mint to-cyan-400` used for hero banners and gamification elements.
 
+### B2B Enterprise Neutral Tokens (Module 8 only)
+These tokens are intentionally **not** in the Mint Pop palette — they establish a visually distinct enterprise register for `/b2b-insight`.
+
+| Variable Name | Hex Code | Tailwind Class | Usage Role |
+| --- | --- | --- | --- |
+| `--b2b-navy` | `#1E3A5F` | `bg-b2b-navy` / `text-b2b-navy` | Card backgrounds and accent fills on the enterprise dashboard |
+| `--b2b-cool-grey` | `#8A9AB5` | `text-b2b-grey` | Muted text, secondary labels, inactive states on enterprise view |
+
 ## 5. Layout & Typography rules
 - Layout Structure: Simulated mobile phone-frame mockup on desktop view (auto-hidden on real mobile screens <= 480px via CSS media query). Bottom navigation bar fixed at the bottom.
 - Typography: Inter or Plus Jakarta Sans font family. Clean hierarchy with heading sizes h1 (24px bold), h2 (18px semibold), body (14px regular), caption (12px muted).

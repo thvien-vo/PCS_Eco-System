@@ -32,6 +32,10 @@ const config: Config = {
         success: 'var(--kiosk-pass)',
         warning: 'var(--warning-amber)',
         error: 'var(--error-rose)',
+
+        /* ── B2B / Enterprise neutral (Module 8) ── */
+        'b2b-navy': 'var(--b2b-navy)',
+        'b2b-grey': 'var(--b2b-cool-grey)',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

@@ -26,6 +26,12 @@
     --emerald-hover: #047857;
     --neon-mint: #10b981;
 
+    /* ── B2B / Enterprise neutral tokens (Module 8 only) ── */
+    /* Mid-navy: card backgrounds on the enterprise dashboard */
+    --b2b-navy: #1e3a5f;
+    /* Cool-grey: muted text and inactive elements on enterprise view */
+    --b2b-cool-grey: #8a9ab5;
+
     /* ── Dedicated state colors ── */
     --kiosk-pass: #22c55e;
     --warning-amber: #f59e0b;

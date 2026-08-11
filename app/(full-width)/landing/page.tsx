@@ -317,6 +317,16 @@ export default function LandingPage() {
           <p className="text-xs text-muted-foreground">
             © 2026 Plastic Circularity Station · Dow Circular Economy Innovation Challenge
           </p>
+          {/* Subtle B2B entry point — intentionally low-profile, for live pitch navigation */}
+          <div className="mt-4 flex items-center justify-center">
+            <Link
+              href="/b2b-insight"
+              className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <ChevronRight className="h-3 w-3" />
+              Xem góc nhìn B2B
+            </Link>
+          </div>
         </div>
       </footer>
     </div>
