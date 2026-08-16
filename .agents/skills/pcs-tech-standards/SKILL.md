@@ -160,3 +160,7 @@ Our i18n implementation uses a custom, lightweight Zustand-based approach rather
 - **Dictionaries:** Stored in `lib/i18n/dictionaries.ts`.
 - **Hook:** Components must use the custom `useTranslation` hook (`hooks/use-translation.ts`) to access translations.
 - **Hydration:** Like all persisted stores, the locale store uses `skipHydration: true` and is manually rehydrated via `StoreHydrationProvider`. Components reading the locale must be gated with `useHasMounted()` to prevent React server/client text mismatches.
+- **Nav/Tab vs. Display Label Rule (CRITICAL for EN overflow prevention):** Navigation tabs (BottomNav, tab bars) have fixed, tight widths of ~56px. English translations are frequently longer than Vietnamese. Therefore:
+  - Every concept that appears in BOTH a tight nav/tab context AND a wider display context (page header, card title) MUST have **two separate dictionary keys**: one short nav key (e.g. `common.navigation.walletShort`) and one full display key (e.g. `common.navigation.wallet`).
+  - The nav component ALWAYS uses the `Short` variant. The full variant is used in page titles, cards, and any context with more than ~80px of available label width.
+  - When adding a new string during Modules 2–7 migration, explicitly check whether the EN string fits within the target container at `text-[10px]` before choosing to use a single key for both contexts.

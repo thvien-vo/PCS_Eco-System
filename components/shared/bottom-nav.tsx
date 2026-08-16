@@ -4,18 +4,16 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Map, Rss, Wallet, Trophy, Gift } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
-import { useHasMounted } from '@/hooks/use-has-mounted';
 import { cn } from '@/lib/utils';
 
 export function BottomNav() {
   const pathname = usePathname();
   const { t } = useTranslation();
-  const hasMounted = useHasMounted();
 
   const tabs = [
     { name: t.common.navigation.map, href: '/map', icon: Map },
     { name: t.common.navigation.feed, href: '/feed', icon: Rss },
-    { name: t.common.navigation.wallet, href: '/wallet', icon: Wallet },
+    { name: t.common.navigation.walletShort, href: '/wallet', icon: Wallet },
     { name: t.common.navigation.challenge, href: '/challenge', icon: Trophy },
     { name: t.common.navigation.marketplace, href: '/marketplace', icon: Gift },
   ];
@@ -26,8 +24,7 @@ export function BottomNav() {
         'absolute bottom-0 z-50 h-[72px] w-full',
         'flex items-center justify-around px-2 pb-safe',
         'border-t border-border bg-card/95 backdrop-blur-sm',
-        'sm:w-[374px] sm:rounded-b-[32px]',
-        !hasMounted && 'opacity-0' // Avoid SSR mismatch flash by hiding nav until hydrated (or we can just show default VI since it won't crash)
+        'sm:w-[374px] sm:rounded-b-[32px]'
       )}
     >
       {tabs.map((tab) => {
@@ -49,8 +46,8 @@ export function BottomNav() {
               strokeWidth={isActive ? 2.5 : 2}
               aria-hidden="true"
             />
-            <span className="text-[10px] font-medium leading-none">
-              {hasMounted ? tab.name : tab.name} {/* Safe text match since default locale is strict vi */}
+            <span className="text-[10px] font-medium leading-none truncate max-w-[52px] text-center">
+              {tab.name}
             </span>
           </Link>
         );

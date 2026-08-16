@@ -3,7 +3,10 @@ export type TranslationDictionary = {
     navigation: {
       map: string;
       feed: string;
+      /** Full display label (page headers, cards). Avoid using in BottomNav — use walletShort instead. */
       wallet: string;
+      /** Shortened nav-context label for the BottomNav tab where space is tight. */
+      walletShort: string;
       challenge: string;
       marketplace: string;
       home: string;
@@ -140,6 +143,7 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
         map: 'Bản đồ',
         feed: 'Cộng đồng',
         wallet: 'Ví Xanh',
+        walletShort: 'Ví Xanh',
         challenge: 'Thử thách',
         marketplace: 'Đổi quà',
         home: 'Trang chủ',
@@ -301,6 +305,7 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
         map: 'Map',
         feed: 'Community',
         wallet: 'Green Wallet',
+        walletShort: 'Wallet',
         challenge: 'Challenge',
         marketplace: 'Rewards',
         home: 'Home',
