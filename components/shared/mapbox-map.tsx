@@ -7,39 +7,42 @@
  * - Must be loaded via next/dynamic({ ssr: false }) — Mapbox uses window/DOM APIs.
  * - ResizeObserver on the container calls map.resize() when phone-frame layout shifts.
  * - Popup content uses NO sensor-related technical terminology (per pcs-design-system §9).
+ *
+ * I18N NOTE: Translated labels are passed in via the `labels` prop from map/page.tsx
+ * (which uses useTranslation). The popup HTML is built inside a useEffect callback
+ * which cannot use React hooks directly, so labels must be passed as plain strings.
  */
 
 import { useEffect, useRef, useCallback, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { useTheme } from 'next-themes';
 import type { Station } from '@/types';
+import type { TranslationDictionary } from '@/lib/i18n/dictionaries';
 
-// ── Status helpers (NO sensor jargon — user-facing labels only) ──
-const STATUS_CONFIG = {
+// ── Status color config (locale-agnostic — colours only) ──
+const STATUS_COLORS = {
   green: {
     color: '#22C55E',
     glowColor: 'rgba(34,197,94,0.5)',
-    label: 'Hoạt động tốt',
-    labelEn: 'green',
   },
   yellow: {
     color: '#F59E0B',
     glowColor: 'rgba(245,158,11,0.5)',
-    label: 'Sắp đầy / Ít phần thưởng',
-    labelEn: 'yellow',
   },
   red: {
     color: '#EF4444',
     glowColor: 'rgba(239,68,68,0.5)',
-    label: 'Tạm ngưng hoạt động',
-    labelEn: 'red',
   },
 } as const;
+
+type MapLabels = Pick<TranslationDictionary['map'], 'popup' | 'fallback' | 'legend' | 'page'>;
 
 interface MapboxMapProps {
   stations: Station[];
   center?: [number, number];
   zoom?: number;
+  /** Translated labels passed from the parent page — used in popup HTML and fallback UI */
+  labels: MapLabels;
 }
 
 function formatDistance(km: number): string {
@@ -47,7 +50,7 @@ function formatDistance(km: number): string {
   return `${km.toFixed(1)}km`;
 }
 
-export function MapboxMap({ stations, center = [106.7009, 10.7769], zoom = 12 }: MapboxMapProps) {
+export function MapboxMap({ stations, labels, center = [106.7009, 10.7769], zoom = 12 }: MapboxMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const popupsRef = useRef<mapboxgl.Popup[]>([]);
@@ -117,7 +120,15 @@ export function MapboxMap({ stations, center = [106.7009, 10.7769], zoom = 12 }:
 
     map.on('load', () => {
       stations.forEach((station) => {
-        const cfg = STATUS_CONFIG[station.status];
+        const cfg = STATUS_COLORS[station.status];
+
+        // Resolve translated status label for this station
+        const statusLabel =
+          station.status === 'green'
+            ? labels.popup.status.active
+            : station.status === 'yellow'
+            ? labels.popup.status.almostFull
+            : labels.popup.status.suspended;
 
         // Create glowing pin element
         const el = document.createElement('div');
@@ -148,8 +159,8 @@ export function MapboxMap({ stations, center = [106.7009, 10.7769], zoom = 12 }:
         // Build popup HTML (no sensor jargon per design system §9)
         const rewardText =
           station.rewardsRemaining > 0
-            ? `<span style="color: #22C55E; font-weight: 600;">${station.rewardsRemaining} phần thưởng còn lại</span>`
-            : `<span style="color: #EF4444; font-weight: 600;">Hết phần thưởng</span>`;
+            ? `<span style="color: #22C55E; font-weight: 600;">${station.rewardsRemaining} ${labels.popup.rewardsRemaining}</span>`
+            : `<span style="color: #EF4444; font-weight: 600;">${labels.popup.noRewards}</span>`;
 
         const popupHTML = `
           <div style="
@@ -177,7 +188,7 @@ export function MapboxMap({ stations, center = [106.7009, 10.7769], zoom = 12 }:
                 color: ${cfg.color};
                 text-transform: uppercase;
                 letter-spacing: 0.05em;
-              ">${cfg.label}</span>
+              ">${statusLabel}</span>
             </div>
 
             <h3 style="
@@ -204,7 +215,7 @@ export function MapboxMap({ stations, center = [106.7009, 10.7769], zoom = 12 }:
               margin-bottom: 10px;
               font-size: 12px;
             ">
-              <span style="color: #64748B;">📍 ${formatDistance(station.distanceKm)} từ bạn</span>
+              <span style="color: #64748B;">📍 ${formatDistance(station.distanceKm)} ${labels.popup.distanceSuffix}</span>
               <span>${rewardText}</span>
             </div>
 
@@ -227,7 +238,7 @@ export function MapboxMap({ stations, center = [106.7009, 10.7769], zoom = 12 }:
               onmouseover="this.style.background='#047857'"
               onmouseout="this.style.background='#059669'"
             >
-              🧭 Chỉ đường
+              ${labels.popup.directionsCta}
             </a>
           </div>
         `;
@@ -282,15 +293,29 @@ export function MapboxMap({ stations, center = [106.7009, 10.7769], zoom = 12 }:
     return (
       <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-card to-background p-6 text-center">
         <div className="text-4xl">🗺️</div>
-        <h3 className="font-semibold text-foreground">Bản đồ cần cấu hình</h3>
+        <h3 className="font-semibold text-foreground">{labels.fallback.title}</h3>
         <p className="max-w-xs text-xs text-muted-foreground leading-relaxed">
-          Thêm <code className="rounded bg-border px-1 py-0.5 font-mono">NEXT_PUBLIC_MAPBOX_TOKEN</code>{' '}
-          vào <code className="rounded bg-border px-1 py-0.5 font-mono">.env.local</code> để xem bản đồ tương tác.
+          {labels.fallback.body.split('NEXT_PUBLIC_MAPBOX_TOKEN').map((part, i, arr) =>
+            i < arr.length - 1 ? (
+              <span key={i}>
+                {part}
+                <code className="rounded bg-border px-1 py-0.5 font-mono">NEXT_PUBLIC_MAPBOX_TOKEN</code>
+              </span>
+            ) : (
+              <span key={i}>{part}</span>
+            )
+          )}
         </p>
         <div className="mt-2 w-full max-w-xs space-y-2 rounded-xl border border-border bg-card p-3">
-          <p className="text-xs font-semibold text-foreground">Vị trí trạm (demo):</p>
+          <p className="text-xs font-semibold text-foreground">{labels.fallback.stationListHeading}</p>
           {stations.map((s) => {
-            const cfg = STATUS_CONFIG[s.status];
+            const cfg = STATUS_COLORS[s.status];
+            const statusLabel =
+              s.status === 'green'
+                ? labels.legend.active
+                : s.status === 'yellow'
+                ? labels.legend.almostFull
+                : labels.legend.suspended;
             return (
               <div key={s.id} className="flex items-center gap-2 text-xs">
                 <span
@@ -299,7 +324,7 @@ export function MapboxMap({ stations, center = [106.7009, 10.7769], zoom = 12 }:
                 />
                 <span className="truncate text-muted-foreground">{s.name}</span>
                 <span className="ml-auto text-[10px]" style={{ color: cfg.color }}>
-                  {cfg.label}
+                  {statusLabel}
                 </span>
               </div>
             );

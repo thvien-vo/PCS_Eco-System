@@ -185,6 +185,46 @@ export type TranslationDictionary = {
     };
     footer: string;
   };
+  map: {
+    page: {
+      title: string;
+      /** "{N} stations in Ho Chi Minh City" — N is interpolated in code */
+      stationCountSubtitle: string;
+      filterAriaLabel: string;
+      searchPlaceholder: string;
+      overlayCount: string;
+      noResultsTitle: string;
+      noResultsHint: string;
+    };
+    filters: {
+      all: string;
+      active: string;
+      almostFull: string;
+      suspended: string;
+    };
+    legend: {
+      active: string;
+      almostFull: string;
+      suspended: string;
+    };
+    popup: {
+      status: {
+        active: string;
+        almostFull: string;
+        suspended: string;
+      };
+      /** "{distance} from you" — distance string is prepended in code */
+      distanceSuffix: string;
+      rewardsRemaining: string;
+      noRewards: string;
+      directionsCta: string;
+    };
+    fallback: {
+      title: string;
+      body: string;
+      stationListHeading: string;
+    };
+  };
 };
 
 export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
@@ -328,7 +368,7 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
       },
       language: {
         title: 'Ngôn ngữ',
-        note: 'Dịch thuật toàn ứng dụng đang được triển khai (Hoàn tất: Settings, Landing, Team, B2B Insight). Các trang khác sẽ tạm hiển thị Tiếng Việt.',
+        note: 'Dịch thuật toàn ứng dụng đang được triển khai (Hoàn tất: Settings, Landing, Team, B2B Insight, Map). Các trang khác sẽ tạm hiển thị Tiếng Việt.',
       },
       contact: {
         title: 'Liên hệ Admin',
@@ -396,6 +436,44 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
         footnote: 'Độ đậm màu phản ánh cường độ hoạt động tương đối. Mỗi lượt quét = một giao dịch nhựa được FTIR xử lý. Dữ liệu được làm mới theo thời gian thực khi triển khai hệ thống sản xuất.',
       },
       footer: 'Dữ liệu hiển thị là minh họa cho mục đích demo cạnh tranh Dow 2026. Các con số không phản ánh kết quả thực tế đã được kiểm chứng.',
+    },
+    map: {
+      page: {
+        title: 'Bản đồ trạm PCS',
+        stationCountSubtitle: 'trạm tại TP. Hồ Chí Minh',
+        filterAriaLabel: 'Lọc bản đồ',
+        searchPlaceholder: 'Tìm trạm theo tên hoặc địa chỉ...',
+        overlayCount: 'trạm hiển thị',
+        noResultsTitle: 'Không tìm thấy trạm',
+        noResultsHint: 'Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm',
+      },
+      filters: {
+        all: 'Tất cả',
+        active: 'Hoạt động',
+        almostFull: 'Sắp đầy',
+        suspended: 'Tạm ngưng',
+      },
+      legend: {
+        active: 'Hoạt động tốt',
+        almostFull: 'Sắp đầy',
+        suspended: 'Tạm ngưng',
+      },
+      popup: {
+        status: {
+          active: 'Hoạt động tốt',
+          almostFull: 'Sắp đầy / Ít phần thưởng',
+          suspended: 'Tạm ngưng hoạt động',
+        },
+        distanceSuffix: 'từ bạn',
+        rewardsRemaining: 'phần thưởng còn lại',
+        noRewards: 'Hết phần thưởng',
+        directionsCta: '🧭 Chỉ đường',
+      },
+      fallback: {
+        title: 'Bản đồ cần cấu hình',
+        body: 'Thêm NEXT_PUBLIC_MAPBOX_TOKEN vào .env.local để xem bản đồ tương tác.',
+        stationListHeading: 'Vị trí trạm (demo):',
+      },
     },
   },
   en: {
@@ -538,7 +616,7 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
       },
       language: {
         title: 'Language',
-        note: 'Full-app translation is in progress (Done: Settings, Landing, Team, B2B Insight). Other pages will temporarily display in Vietnamese.',
+        note: 'Full-app translation is in progress (Done: Settings, Landing, Team, B2B Insight, Map). Other pages will temporarily display in Vietnamese.',
       },
       contact: {
         title: 'Contact Admin',
@@ -608,6 +686,44 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
         footnote: 'Colour intensity reflects relative activity levels. Each scan = one plastic transaction processed by FTIR. Data refreshes in real time when the production system is deployed.',
       },
       footer: 'Data shown is illustrative for the Dow 2026 competition demo. Figures do not reflect verified real-world results.',
+    },
+    map: {
+      page: {
+        title: 'PCS Station Map',
+        stationCountSubtitle: 'stations in Ho Chi Minh City',
+        filterAriaLabel: 'Filter map',
+        searchPlaceholder: 'Search by station name or address...',
+        overlayCount: 'stations shown',
+        noResultsTitle: 'No stations found',
+        noResultsHint: 'Try adjusting filters or search terms',
+      },
+      filters: {
+        all: 'All',
+        active: 'Active',
+        almostFull: 'Almost Full',
+        suspended: 'Suspended',
+      },
+      legend: {
+        active: 'Active',
+        almostFull: 'Almost Full',
+        suspended: 'Suspended',
+      },
+      popup: {
+        status: {
+          active: 'Active',
+          almostFull: 'Low Stock',
+          suspended: 'Temporarily Closed',
+        },
+        distanceSuffix: 'from you',
+        rewardsRemaining: 'rewards left',
+        noRewards: 'No rewards',
+        directionsCta: '🧭 Directions',
+      },
+      fallback: {
+        title: 'Map configuration needed',
+        body: 'Add NEXT_PUBLIC_MAPBOX_TOKEN to .env.local to view the interactive map.',
+        stationListHeading: 'Station locations (demo):',
+      },
     },
   },
 };
