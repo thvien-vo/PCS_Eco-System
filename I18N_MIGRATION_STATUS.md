@@ -6,7 +6,7 @@ This file tracks the progress of Phase 2: migrating hardcoded Vietnamese strings
 | :--- | :--- | :--- | :--- |
 | **0** | **Module 9 (Settings)** & Core i18n Infra | ✅ Done | `765926c` |
 | **1** | **Shared Components** & **Module 1** (Landing/Team) | ✅ Done | `24f47c0` |
-| **2** | **Module 8** (B2B Insight) | ⏳ In Progress (pending approval) | |
+| **2** | **Module 8** (B2B Insight) | ✅ Done | `832a18e` |
 | **3** | **Module 2** (Map) | ⬜ Not Started | |
 | **4** | **Module 6** (Marketplace) | ⬜ Not Started | |
 | **5** | **Module 4** (Wallet) | ⬜ Not Started | |
