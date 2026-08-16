@@ -16,9 +16,9 @@ export default function KioskAppLayout({
       <div className="relative w-full h-full pb-[72px] overflow-y-auto scrollbar-hide">
         {children}
       </div>
-      
+
       {/* Kiosk FAB - Placed slightly above the bottom nav */}
-      <Link 
+      <Link
         href="/kiosk"
         className="absolute bottom-24 right-4 z-[60] flex h-14 w-14 items-center justify-center rounded-full bg-[var(--primary-emerald)] text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
         aria-label="Mở Kiosk"

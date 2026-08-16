@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ArrowLeft, ExternalLink, Palette, GraduationCap, Code2, BarChart3, Leaf } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Palette, GraduationCap, Code2, BarChart3, Leaf, Settings } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { TeamMember } from '@/types';
@@ -179,7 +179,15 @@ export default function TeamPage() {
             Trang chủ
           </Link>
           <span className="text-border">|</span>
-          <h1 className="text-sm font-semibold text-foreground">Đội ngũ PCS</h1>
+          <h1 className="flex-1 text-sm font-semibold text-foreground">Đội ngũ PCS</h1>
+          {/* Settings entry point — per Instagram/Facebook pattern: reached from profile screen */}
+          <Link
+            href="/settings"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            aria-label="Cài đặt"
+          >
+            <Settings className="h-4 w-4" />
+          </Link>
         </div>
       </div>
 

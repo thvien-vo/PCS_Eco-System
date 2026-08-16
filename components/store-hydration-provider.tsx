@@ -4,6 +4,9 @@ import { useEffect } from 'react';
 import { useWalletStore } from '@/store/wallet-store';
 import { useFeedStore } from '@/store/feed-store';
 
+import { useLocaleStore } from '@/store/locale-store';
+import { useProfileStore } from '@/store/profile-store';
+
 /**
  * StoreHydrationProvider — mounted once at the root layout.
  *
@@ -21,6 +24,8 @@ export function StoreHydrationProvider() {
     // Components that read persisted values must gate behind useHasMounted().
     useWalletStore.persist.rehydrate();
     useFeedStore.persist.rehydrate();
+    useLocaleStore.persist.rehydrate();
+    useProfileStore.persist.rehydrate();
   }, []);
 
   // Renders nothing — purely a side-effect component.

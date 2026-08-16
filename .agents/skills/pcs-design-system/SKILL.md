@@ -11,7 +11,8 @@ description: Design system, UI/UX rules, the 8-module structure, the Vietnamese/
 - Concept: A digital ecosystem linking smart plastic collection kiosks (PCS Stations), green rewards wallet, social voucher feed, gamification challenge, and enterprise Data-as-a-Service insights for Dow.
 
 ## 2. Language convention (100% Vietnamese UI text, English code/ variable names)
-- 100% Vietnamese UI Text: Every user-facing text, button label, modal message, error message, notification, and tooltip MUST be in grammatically correct Vietnamese with full accents/diacritics. This applies to every screen, button, and message the end user sees.
+- 100% Vietnamese UI Text (except Module 9 Settings): Every user-facing text, button label, modal message, error message, notification, and tooltip MUST be in grammatically correct Vietnamese with full accents/diacritics. 
+- **Phase 1 Bilingual Scope:** Module 9 (Settings) now supports bilingual VI/EN. However, Modules 1-8 remain strictly 100% Vietnamese until Phase 2. The default fallback locale for the entire app remains Vietnamese.
 - Code Base: English for standard variable names, component files, type definitions, and code comments.
 
 ## 3. Required tech stack

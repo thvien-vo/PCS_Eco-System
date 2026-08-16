@@ -19,7 +19,8 @@
  */
 
 import { motion } from 'framer-motion';
-import { Bell, Search } from 'lucide-react';
+import { Bell, Search, Settings } from 'lucide-react';
+import Link from 'next/link';
 import { QuickActionCarousel } from '@/components/feed/quick-action-carousel';
 import { GreenStories } from '@/components/feed/green-stories';
 import { FlashSaleBar } from '@/components/feed/flash-sale-bar';
@@ -56,6 +57,13 @@ export default function GreenFeedPage() {
               {/* Notification badge */}
               <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500 border border-background" />
             </button>
+            <Link
+              href="/settings"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-card border border-border text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Cài đặt"
+            >
+              <Settings className="h-4 w-4" />
+            </Link>
           </div>
         </div>
       </header>

@@ -150,3 +150,13 @@ const drag = useDragScroll();
 - `cursor: grabbing` applies during the drag for visual affordance; the consumer sets `cursor-grab` at rest via className.
 
 **DO NOT** add custom pointer/touch drag logic in individual components — always import and use the shared hook.
+
+## 13. I18N Technical Convention (Zustand-based)
+
+Our i18n implementation uses a custom, lightweight Zustand-based approach rather than `next-intl` to minimize bundle size and integrate smoothly with our hydration-guard patterns.
+
+- **Locale Store:** `store/locale-store.ts` manages the current language (`'vi'` or `'en'`).
+- **Default Locale:** Must strictly default to `'vi'`. No `navigator.language` auto-detection is used.
+- **Dictionaries:** Stored in `lib/i18n/dictionaries.ts`.
+- **Hook:** Components must use the custom `useTranslation` hook (`hooks/use-translation.ts`) to access translations.
+- **Hydration:** Like all persisted stores, the locale store uses `skipHydration: true` and is manually rehydrated via `StoreHydrationProvider`. Components reading the locale must be gated with `useHasMounted()` to prevent React server/client text mismatches.
