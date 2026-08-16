@@ -5,6 +5,10 @@
  * ──────────────────
  * next/dynamic with { ssr: false } MUST live in a 'use client' file in Next.js 16+.
  * This wrapper is the correct place per pcs-tech-standards §10b.
+ *
+ * Props are passed through transparently — dynamic() preserves the component's
+ * full prop types, so WeeklyPlasticChartDynamic and PassRejectChartDynamic
+ * accept the same labels props as their underlying components.
  */
 import dynamic from 'next/dynamic';
 

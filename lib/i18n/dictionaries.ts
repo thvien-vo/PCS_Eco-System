@@ -134,6 +134,57 @@ export type TranslationDictionary = {
       };
     };
   };
+  b2b: {
+    nav: {
+      backHome: string;
+      title: string;
+      /** Short badge shown beside the header title */
+      sampleDataBadge: string;
+    };
+    valueStatement: {
+      eyebrow: string;
+      headlinePart1: string;
+      headlinePart2: string;
+      headlinePart3pre: string;
+      headlinePart3highlight: string;
+      body: string;
+      pipeline: {
+        ftir: string;
+        ml: string;
+        feedstock: string;
+      };
+    };
+    kpi: {
+      totalScans: { label: string; unit: string; };
+      passRate: { label: string; unit: string; };
+      totalPlastic: { label: string; unit: string; };
+      activeStations: { label: string; unit: string; };
+    };
+    charts: {
+      weeklyPlastic: {
+        title: string;
+        badge: string;
+        tooltipSeries: string;
+        /** prefix before the week number: e.g. "Tuần" in VI, "Week" in EN */
+        tooltipWeekPrefix: string;
+      };
+      passReject: {
+        title: string;
+        legendPass: string;
+        legendReject: string;
+        tooltipPass: string;
+        tooltipReject: string;
+      };
+    };
+    heatmap: {
+      title: string;
+      badge: string;
+      /** suffix after scan count number: e.g. "lượt quét" / "scans" */
+      scanSuffix: string;
+      footnote: string;
+    };
+    footer: string;
+  };
 };
 
 export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
@@ -277,7 +328,7 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
       },
       language: {
         title: 'Ngôn ngữ',
-        note: 'Dịch thuật toàn ứng dụng đang được triển khai (Hoàn tất: Settings, Landing, Team). Các trang khác sẽ tạm hiển thị Tiếng Việt.',
+        note: 'Dịch thuật toàn ứng dụng đang được triển khai (Hoàn tất: Settings, Landing, Team, B2B Insight). Các trang khác sẽ tạm hiển thị Tiếng Việt.',
       },
       contact: {
         title: 'Liên hệ Admin',
@@ -297,6 +348,54 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
           description: 'Yêu cầu của bạn đã được ghi nhận. Chúng tôi sẽ phản hồi sớm nhất.',
         },
       },
+    },
+    b2b: {
+      nav: {
+        backHome: 'Trang chủ',
+        title: 'Góc nhìn Doanh nghiệp',
+        sampleDataBadge: 'Dữ liệu thử nghiệm',
+      },
+      valueStatement: {
+        eyebrow: 'Mệnh đề giá trị cốt lõi cho Dow',
+        headlinePart1: 'Càng nhiều dữ liệu →',
+        headlinePart2: 'độ chính xác phân loại càng cao',
+        headlinePart3pre: '→ nguyên liệu đầu vào sạch hơn cho',
+        headlinePart3highlight: 'Tái chế Cơ học',
+        body: 'Mỗi lượt quét FTIR tại trạm PCS mở rộng bộ dữ liệu phân tích dòng chất thải địa phương. Dữ liệu tích lũy giúp mô hình phân loại nhận diện “dấu vân tay hóa học” của từng loại polyme chính xác hơn — đảm bảo nguồn nhựa đầu vào thuần hơn cho các cơ sở Tái chế Cơ học (MRF) của Dow.',
+        pipeline: {
+          ftir: 'Phổ FTIR phản xã khuếch tán',
+          ml: 'Mô hình ML (Random Forest / MobileNet-1D)',
+          feedstock: 'Nguyên liệu sạch cho MRF',
+        },
+      },
+      kpi: {
+        totalScans: { label: 'Tổng lượt quét (8 tuần)', unit: 'quét' },
+        passRate: { label: 'Tỉ lệ Đạt chuẩn', unit: '%' },
+        totalPlastic: { label: 'Tổng nhựa phân loại (8 tuần)', unit: 'kg' },
+        activeStations: { label: 'Trạm hoạt động', unit: 'trạm' },
+      },
+      charts: {
+        weeklyPlastic: {
+          title: 'Nhựa phân loại theo tuần',
+          badge: '8 tuần gần nhất',
+          tooltipSeries: 'Nhựa đã phân loại',
+          tooltipWeekPrefix: 'Tuần',
+        },
+        passReject: {
+          title: 'Tỉ lệ Đạt / Từ chối theo loại nhựa',
+          legendPass: 'Đạt',
+          legendReject: 'Từ chối',
+          tooltipPass: '✅ Đạt',
+          tooltipReject: '❌ Từ chối',
+        },
+      },
+      heatmap: {
+        title: 'Bản đồ nhiệt trạm hoạt động',
+        badge: 'Tuần hiện tại',
+        scanSuffix: 'lượt quét',
+        footnote: 'Độ đậm màu phản ánh cường độ hoạt động tương đối. Mỗi lượt quét = một giao dịch nhựa được FTIR xử lý. Dữ liệu được làm mới theo thời gian thực khi triển khai hệ thống sản xuất.',
+      },
+      footer: 'Dữ liệu hiển thị là minh họa cho mục đích demo cạnh tranh Dow 2026. Các con số không phản ánh kết quả thực tế đã được kiểm chứng.',
     },
   },
   en: {
@@ -439,7 +538,7 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
       },
       language: {
         title: 'Language',
-        note: 'Full-app translation is in progress (Done: Settings, Landing, Team). Other pages will temporarily display in Vietnamese.',
+        note: 'Full-app translation is in progress (Done: Settings, Landing, Team, B2B Insight). Other pages will temporarily display in Vietnamese.',
       },
       contact: {
         title: 'Contact Admin',
@@ -459,6 +558,56 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
           description: 'Your request has been recorded. We will respond shortly.',
         },
       },
+    },
+    b2b: {
+      nav: {
+        backHome: 'Home',
+        title: 'Enterprise Insights',
+        sampleDataBadge: 'Sample Data',
+      },
+      valueStatement: {
+        eyebrow: 'Core Value Proposition for Dow',
+        headlinePart1: 'More Data →',
+        headlinePart2: 'higher classification accuracy',
+        headlinePart3pre: '→ cleaner feedstock for',
+        headlinePart3highlight: 'Mechanical Recycling',
+        body: 'Every FTIR scan at a PCS station expands the local waste stream analytics dataset. Accumulated data enables the classification model to identify the "chemical fingerprint" of each polymer type more accurately — ensuring purer plastic inputs for Dow\'s Mechanical Recycling facilities (MRFs).',
+        pipeline: {
+          ftir: 'Diffuse Reflectance FTIR',
+          ml: 'ML Model (Random Forest / MobileNet-1D)',
+          feedstock: 'Clean Feedstock for MRF',
+        },
+      },
+      kpi: {
+        totalScans: { label: 'Total Scans (8 Weeks)', unit: 'scans' },
+        passRate: { label: 'Pass Rate', unit: '%' },
+        /** Shorter label to prevent KPI chip overflow in EN */
+        totalPlastic: { label: 'Plastic Sorted (8 Wks)', unit: 'kg' },
+        /** Unit dropped in EN: label already says "Active Stations", number alone is clear */
+        activeStations: { label: 'Active Stations', unit: '' },
+      },
+      charts: {
+        weeklyPlastic: {
+          title: 'Plastic Sorted by Week',
+          badge: 'Last 8 Weeks',
+          tooltipSeries: 'Plastic Sorted',
+          tooltipWeekPrefix: 'Week',
+        },
+        passReject: {
+          title: 'Pass / Reject by Plastic Type',
+          legendPass: 'Pass',
+          legendReject: 'Reject',
+          tooltipPass: '✅ Pass',
+          tooltipReject: '❌ Reject',
+        },
+      },
+      heatmap: {
+        title: 'Active Station Heatmap',
+        badge: 'Current Week',
+        scanSuffix: 'scans',
+        footnote: 'Colour intensity reflects relative activity levels. Each scan = one plastic transaction processed by FTIR. Data refreshes in real time when the production system is deployed.',
+      },
+      footer: 'Data shown is illustrative for the Dow 2026 competition demo. Figures do not reflect verified real-world results.',
     },
   },
 };

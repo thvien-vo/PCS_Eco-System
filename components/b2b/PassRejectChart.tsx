@@ -12,7 +12,16 @@ import {
 } from 'recharts';
 import { MOCK_PASS_REJECT } from '@/lib/mock-data';
 
-export default function PassRejectChart() {
+interface PassRejectChartProps {
+  labels: {
+    legendPass: string;
+    legendReject: string;
+    tooltipPass: string;
+    tooltipReject: string;
+  };
+}
+
+export default function PassRejectChart({ labels }: PassRejectChartProps) {
   return (
     <ResponsiveContainer width="100%" height={220}>
       <BarChart
@@ -52,13 +61,13 @@ export default function PassRejectChart() {
           }}
           formatter={(value, name) => [
             typeof value === 'number' ? value.toLocaleString('vi-VN') : String(value ?? ''),
-            name === 'pass' ? '✅ Đạt' : '❌ Từ chối',
+            name === 'pass' ? labels.tooltipPass : labels.tooltipReject,
           ]}
         />
         <Legend
           iconType="circle"
           iconSize={8}
-          formatter={(value) => (value === 'pass' ? 'Đạt' : 'Từ chối')}
+          formatter={(value) => (value === 'pass' ? labels.legendPass : labels.legendReject)}
           wrapperStyle={{ fontSize: 12, color: 'var(--muted-foreground)' }}
         />
         <Bar dataKey="pass" fill="#2d6a9f" radius={[0, 4, 4, 0]} name="pass" />

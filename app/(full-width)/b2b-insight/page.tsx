@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { Database, BarChart2, Activity, ChevronLeft, ArrowRight } from 'lucide-react';
 import { MOCK_WEEKLY_PLASTIC, MOCK_PASS_REJECT, MOCK_STATION_ACTIVITY } from '@/lib/mock-data';
@@ -7,67 +9,58 @@ import {
   WeeklyPlasticChartDynamic as WeeklyPlasticChart,
   PassRejectChartDynamic as PassRejectChart,
 } from '@/components/b2b/ChartWrappers';
-
-// ─── Station Heatmap — pure server/client-safe colour-intensity table ─────────
-const MAX_SCANS = Math.max(...MOCK_STATION_ACTIVITY.map((s) => s.scansThisWeek));
-
-function StationHeatmap() {
-  return (
-    <div className="space-y-2.5">
-      {MOCK_STATION_ACTIVITY.map((station) => {
-        const ratio = station.scansThisWeek / MAX_SCANS;
-        // intensity from 15 % → 90 % opacity of the b2b-navy
-        const opacity = 0.15 + ratio * 0.75;
-        const textDark = ratio > 0.55;
-        return (
-          <div key={station.stationId} className="flex items-center gap-3">
-            {/* Station label */}
-            <span className="w-48 flex-shrink-0 truncate text-xs font-medium text-[var(--muted-foreground)]">
-              {station.stationName}
-            </span>
-            {/* Coloured bar cell */}
-            <div className="relative flex-1 overflow-hidden rounded-md" style={{ height: 28 }}>
-              {/* background track */}
-              <div className="absolute inset-0 rounded-md bg-[var(--border)]" />
-              {/* intensity fill */}
-              <div
-                className="absolute inset-y-0 left-0 rounded-md transition-all duration-500"
-                style={{
-                  width: `${ratio * 100}%`,
-                  backgroundColor: `rgba(30, 58, 95, ${opacity})`,
-                }}
-              />
-              {/* scan count label */}
-              <span
-                className={`absolute inset-y-0 left-3 flex items-center text-[11px] font-semibold ${
-                  textDark ? 'text-white' : 'text-[var(--foreground)]'
-                }`}
-              >
-                {station.scansThisWeek.toLocaleString('vi-VN')} lượt quét
-              </span>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
+import { useTranslation } from '@/hooks/use-translation';
+import { useHasMounted } from '@/hooks/use-has-mounted';
 
 // ─── Metric summary chips ──────────────────────────────────────────────────────
 const TOTAL_SCANS = MOCK_PASS_REJECT.reduce((acc, d) => acc + d.pass + d.reject, 0);
 const TOTAL_PASS = MOCK_PASS_REJECT.reduce((acc, d) => acc + d.pass, 0);
 const TOTAL_KG = MOCK_WEEKLY_PLASTIC.reduce((acc, d) => acc + d.kgSorted, 0);
 const PASS_RATE = Math.round((TOTAL_PASS / TOTAL_SCANS) * 100);
-
-const KPI_CHIPS = [
-  { label: 'Tổng lượt quét (8 tuần)', value: TOTAL_SCANS.toLocaleString('vi-VN'), unit: 'quét' },
-  { label: 'Tỉ lệ Đạt chuẩn', value: `${PASS_RATE}`, unit: '%' },
-  { label: 'Tổng nhựa phân loại (8 tuần)', value: TOTAL_KG.toLocaleString('vi-VN'), unit: 'kg' },
-  { label: 'Trạm hoạt động', value: MOCK_STATION_ACTIVITY.length.toLocaleString('vi-VN'), unit: 'trạm' },
-];
+const MAX_SCANS = Math.max(...MOCK_STATION_ACTIVITY.map((s) => s.scansThisWeek));
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function B2BInsightPage() {
+  const { t } = useTranslation();
+  const hasMounted = useHasMounted();
+  const tb = t.b2b;
+
+  // Prevent hydration mismatch
+  if (!hasMounted) {
+    return (
+      <div className="min-h-screen bg-[#0d1b2e]">
+        <div className="h-16 border-b border-[#263a52] bg-[#0d1b2e]/95" />
+        <div className="mx-auto max-w-6xl px-6 pt-10 space-y-6">
+          <div className="h-64 rounded-2xl bg-[#0f2540] animate-pulse" />
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-24 rounded-xl bg-[#0f2540] animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const KPI_CHIPS = [
+    { label: tb.kpi.totalScans.label, value: TOTAL_SCANS.toLocaleString('vi-VN'), unit: tb.kpi.totalScans.unit },
+    { label: tb.kpi.passRate.label, value: `${PASS_RATE}`, unit: tb.kpi.passRate.unit },
+    { label: tb.kpi.totalPlastic.label, value: TOTAL_KG.toLocaleString('vi-VN'), unit: tb.kpi.totalPlastic.unit },
+    { label: tb.kpi.activeStations.label, value: MOCK_STATION_ACTIVITY.length.toLocaleString('vi-VN'), unit: tb.kpi.activeStations.unit },
+  ];
+
+  const weeklyLabels = {
+    tooltipSeries: tb.charts.weeklyPlastic.tooltipSeries,
+    tooltipWeekPrefix: tb.charts.weeklyPlastic.tooltipWeekPrefix,
+  };
+
+  const passRejectLabels = {
+    legendPass: tb.charts.passReject.legendPass,
+    legendReject: tb.charts.passReject.legendReject,
+    tooltipPass: tb.charts.passReject.tooltipPass,
+    tooltipReject: tb.charts.passReject.tooltipReject,
+  };
+
   return (
     <div className="min-h-screen bg-[#0d1b2e] text-[var(--foreground)]">
       {/* ── TOP NAV ── */}
@@ -78,16 +71,16 @@ export default function B2BInsightPage() {
             className="flex items-center gap-1.5 text-sm text-[var(--b2b-cool-grey)] transition-colors hover:text-white"
           >
             <ChevronLeft className="h-4 w-4" />
-            Trang chủ
+            {tb.nav.backHome}
           </Link>
 
           <div className="flex items-center gap-2.5">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--b2b-navy)]">
               <Database className="h-3.5 w-3.5 text-[#7eb8f5]" />
             </div>
-            <span className="text-sm font-semibold text-white">Góc nhìn Doanh nghiệp</span>
+            <span className="text-sm font-semibold text-white">{tb.nav.title}</span>
             <span className="rounded-full border border-[#263a52] bg-[#1a2f48] px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-[var(--b2b-cool-grey)]">
-              Dữ liệu thử nghiệm
+              {tb.nav.sampleDataBadge}
             </span>
           </div>
 
@@ -103,32 +96,28 @@ export default function B2BInsightPage() {
             ══════════════════════════════════════════════════════════════ */}
         <section className="mb-14 rounded-2xl border border-[#1e3a5f] bg-gradient-to-br from-[#0f2540] to-[#0d1b2e] px-8 py-14 text-center shadow-2xl">
           <p className="mb-6 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--b2b-cool-grey)]">
-            Mệnh đề giá trị cốt lõi cho Dow
+            {tb.valueStatement.eyebrow}
           </p>
           <h1 className="mx-auto max-w-4xl text-4xl font-extrabold leading-tight tracking-tight text-white md:text-5xl lg:text-6xl">
-            Càng nhiều dữ liệu →{' '}
-            <span className="text-[#7eb8f5]">độ chính xác phân loại càng cao</span>{' '}
-            → nguyên liệu đầu vào sạch hơn cho{' '}
-            <span className="text-[#5acfb0]">Tái chế Cơ học</span>
+            {tb.valueStatement.headlinePart1}{' '}
+            <span className="text-[#7eb8f5]">{tb.valueStatement.headlinePart2}</span>{' '}
+            {tb.valueStatement.headlinePart3pre}{' '}
+            <span className="text-[#5acfb0]">{tb.valueStatement.headlinePart3highlight}</span>
           </h1>
           <p className="mt-8 mx-auto max-w-3xl text-base leading-relaxed text-[var(--b2b-cool-grey)] md:text-lg">
-            Mỗi lượt quét FTIR tại trạm PCS mở rộng bộ dữ liệu phân tích dòng
-            chất thải địa phương. Dữ liệu tích lũy giúp mô hình phân loại nhận
-            diện &ldquo;dấu vân tay hóa học&rdquo; của từng loại polyme chính xác hơn —
-            đảm bảo nguồn nhựa đầu vào thuần hơn cho các cơ sở Tái chế Cơ học
-            (MRF) của Dow.
+            {tb.valueStatement.body}
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4 text-sm text-[var(--b2b-cool-grey)]">
             <span className="flex items-center gap-1.5 rounded-full border border-[#263a52] bg-[#1a2f48] px-4 py-1.5">
-              🔬 Phổ FTIR phản xã khuếch tán
+              🔬 {tb.valueStatement.pipeline.ftir}
             </span>
             <ArrowRight className="h-4 w-4 opacity-40" />
             <span className="flex items-center gap-1.5 rounded-full border border-[#263a52] bg-[#1a2f48] px-4 py-1.5">
-              🤖 Mô hình ML (Random Forest / MobileNet-1D)
+              🤖 {tb.valueStatement.pipeline.ml}
             </span>
             <ArrowRight className="h-4 w-4 opacity-40" />
             <span className="flex items-center gap-1.5 rounded-full border border-[#263a52] bg-[#1a2f48] px-4 py-1.5">
-              ♻️ Nguyên liệu sạch cho MRF
+              ♻️ {tb.valueStatement.pipeline.feedstock}
             </span>
           </div>
         </section>
@@ -142,9 +131,11 @@ export default function B2BInsightPage() {
             >
               <p className="text-2xl font-extrabold text-white">
                 {chip.value}
-                <span className="ml-1 text-sm font-medium text-[var(--b2b-cool-grey)]">
-                  {chip.unit}
-                </span>
+                {chip.unit && (
+                  <span className="ml-1 text-sm font-medium text-[var(--b2b-cool-grey)]">
+                    {chip.unit}
+                  </span>
+                )}
               </p>
               <p className="mt-1 text-xs text-[var(--b2b-cool-grey)]">{chip.label}</p>
             </div>
@@ -158,11 +149,11 @@ export default function B2BInsightPage() {
             <div className="mb-5 flex items-center gap-2.5">
               <BarChart2 className="h-4 w-4 text-[#7eb8f5]" />
               <h2 className="text-sm font-semibold text-white">
-                Nhựa phân loại theo tuần
+                {tb.charts.weeklyPlastic.title}
               </h2>
-              <span className="ml-auto text-[11px] text-[var(--b2b-cool-grey)]">8 tuần gần nhất</span>
+              <span className="ml-auto text-[11px] text-[var(--b2b-cool-grey)]">{tb.charts.weeklyPlastic.badge}</span>
             </div>
-            <WeeklyPlasticChart />
+            <WeeklyPlasticChart labels={weeklyLabels} />
           </div>
 
           {/* Chart 2 — PASS/REJECT breakdown */}
@@ -170,10 +161,10 @@ export default function B2BInsightPage() {
             <div className="mb-5 flex items-center gap-2.5">
               <BarChart2 className="h-4 w-4 text-[#5acfb0]" />
               <h2 className="text-sm font-semibold text-white">
-                Tỉ lệ Đạt / Từ chối theo loại nhựa
+                {tb.charts.passReject.title}
               </h2>
             </div>
-            <PassRejectChart />
+            <PassRejectChart labels={passRejectLabels} />
           </div>
         </section>
 
@@ -182,22 +173,49 @@ export default function B2BInsightPage() {
           <div className="mb-6 flex items-center gap-2.5">
             <Activity className="h-4 w-4 text-[#f0a94e]" />
             <h2 className="text-sm font-semibold text-white">
-              Bản đồ nhiệt trạm hoạt động
+              {tb.heatmap.title}
             </h2>
-            <span className="ml-auto text-[11px] text-[var(--b2b-cool-grey)]">Tuần hiện tại</span>
+            <span className="ml-auto text-[11px] text-[var(--b2b-cool-grey)]">{tb.heatmap.badge}</span>
           </div>
-          <StationHeatmap />
+          <div className="space-y-2.5">
+            {MOCK_STATION_ACTIVITY.map((station) => {
+              const ratio = station.scansThisWeek / MAX_SCANS;
+              const opacity = 0.15 + ratio * 0.75;
+              const textDark = ratio > 0.55;
+              return (
+                <div key={station.stationId} className="flex items-center gap-3">
+                  <span className="w-48 flex-shrink-0 truncate text-xs font-medium text-[var(--muted-foreground)]">
+                    {station.stationName}
+                  </span>
+                  <div className="relative flex-1 overflow-hidden rounded-md" style={{ height: 28 }}>
+                    <div className="absolute inset-0 rounded-md bg-[var(--border)]" />
+                    <div
+                      className="absolute inset-y-0 left-0 rounded-md transition-all duration-500"
+                      style={{
+                        width: `${ratio * 100}%`,
+                        backgroundColor: `rgba(30, 58, 95, ${opacity})`,
+                      }}
+                    />
+                    <span
+                      className={`absolute inset-y-0 left-3 flex items-center text-[11px] font-semibold ${
+                        textDark ? 'text-white' : 'text-[var(--foreground)]'
+                      }`}
+                    >
+                      {station.scansThisWeek.toLocaleString('vi-VN')} {tb.heatmap.scanSuffix}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
           <p className="mt-5 text-[11px] leading-relaxed text-[var(--b2b-cool-grey)]">
-            Độ đậm màu phản ánh cường độ hoạt động tương đối. Mỗi lượt quét = một giao
-            dịch nhựa được FTIR xử lý. Dữ liệu được làm mới theo thời gian thực khi
-            triển khai hệ thống sản xuất.
+            {tb.heatmap.footnote}
           </p>
         </section>
 
         {/* ── FOOTNOTE ── */}
         <p className="mt-10 text-center text-xs text-[var(--b2b-cool-grey)]">
-          Dữ liệu hiển thị là minh họa cho mục đích demo cạnh tranh Dow 2026.
-          Các con số không phản ánh kết quả thực tế đã được kiểm chứng.
+          {tb.footer}
         </p>
       </main>
     </div>

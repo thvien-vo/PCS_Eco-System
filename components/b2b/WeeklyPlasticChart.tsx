@@ -14,7 +14,14 @@ import { MOCK_WEEKLY_PLASTIC } from '@/lib/mock-data';
 
 const MAX_KG = Math.max(...MOCK_WEEKLY_PLASTIC.map((d) => d.kgSorted));
 
-export default function WeeklyPlasticChart() {
+interface WeeklyPlasticChartProps {
+  labels: {
+    tooltipSeries: string;
+    tooltipWeekPrefix: string;
+  };
+}
+
+export default function WeeklyPlasticChart({ labels }: WeeklyPlasticChartProps) {
   return (
     <ResponsiveContainer width="100%" height={220}>
       <BarChart
@@ -51,9 +58,9 @@ export default function WeeklyPlasticChart() {
           }}
           formatter={(value) => [
             typeof value === 'number' ? `${value.toLocaleString('vi-VN')} kg` : String(value ?? ''),
-            'Nhựa đã phân loại',
+            labels.tooltipSeries,
           ]}
-          labelFormatter={(label) => `Tuần ${String(label)}`}
+          labelFormatter={(label) => `${labels.tooltipWeekPrefix} ${String(label)}`}
         />
         <Bar dataKey="kgSorted" radius={[6, 6, 0, 0]}>
           {MOCK_WEEKLY_PLASTIC.map((entry) => {
