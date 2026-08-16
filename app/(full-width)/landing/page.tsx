@@ -5,6 +5,8 @@ import { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Leaf, MapPin, Users, Recycle, ChevronRight, Star, ArrowDown } from 'lucide-react';
 import { MOTION_TOKENS } from '@/lib/motion-tokens';
+import { useTranslation } from '@/hooks/use-translation';
+import { useHasMounted } from '@/hooks/use-has-mounted';
 
 // ---------------------------------------------------------------------------
 // Animated stat counter
@@ -40,65 +42,72 @@ function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: str
 }
 
 // ---------------------------------------------------------------------------
-// Stats data
-// ---------------------------------------------------------------------------
-const OVERVIEW_STATS = [
-  {
-    icon: Recycle,
-    label: 'Tổng nhựa tái chế',
-    value: 12840,
-    suffix: ' kg',
-    color: 'text-emerald',
-    bg: 'bg-emerald/10',
-  },
-  {
-    icon: MapPin,
-    label: 'Trạm hoạt động',
-    value: 47,
-    suffix: ' trạm',
-    color: 'text-mint',
-    bg: 'bg-mint/10',
-  },
-  {
-    icon: Users,
-    label: 'Người dùng tích cực',
-    value: 3210,
-    suffix: '+',
-    color: 'text-warning',
-    bg: 'bg-warning/10',
-  },
-];
-
-// ---------------------------------------------------------------------------
-// Feature highlights
-// ---------------------------------------------------------------------------
-const FEATURES = [
-  {
-    icon: '🗺️',
-    title: 'Bản đồ trạm thông minh',
-    desc: 'Tìm trạm PCS gần nhất với trạng thái thời gian thực.',
-  },
-  {
-    icon: '🪙',
-    title: 'Ví Điểm Xanh',
-    desc: 'Tích điểm mỗi lần tái chế, đổi quà từ thương hiệu đối tác.',
-  },
-  {
-    icon: '🏆',
-    title: 'Thử thách & Bảng xếp hạng',
-    desc: 'Cạnh tranh lành mạnh, cùng nhau bảo vệ hành tinh.',
-  },
-  {
-    icon: '📊',
-    title: 'Báo cáo CO₂ cá nhân',
-    desc: 'Theo dõi lượng khí thải bạn đã giảm thiểu thực sự.',
-  },
-];
-
-// ---------------------------------------------------------------------------
 // Landing Page Component
 // ---------------------------------------------------------------------------
 export default function LandingPage() {
+  const { t } = useTranslation();
+  const hasMounted = useHasMounted();
+  const tLanding = t.landing;
+
+  // Prevent hydration mismatch for translated strings
+  if (!hasMounted) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="h-screen bg-mint-pop animate-pulse opacity-50" />
+      </div>
+    );
+  }
+
+  const OVERVIEW_STATS = [
+    {
+      icon: Recycle,
+      label: tLanding.stats.labels.plastic,
+      value: 12840,
+      suffix: ' kg',
+      color: 'text-emerald',
+      bg: 'bg-emerald/10',
+    },
+    {
+      icon: MapPin,
+      label: tLanding.stats.labels.stations,
+      value: 47,
+      suffix: ' trạm', // Wait, maybe we should extract this suffix too if needed, but 'trạm' means stations so we can keep suffix mostly hardcoded or from t, let's keep hardcoded suffix or omit it and rely on labels. Actually, let's keep it as is for now since it's just a metric.
+      color: 'text-mint',
+      bg: 'bg-mint/10',
+    },
+    {
+      icon: Users,
+      label: tLanding.stats.labels.users,
+      value: 3210,
+      suffix: '+',
+      color: 'text-warning',
+      bg: 'bg-warning/10',
+    },
+  ];
+
+  const FEATURES = [
+    {
+      icon: '🗺️',
+      title: tLanding.features.items.map.title,
+      desc: tLanding.features.items.map.desc,
+    },
+    {
+      icon: '🪙',
+      title: tLanding.features.items.wallet.title,
+      desc: tLanding.features.items.wallet.desc,
+    },
+    {
+      icon: '🏆',
+      title: tLanding.features.items.challenge.title,
+      desc: tLanding.features.items.challenge.desc,
+    },
+    {
+      icon: '📊',
+      title: tLanding.features.items.carbon.title,
+      desc: tLanding.features.items.carbon.desc,
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       {/* ── HERO SECTION ── */}
@@ -118,7 +127,7 @@ export default function LandingPage() {
           >
             <span className="flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium backdrop-blur-sm">
               <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-              Dow Circular Economy Innovation Challenge 2026
+              {tLanding.hero.badge}
             </span>
           </motion.div>
 
@@ -132,9 +141,9 @@ export default function LandingPage() {
             }}
             className="mb-6 max-w-3xl text-4xl font-extrabold leading-tight tracking-tight lg:text-6xl"
           >
-            Hệ sinh thái số cho{' '}
+            {tLanding.hero.titlePre}
             <span className="inline-block bg-gradient-to-r from-[#6ee7b7] to-[#34d399] bg-clip-text text-transparent">
-              kinh tế tuần hoàn nhựa
+              {tLanding.hero.titleHighlight}
             </span>
           </motion.h1>
 
@@ -148,8 +157,7 @@ export default function LandingPage() {
             }}
             className="mb-10 max-w-xl text-lg text-white/80 leading-relaxed"
           >
-            PCS kết nối người dùng với trạm thu gom nhựa thông minh, thưởng điểm xanh và
-            cung cấp dữ liệu giá trị cho doanh nghiệp — tất cả trong một ứng dụng.
+            {tLanding.hero.desc}
           </motion.p>
 
           <motion.div
@@ -167,7 +175,7 @@ export default function LandingPage() {
               className="group flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-[var(--primary-emerald)] shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl"
             >
               <MapPin className="h-4 w-4" />
-              Tìm trạm gần đây
+              {tLanding.hero.findStationBtn}
               <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
             <Link
@@ -175,7 +183,7 @@ export default function LandingPage() {
               className="flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-7 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:bg-white/20"
             >
               <Users className="h-4 w-4" />
-              Đội ngũ chúng tôi
+              {tLanding.hero.teamBtn}
             </Link>
           </motion.div>
 
@@ -202,10 +210,10 @@ export default function LandingPage() {
             className="mb-12 text-center"
           >
             <h2 className="mb-3 text-3xl font-bold text-foreground">
-              Tác động thực tế
+              {tLanding.stats.title}
             </h2>
             <p className="text-muted-foreground">
-              Cùng nhau, chúng ta đang tạo ra sự khác biệt thực sự cho hành tinh
+              {tLanding.stats.subtitle}
             </p>
           </motion.div>
 
@@ -250,9 +258,9 @@ export default function LandingPage() {
             transition={{ duration: MOTION_TOKENS.durations.slow }}
             className="mb-12 text-center"
           >
-            <h2 className="mb-3 text-3xl font-bold text-foreground">Tính năng nổi bật</h2>
+            <h2 className="mb-3 text-3xl font-bold text-foreground">{tLanding.features.title}</h2>
             <p className="text-muted-foreground">
-              Từ trạm kiosk đến mạng xã hội — mọi thứ bạn cần để tái chế hiệu quả
+              {tLanding.features.subtitle}
             </p>
           </motion.div>
 
@@ -292,17 +300,17 @@ export default function LandingPage() {
         >
           <Leaf className="mx-auto mb-4 h-10 w-10 opacity-80" />
           <h2 className="mb-4 text-3xl font-extrabold lg:text-4xl">
-            Bắt đầu hành trình xanh ngay hôm nay
+            {tLanding.cta.title}
           </h2>
           <p className="mb-8 text-lg text-white/80">
-            Mỗi chai nhựa bạn tái chế là một bước nhỏ tạo ra sự thay đổi lớn cho thế hệ tương lai.
+            {tLanding.cta.desc}
           </p>
           <Link
             href="/map"
             className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-base font-semibold text-[var(--primary-emerald)] shadow-xl transition-all duration-200 hover:scale-105 hover:shadow-2xl"
           >
             <MapPin className="h-5 w-5" />
-            Tìm trạm PCS gần bạn
+            {tLanding.cta.btn}
           </Link>
         </motion.div>
       </section>
@@ -315,16 +323,16 @@ export default function LandingPage() {
             <span className="font-semibold text-foreground">PCS Eco-System</span>
           </div>
           <p className="text-xs text-muted-foreground">
-            © 2026 Plastic Circularity Station · Dow Circular Economy Innovation Challenge
+            {tLanding.footer.copyright}
           </p>
-          {/* Subtle B2B entry point — intentionally low-profile, for live pitch navigation */}
+          {/* Subtle B2B entry point */}
           <div className="mt-4 flex items-center justify-center">
             <Link
               href="/b2b-insight"
               className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
             >
               <ChevronRight className="h-3 w-3" />
-              Xem góc nhìn B2B
+              {tLanding.footer.b2b}
             </Link>
           </div>
         </div>
