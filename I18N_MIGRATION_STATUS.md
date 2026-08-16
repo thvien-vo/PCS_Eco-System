@@ -5,7 +5,7 @@ This file tracks the progress of Phase 2: migrating hardcoded Vietnamese strings
 | Step | Scope | Status | Commit Hash |
 | :--- | :--- | :--- | :--- |
 | **0** | **Module 9 (Settings)** & Core i18n Infra | ✅ Done | `765926c` |
-| **1** | **Shared Components** & **Module 1** (Landing/Team) | ⏳ In Progress | |
+| **1** | **Shared Components** & **Module 1** (Landing/Team) | ✅ Done | `fc28718` |
 | **2** | **Module 8** (B2B Insight) | ⬜ Not Started | |
 | **3** | **Module 2** (Map) | ⬜ Not Started | |
 | **4** | **Module 6** (Marketplace) | ⬜ Not Started | |
