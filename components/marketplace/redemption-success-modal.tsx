@@ -13,11 +13,15 @@ import { useState } from 'react';
 import { MOTION_TOKENS } from '@/lib/motion-tokens';
 import { cn } from '@/lib/utils';
 import type { MarketplaceCatalogItem } from '@/types';
+import type { TranslationDictionary } from '@/lib/i18n/dictionaries';
+
+type ModalLabels = TranslationDictionary['marketplace']['modal'];
 
 interface RedemptionSuccessModalProps {
   item: MarketplaceCatalogItem | null;
   isOpen: boolean;
   onClose: () => void;
+  labels: ModalLabels;
 }
 
 /** Generate a deterministic-looking but fake redemption code from the item ID */
@@ -31,7 +35,7 @@ function generateFakeCode(itemId: string): string {
   return code;
 }
 
-export function RedemptionSuccessModal({ item, isOpen, onClose }: RedemptionSuccessModalProps) {
+export function RedemptionSuccessModal({ item, isOpen, onClose, labels }: RedemptionSuccessModalProps) {
   const [copied, setCopied] = useState(false);
   const code = item ? generateFakeCode(item.id) : '';
 
@@ -82,7 +86,7 @@ export function RedemptionSuccessModal({ item, isOpen, onClose }: RedemptionSucc
               id="redemption-modal-close"
               onClick={onClose}
               className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-border/50 text-muted-foreground transition-colors hover:bg-border"
-              aria-label="Đóng"
+              aria-label={labels.closeAriaLabel}
             >
               <X className="h-4 w-4" />
             </button>
@@ -100,9 +104,9 @@ export function RedemptionSuccessModal({ item, isOpen, onClose }: RedemptionSucc
 
               {/* Headline */}
               <div className="text-center">
-                <h2 className="text-lg font-bold text-foreground">Đổi điểm thành công! 🎉</h2>
+                <h2 className="text-lg font-bold text-foreground">{labels.title}</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Bạn đã đổi thành công <span className="font-semibold text-emerald">{item.title}</span>
+                  {labels.successPrefix} <span className="font-semibold text-emerald">{item.title}</span>
                 </p>
               </div>
 
@@ -118,11 +122,11 @@ export function RedemptionSuccessModal({ item, isOpen, onClose }: RedemptionSucc
                   <p className="text-[10px] text-muted-foreground">{item.partnerName}</p>
                   <p className="text-sm font-semibold text-foreground">{item.title}</p>
                   <p className="mt-1 text-[11px] text-muted-foreground">
-                    Đã trừ{' '}
+                    {labels.deductedPrefix}
                     <span className="font-bold text-emerald">
-                      {item.pointsCost.toLocaleString('vi-VN')} điểm
-                    </span>{' '}
-                    từ Ví Xanh của bạn
+                      {item.pointsCost.toLocaleString('vi-VN')}{labels.deductedPointsUnit}
+                    </span>
+                    {labels.deductedSuffix}
                   </p>
                 </div>
               </div>
@@ -130,7 +134,7 @@ export function RedemptionSuccessModal({ item, isOpen, onClose }: RedemptionSucc
               {/* Redemption code */}
               <div className="w-full rounded-2xl border-2 border-dashed border-emerald/30 bg-emerald/5 p-4">
                 <p className="mb-2 text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Mã đổi thưởng của bạn
+                  {labels.codeSubtitle}
                 </p>
                 <div className="flex items-center justify-between gap-2 rounded-xl bg-card p-3">
                   <span
@@ -151,11 +155,11 @@ export function RedemptionSuccessModal({ item, isOpen, onClose }: RedemptionSucc
                     )}
                   >
                     <Copy className="h-3 w-3" />
-                    {copied ? 'Đã sao chép' : 'Sao chép'}
+                    {copied ? labels.copiedButton : labels.copyButton}
                   </button>
                 </div>
                 <p className="mt-2 text-center text-[10px] text-muted-foreground">
-                  Xuất trình mã này cho đối tác để nhận ưu đãi
+                  {labels.instruction}
                 </p>
               </div>
 
@@ -165,7 +169,7 @@ export function RedemptionSuccessModal({ item, isOpen, onClose }: RedemptionSucc
                 onClick={onClose}
                 className="w-full rounded-full bg-gradient-to-r from-emerald to-mint py-3 text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-90 active:scale-[0.98] min-h-[44px]"
               >
-                Tuyệt vời!
+                {labels.doneButton}
               </button>
             </div>
           </motion.div>

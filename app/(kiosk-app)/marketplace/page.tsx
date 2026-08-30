@@ -32,23 +32,18 @@ import { RedemptionSuccessModal } from '@/components/marketplace/redemption-succ
 import { MOTION_TOKENS } from '@/lib/motion-tokens';
 import { cn } from '@/lib/utils';
 import type { MarketplaceCatalogItem, CatalogCategory } from '@/types';
+import { useTranslation } from '@/hooks/use-translation';
+import { useHasMounted } from '@/hooks/use-has-mounted';
 
-// ── Filter tab config ─────────────────────────────────────────────────────────
 type FilterTab = 'all' | CatalogCategory;
-
-const FILTER_TABS: { id: FilterTab; label: string; icon: React.FC<{ className?: string }> }[] = [
-  { id: 'all', label: 'Tất cả', icon: ShoppingBag },
-  { id: 'voucher', label: 'Mã giảm', icon: Tag },
-  { id: 'gift', label: 'Quà tặng', icon: Gift },
-  { id: 'cashback', label: 'Hoàn tiền', icon: Wallet },
-];
 
 // ── Stagger animation for grid items ─────────────────────────────────────────
 const GRID_STAGGER = 0.06; // seconds between card reveals
 
 export default function MarketplacePage() {
-  // ── Hydration guard (pcs-tech-standards §10a) ────────────────────────────
-  const [hasMounted, setHasMounted] = useState(false);
+  const { t } = useTranslation();
+  const tm = t.marketplace;
+  const hasMounted = useHasMounted();
 
   // ── Wallet store — real points from persisted Zustand store ──────────────
   const points = useWalletStore((s) => s.points);
@@ -73,7 +68,6 @@ export default function MarketplacePage() {
   // ── Hydration: manually rehydrate wallet store after mount ────────────────
   useEffect(() => {
     useWalletStore.persist.rehydrate();
-    setHasMounted(true);
   }, []);
 
   // ── Fetch catalog on mount ────────────────────────────────────────────────
@@ -84,11 +78,11 @@ export default function MarketplacePage() {
       const items = await MarketplaceService.getCatalogItems();
       setCatalogItems(items);
     } catch {
-      setFetchError('Không thể tải danh sách phần thưởng. Vui lòng thử lại.');
+      setFetchError(tm.page.errorMessage);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [tm.page.errorMessage]);
 
   useEffect(() => {
     fetchCatalog();
@@ -99,6 +93,13 @@ export default function MarketplacePage() {
     activeFilter === 'all'
       ? catalogItems
       : catalogItems.filter((item) => item.category === activeFilter);
+
+  const FILTER_TABS: { id: FilterTab; label: string; icon: React.FC<{ className?: string }> }[] = [
+    { id: 'all', label: tm.page.filterAll, icon: ShoppingBag },
+    { id: 'voucher', label: tm.page.filterVoucher, icon: Tag },
+    { id: 'gift', label: tm.page.filterGift, icon: Gift },
+    { id: 'cashback', label: tm.page.filterCashback, icon: Wallet },
+  ];
 
   // ── Redemption handler ────────────────────────────────────────────────────
   /**
@@ -146,7 +147,7 @@ export default function MarketplacePage() {
   if (!hasMounted || isLoading) {
     return (
       <div className="flex min-h-full flex-col">
-        <MarketplaceHeader points={0} isLoading />
+        <MarketplaceHeader points={0} isLoading labels={tm.page} />
         <MarketplaceSkeleton />
       </div>
     );
@@ -156,13 +157,13 @@ export default function MarketplacePage() {
   if (fetchError) {
     return (
       <div className="flex min-h-full flex-col">
-        <MarketplaceHeader points={points} />
+        <MarketplaceHeader points={points} labels={tm.page} />
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-error/10">
             <Gift className="h-8 w-8 text-error" />
           </div>
           <div>
-            <h3 className="font-semibold text-foreground">Đã xảy ra lỗi</h3>
+            <h3 className="font-semibold text-foreground">{tm.page.errorTitle}</h3>
             <p className="mt-1 text-sm text-muted-foreground">{fetchError}</p>
           </div>
           <button
@@ -171,7 +172,7 @@ export default function MarketplacePage() {
             className="flex items-center gap-2 rounded-full bg-emerald px-5 py-2.5 text-sm font-semibold text-white min-h-[44px]"
           >
             <RefreshCw className="h-4 w-4" />
-            Thử lại
+            {tm.page.retryButton}
           </button>
         </div>
       </div>
@@ -194,11 +195,12 @@ export default function MarketplacePage() {
         item={successItem}
         isOpen={isSuccessModalOpen}
         onClose={handleModalClose}
+        labels={tm.modal}
       />
 
       <div className="flex min-h-full flex-col">
         {/* ── Hero header with live points balance ── */}
-        <MarketplaceHeader points={points} />
+        <MarketplaceHeader points={points} labels={tm.page} />
 
         {/* ── Filter tabs ── */}
         <div className="flex gap-2 overflow-x-auto px-4 pb-3 pt-1 scrollbar-hide">
@@ -237,7 +239,7 @@ export default function MarketplacePage() {
               transition={{ duration: MOTION_TOKENS.durations.fast }}
               className="text-xs text-muted-foreground"
             >
-              {filteredItems.length} phần thưởng
+              {filteredItems.length} {tm.page.itemsCount}
             </motion.p>
           </AnimatePresence>
         </div>
@@ -247,7 +249,7 @@ export default function MarketplacePage() {
           <div className="flex flex-1 flex-col items-center justify-center gap-3 p-8 text-center">
             <Gift className="h-10 w-10 text-muted-foreground/50" />
             <p className="text-sm font-medium text-muted-foreground">
-              Không có phần thưởng trong danh mục này
+              {tm.page.emptyState}
             </p>
           </div>
         ) : (
@@ -268,6 +270,7 @@ export default function MarketplacePage() {
                   currentPoints={points}
                   isAlreadyRedeemed={redeemedVouchers.includes(item.id)}
                   onRedeem={handleRedeem}
+                  labels={tm.card}
                 />
               </motion.div>
             ))}
@@ -282,9 +285,11 @@ export default function MarketplacePage() {
 function MarketplaceHeader({
   points,
   isLoading = false,
+  labels,
 }: {
   points: number;
   isLoading?: boolean;
+  labels: { title: string; subtitle: string; pointsBalance: string };
 }) {
   return (
     <div className="relative overflow-hidden bg-gradient-to-br from-emerald to-mint px-4 pb-5 pt-6">
@@ -295,9 +300,9 @@ function MarketplaceHeader({
       <div className="relative">
         <div className="flex items-center gap-2">
           <Gift className="h-5 w-5 text-white/80" />
-          <h1 className="text-base font-bold text-white">Chợ Đổi Thưởng</h1>
+          <h1 className="text-base font-bold text-white">{labels.title}</h1>
         </div>
-        <p className="mt-0.5 text-[11px] text-white/70">Dùng Điểm Xanh để đổi ưu đãi hấp dẫn</p>
+        <p className="mt-0.5 text-[11px] text-white/70">{labels.subtitle}</p>
 
         {/* Points balance — real value from wallet-store */}
         <div className="mt-3 flex items-baseline gap-1.5">
@@ -308,7 +313,7 @@ function MarketplaceHeader({
               <span className="text-3xl font-extrabold tabular-nums text-white">
                 {points.toLocaleString('vi-VN')}
               </span>
-              <span className="text-sm font-medium text-white/80">điểm hiện có</span>
+              <span className="text-sm font-medium text-white/80">{labels.pointsBalance}</span>
             </>
           )}
         </div>

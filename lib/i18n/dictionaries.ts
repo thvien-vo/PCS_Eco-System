@@ -225,6 +225,46 @@ export type TranslationDictionary = {
       stationListHeading: string;
     };
   };
+  marketplace: {
+    page: {
+      title: string;
+      subtitle: string;
+      pointsBalance: string;
+      filterAll: string;
+      filterVoucher: string;
+      filterGift: string;
+      filterCashback: string;
+      itemsCount: string;
+      emptyState: string;
+      errorTitle: string;
+      errorMessage: string;
+      retryButton: string;
+    };
+    card: {
+      expired: string;
+      expiresInHM: string;
+      expiresInM: string;
+      alreadyRedeemed: string;
+      notEnoughPoints: string;
+      earnMorePoints: string;
+      pointsUnit: string;
+      redeemSuccess: string;
+      redeemNow: string;
+    };
+    modal: {
+      closeAriaLabel: string;
+      title: string;
+      successPrefix: string;
+      deductedPrefix: string;
+      deductedPointsUnit: string;
+      deductedSuffix: string;
+      codeSubtitle: string;
+      copyButton: string;
+      copiedButton: string;
+      instruction: string;
+      doneButton: string;
+    };
+  };
 };
 
 export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
@@ -368,7 +408,7 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
       },
       language: {
         title: 'Ngôn ngữ',
-        note: 'Dịch thuật toàn ứng dụng đang được triển khai (Hoàn tất: Settings, Landing, Team, B2B Insight, Map). Các trang khác sẽ tạm hiển thị Tiếng Việt.',
+        note: 'Dịch thuật toàn ứng dụng đang được triển khai (Hoàn tất: Settings, Landing, Team, B2B Insight, Map, Marketplace). Các trang khác sẽ tạm hiển thị Tiếng Việt.',
       },
       contact: {
         title: 'Liên hệ Admin',
@@ -473,6 +513,46 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
         title: 'Bản đồ cần cấu hình',
         body: 'Thêm NEXT_PUBLIC_MAPBOX_TOKEN vào .env.local để xem bản đồ tương tác.',
         stationListHeading: 'Vị trí trạm (demo):',
+      },
+    },
+    marketplace: {
+      page: {
+        title: 'Chợ Đổi Thưởng',
+        subtitle: 'Dùng Điểm Xanh để đổi ưu đãi hấp dẫn',
+        pointsBalance: 'điểm hiện có',
+        filterAll: 'Tất cả',
+        filterVoucher: 'Mã giảm',
+        filterGift: 'Quà tặng',
+        filterCashback: 'Hoàn tiền',
+        itemsCount: 'phần thưởng',
+        emptyState: 'Không có phần thưởng trong danh mục này',
+        errorTitle: 'Đã xảy ra lỗi',
+        errorMessage: 'Không thể tải danh sách phần thưởng. Vui lòng thử lại.',
+        retryButton: 'Thử lại',
+      },
+      card: {
+        expired: 'Đã hết hạn',
+        expiresInHM: 'Còn {hrs}g {mins}p',
+        expiresInM: 'Còn {mins} phút',
+        alreadyRedeemed: '✓ Đã đổi',
+        notEnoughPoints: 'Chưa đủ điểm',
+        earnMorePoints: 'Xem cách kiếm thêm điểm',
+        pointsUnit: 'điểm',
+        redeemSuccess: 'Đã đổi thành công',
+        redeemNow: 'Đổi ngay',
+      },
+      modal: {
+        closeAriaLabel: 'Đóng',
+        title: 'Đổi điểm thành công! 🎉',
+        successPrefix: 'Bạn đã đổi thành công ',
+        deductedPrefix: 'Đã trừ ',
+        deductedPointsUnit: ' điểm ',
+        deductedSuffix: 'từ Ví Xanh của bạn',
+        codeSubtitle: 'Mã đổi thưởng của bạn',
+        copyButton: 'Sao chép',
+        copiedButton: 'Đã sao chép',
+        instruction: 'Xuất trình mã này cho đối tác để nhận ưu đãi',
+        doneButton: 'Tuyệt vời!',
       },
     },
   },
@@ -616,7 +696,7 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
       },
       language: {
         title: 'Language',
-        note: 'Full-app translation is in progress (Done: Settings, Landing, Team, B2B Insight, Map). Other pages will temporarily display in Vietnamese.',
+        note: 'Full-app translation is in progress (Done: Settings, Landing, Team, B2B Insight, Map, Marketplace). Other pages will temporarily display in Vietnamese.',
       },
       contact: {
         title: 'Contact Admin',
@@ -723,6 +803,46 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
         title: 'Map configuration needed',
         body: 'Add NEXT_PUBLIC_MAPBOX_TOKEN to .env.local to view the interactive map.',
         stationListHeading: 'Station locations (demo):',
+      },
+    },
+    marketplace: {
+      page: {
+        title: 'Green Rewards',
+        subtitle: 'Use Green Points to redeem exciting offers',
+        pointsBalance: 'points available',
+        filterAll: 'All',
+        filterVoucher: 'Vouchers',
+        filterGift: 'Gifts',
+        filterCashback: 'Cashback',
+        itemsCount: 'items',
+        emptyState: 'No rewards available in this category',
+        errorTitle: 'An error occurred',
+        errorMessage: 'Unable to load rewards catalog. Please try again.',
+        retryButton: 'Retry',
+      },
+      card: {
+        expired: 'Expired',
+        expiresInHM: '{hrs}h {mins}m left',
+        expiresInM: '{mins} mins left',
+        alreadyRedeemed: '✓ Redeemed',
+        notEnoughPoints: 'Not enough points',
+        earnMorePoints: 'Learn how to earn points',
+        pointsUnit: 'pts',
+        redeemSuccess: 'Successfully redeemed',
+        redeemNow: 'Redeem',
+      },
+      modal: {
+        closeAriaLabel: 'Close',
+        title: 'Redeemed successfully! 🎉',
+        successPrefix: 'You have successfully redeemed ',
+        deductedPrefix: 'Deducted ',
+        deductedPointsUnit: ' points ',
+        deductedSuffix: 'from your Green Wallet',
+        codeSubtitle: 'Your redemption code',
+        copyButton: 'Copy',
+        copiedButton: 'Copied',
+        instruction: 'Show this code to the partner to claim your offer',
+        doneButton: 'Awesome!',
       },
     },
   },

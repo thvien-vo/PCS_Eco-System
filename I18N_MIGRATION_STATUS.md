@@ -8,7 +8,7 @@ This file tracks the progress of Phase 2: migrating hardcoded Vietnamese strings
 | **1** | **Shared Components** & **Module 1** (Landing/Team) | ✅ Done | `24f47c0` |
 | **2** | **Module 8** (B2B Insight) | ✅ Done | `832a18e` |
 | **3** | **Module 2** (Map) | ✅ Done | `6865cc5` |
-| **4** | **Module 6** (Marketplace) | ⬜ Not Started | |
+| **4** | **Module 6** (Marketplace) | ✅ Done | |
 | **5** | **Module 4** (Wallet) | ⬜ Not Started | |
 | **6** | **Module 3** (Feed) | ⬜ Not Started | |
 | **7** | **Module 5** (Challenge) | ⬜ Not Started | |

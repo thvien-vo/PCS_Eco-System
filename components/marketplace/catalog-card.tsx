@@ -26,21 +26,25 @@ import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { MOTION_TOKENS } from '@/lib/motion-tokens';
 import type { MarketplaceCatalogItem } from '@/types';
+import type { TranslationDictionary } from '@/lib/i18n/dictionaries';
+
+type CatalogCardLabels = TranslationDictionary['marketplace']['card'];
 
 interface CatalogCardProps {
   item: MarketplaceCatalogItem;
   currentPoints: number;
   isAlreadyRedeemed: boolean;
   onRedeem: (item: MarketplaceCatalogItem, originPosition: { x: number; y: number }) => void;
+  labels: CatalogCardLabels;
 }
 
-const CATEGORY_STYLES: Record<MarketplaceCatalogItem['category'], { bg: string; text: string; label: string }> = {
-  voucher: { bg: 'bg-emerald/10', text: 'text-emerald', label: 'Mã giảm giá' },
-  gift: { bg: 'bg-purple-500/10', text: 'text-purple-500', label: 'Quà tặng' },
-  cashback: { bg: 'bg-warning/10', text: 'text-warning', label: 'Hoàn tiền' },
+const CATEGORY_STYLES: Record<MarketplaceCatalogItem['category'], { bg: string; text: string }> = {
+  voucher: { bg: 'bg-emerald/10', text: 'text-emerald' },
+  gift: { bg: 'bg-purple-500/10', text: 'text-purple-500' },
+  cashback: { bg: 'bg-warning/10', text: 'text-warning' },
 };
 
-function FlashBadge({ expiresAt }: { expiresAt: string }) {
+function FlashBadge({ expiresAt, labels }: { expiresAt: string; labels: CatalogCardLabels }) {
   const expiry = new Date(expiresAt);
   const now = new Date();
   const diffMs = expiry.getTime() - now.getTime();
@@ -49,10 +53,10 @@ function FlashBadge({ expiresAt }: { expiresAt: string }) {
 
   const label =
     diffMs <= 0
-      ? 'Đã hết hạn'
+      ? labels.expired
       : diffHrs > 0
-        ? `Còn ${diffHrs}g ${diffMins}p`
-        : `Còn ${diffMins} phút`;
+        ? labels.expiresInHM.replace('{hrs}', String(diffHrs)).replace('{mins}', String(diffMins))
+        : labels.expiresInM.replace('{mins}', String(diffMins));
 
   return (
     <div className="flex items-center gap-1 rounded-full bg-error/10 px-2 py-0.5 text-[10px] font-semibold text-error">
@@ -62,7 +66,7 @@ function FlashBadge({ expiresAt }: { expiresAt: string }) {
   );
 }
 
-export function CatalogCard({ item, currentPoints, isAlreadyRedeemed, onRedeem }: CatalogCardProps) {
+export function CatalogCard({ item, currentPoints, isAlreadyRedeemed, onRedeem, labels }: CatalogCardProps) {
   const router = useRouter();
   const isRedeemingRef = useRef<boolean>(false);
   const [isPressed, setIsPressed] = useState(false);
@@ -120,7 +124,7 @@ export function CatalogCard({ item, currentPoints, isAlreadyRedeemed, onRedeem }
       {/* ── Already redeemed badge ── */}
       {isAlreadyRedeemed && (
         <div className="absolute left-2 top-2 z-10 rounded-full bg-emerald px-2 py-0.5 text-[10px] font-bold text-white shadow">
-          ✓ Đã đổi
+          {labels.alreadyRedeemed}
         </div>
       )}
 
@@ -143,7 +147,7 @@ export function CatalogCard({ item, currentPoints, isAlreadyRedeemed, onRedeem }
               <Lock className="h-4 w-4 text-white" />
             </div>
             <p className="text-[11px] font-semibold leading-tight text-white drop-shadow">
-              Chưa đủ điểm
+              {labels.notEnoughPoints}
             </p>
             <button
               id={`earn-more-${item.id}`}
@@ -154,7 +158,7 @@ export function CatalogCard({ item, currentPoints, isAlreadyRedeemed, onRedeem }
                 'min-h-[36px]', // ≥ 44px touch target via padding
               )}
             >
-              Xem cách kiếm thêm điểm
+              {labels.earnMorePoints}
               <ArrowRight className="h-3 w-3" />
             </button>
           </div>
@@ -175,7 +179,7 @@ export function CatalogCard({ item, currentPoints, isAlreadyRedeemed, onRedeem }
             <Tag className="h-2.5 w-2.5" />
             {item.tag}
           </span>
-          {item.isFlashSale && item.expiresAt && <FlashBadge expiresAt={item.expiresAt} />}
+          {item.isFlashSale && item.expiresAt && <FlashBadge expiresAt={item.expiresAt} labels={labels} />}
         </div>
 
         {/* Partner + title */}
@@ -198,12 +202,12 @@ export function CatalogCard({ item, currentPoints, isAlreadyRedeemed, onRedeem }
             <span className="text-base font-extrabold text-emerald">
               {item.pointsCost.toLocaleString('vi-VN')}
             </span>
-            <span className="text-[10px] font-medium text-muted-foreground">điểm</span>
+            <span className="text-[10px] font-medium text-muted-foreground">{labels.pointsUnit}</span>
           </div>
 
           {isAlreadyRedeemed ? (
             <div className="rounded-full bg-emerald/10 px-3 py-1.5 text-[11px] font-semibold text-emerald">
-              Đã đổi thành công
+              {labels.redeemSuccess}
             </div>
           ) : canAfford ? (
             <motion.button
@@ -222,12 +226,12 @@ export function CatalogCard({ item, currentPoints, isAlreadyRedeemed, onRedeem }
                 isPressed ? 'opacity-80' : 'opacity-100',
               )}
             >
-              Đổi ngay
+              {labels.redeemNow}
               <Zap className="h-3 w-3 fill-white" />
             </motion.button>
           ) : (
             <div className="rounded-full bg-muted-foreground/10 px-3 py-1.5 text-[11px] font-medium text-muted-foreground">
-              Chưa đủ điểm
+              {labels.notEnoughPoints}
             </div>
           )}
         </div>
