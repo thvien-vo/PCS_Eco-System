@@ -9,7 +9,7 @@ This file tracks the progress of Phase 2: migrating hardcoded Vietnamese strings
 | **2** | **Module 8** (B2B Insight) | ✅ Done | `832a18e` |
 | **3** | **Module 2** (Map) | ✅ Done | `6865cc5` |
 | **4** | **Module 6** (Marketplace) | ✅ Done | `817b789` |
-| **5** | **Module 4** (Wallet) | ⬜ Not Started | |
+| **5** | **Module 4** (Wallet) | ✅ Done | |
 | **6** | **Module 3** (Feed) | ⬜ Not Started | |
 | **7** | **Module 5** (Challenge) | ⬜ Not Started | |
 | **8** | **Module 7** (Kiosk - **Critical**) | ⬜ Not Started | |

@@ -3,12 +3,16 @@
 import dynamic from 'next/dynamic';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { DailyTrend } from '@/lib/wallet-calculations';
+import type { TranslationDictionary } from '@/lib/i18n/dictionaries';
+
+type ChartLabels = TranslationDictionary['wallet']['chart'];
 
 // Recharts component MUST be 'use client' and dynamically imported with ssr: false
 // per pcs-tech-standards §10 to prevent 0-width flash from ResponsiveContainer.
 
 interface WeeklyChartInnerProps {
   data: DailyTrend[];
+  labels: ChartLabels;
 }
 
 interface CustomTooltipProps {
@@ -16,9 +20,10 @@ interface CustomTooltipProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload?: any[];
   label?: string;
+  labels: ChartLabels;
 }
 
-function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
+function CustomTooltip({ active, payload, label, labels }: CustomTooltipProps) {
   if (active && payload && payload.length) {
     return (
       <div className="rounded-xl border border-border bg-card p-3 shadow-lg">
@@ -26,12 +31,12 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-emerald" />
-            <span className="text-xs font-medium text-emerald">{payload[0].value} pt</span>
+            <span className="text-xs font-medium text-emerald">{payload[0].value} {labels.tooltipPoints}</span>
           </div>
           {payload[1] && (
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-cyan-400" />
-              <span className="text-xs font-medium text-cyan-500">{payload[1].value} kg CO₂</span>
+              <span className="text-xs font-medium text-cyan-500">{payload[1].value} {labels.tooltipCo2}</span>
             </div>
           )}
         </div>
@@ -41,7 +46,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   return null;
 }
 
-export function WeeklyChartInner({ data }: WeeklyChartInnerProps) {
+export function WeeklyChartInner({ data, labels }: WeeklyChartInnerProps) {
   // Format labels to simple day/month for the X-axis
   const formattedData = data.map((item) => {
     const d = new Date(item.day);
@@ -76,7 +81,7 @@ export function WeeklyChartInner({ data }: WeeklyChartInnerProps) {
             tickLine={false} 
             tick={false} // Hide secondary axis labels to keep it clean
           />
-          <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'var(--border)', strokeWidth: 1, strokeDasharray: '4 4' }} />
+          <Tooltip content={<CustomTooltip labels={labels} />} cursor={{ stroke: 'var(--border)', strokeWidth: 1, strokeDasharray: '4 4' }} />
           <Line
             yAxisId="left"
             type="monotone"

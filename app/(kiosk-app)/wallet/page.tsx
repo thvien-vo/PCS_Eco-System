@@ -5,6 +5,7 @@ import { useWalletStore } from '@/store/wallet-store';
 import { useHasMounted } from '@/hooks/use-has-mounted';
 import { computeWalletStats } from '@/lib/wallet-calculations';
 import { MOCK_TRANSACTIONS } from '@/lib/mock-data';
+import { useTranslation } from '@/hooks/use-translation';
 
 import { WalletSkeleton } from '@/components/wallet/wallet-skeleton';
 import { PointsHeroCard } from '@/components/wallet/points-hero-card';
@@ -16,6 +17,8 @@ import { TransactionList } from '@/components/wallet/transaction-list';
 export default function WalletPage() {
   const hasMounted = useHasMounted();
   const { transactions, points, seedDemoTransactions } = useWalletStore();
+  const { t } = useTranslation();
+  const tm = t.wallet;
 
   useEffect(() => {
     if (hasMounted) {
@@ -33,40 +36,40 @@ export default function WalletPage() {
   return (
     <div className="flex flex-col gap-8 p-4">
       <section>
-        <PointsHeroCard stats={stats} />
+        <PointsHeroCard stats={stats} labels={tm.heroCard} tierLabels={tm.tiers} />
       </section>
 
       <section>
         <div className="mb-2 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-foreground">Báo Cáo Carbon</h2>
+          <h2 className="text-lg font-semibold text-foreground">{tm.page.carbonReportTitle}</h2>
         </div>
         <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">
-          <ActivityRings stats={stats} />
+          <ActivityRings stats={stats} labels={tm.rings} />
         </div>
       </section>
 
       <section>
         <div className="mb-4">
-          <h2 className="text-lg font-semibold text-foreground">Xu Hướng 7 Ngày</h2>
-          <p className="text-xs text-muted-foreground">Điểm tích lũy & CO₂ giảm được</p>
+          <h2 className="text-lg font-semibold text-foreground">{tm.page.weeklyTrendTitle}</h2>
+          <p className="text-xs text-muted-foreground">{tm.page.weeklyTrendSubtitle}</p>
         </div>
         <div className="rounded-3xl border border-border bg-card p-4 shadow-sm pt-6">
-          <WeeklyChart data={stats.weeklyTrend} />
+          <WeeklyChart data={stats.weeklyTrend} labels={tm.chart} />
         </div>
       </section>
 
       <section>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-foreground">Voucher Đã Lưu</h2>
+          <h2 className="text-lg font-semibold text-foreground">{tm.page.savedVouchersTitle}</h2>
         </div>
-        <VoucherInventory />
+        <VoucherInventory labels={tm.vouchers} />
       </section>
 
       <section>
         <div className="mb-4">
-          <h2 className="text-lg font-semibold text-foreground">Lịch Sử Giao Dịch</h2>
+          <h2 className="text-lg font-semibold text-foreground">{tm.page.transactionHistoryTitle}</h2>
         </div>
-        <TransactionList transactions={transactions} />
+        <TransactionList transactions={transactions} labels={tm.transactions} voucherTitles={tm.vouchers.titles} />
       </section>
     </div>
   );

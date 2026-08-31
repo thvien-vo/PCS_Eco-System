@@ -265,6 +265,50 @@ export type TranslationDictionary = {
       doneButton: string;
     };
   };
+  wallet: {
+    page: {
+      carbonReportTitle: string;
+      weeklyTrendTitle: string;
+      weeklyTrendSubtitle: string;
+      savedVouchersTitle: string;
+      transactionHistoryTitle: string;
+    };
+    heroCard: {
+      totalPoints: string;
+      pointsUnit: string;
+      co2Reduced: string;
+      kgUnit: string;
+    };
+    tiers: Record<string, string>;
+    rings: {
+      co2Unit: string;
+      legendCo2: string;
+      legendTrees: string;
+    };
+    chart: {
+      tooltipPoints: string;
+      tooltipCo2: string;
+    };
+    vouchers: {
+      emptyTitle: string;
+      emptyDescription: string;
+      emptyAction: string;
+      savedAt: string;
+      dateLocale: string;
+      sponsors: Record<string, string>;
+      titles: Record<string, string>;
+    };
+    transactions: {
+      dateLocale: string;
+      loadMore: string;
+      recycleDesc: string;
+      redeemVoucherDesc: string;
+      redeemRewardDesc: string;
+      earnFallback: string;
+      redeemFallback: string;
+      stations: Record<string, string>;
+    };
+  };
 };
 
 export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
@@ -408,7 +452,7 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
       },
       language: {
         title: 'Ngôn ngữ',
-        note: 'Dịch thuật toàn ứng dụng đang được triển khai (Hoàn tất: Settings, Landing, Team, B2B Insight, Map, Marketplace). Các trang khác sẽ tạm hiển thị Tiếng Việt.',
+        note: 'Dịch thuật toàn ứng dụng đang được triển khai (Hoàn tất: Settings, Landing, Team, B2B Insight, Map, Marketplace, Wallet). Các trang khác sẽ tạm hiển thị Tiếng Việt.',
       },
       contact: {
         title: 'Liên hệ Admin',
@@ -555,6 +599,53 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
         doneButton: 'Tuyệt vời!',
       },
     },
+    wallet: {
+      page: {
+        carbonReportTitle: 'Báo Cáo Carbon',
+        weeklyTrendTitle: 'Xu Hướng 7 Ngày',
+        weeklyTrendSubtitle: 'Điểm tích lũy & CO₂ giảm được',
+        savedVouchersTitle: 'Voucher Đã Lưu',
+        transactionHistoryTitle: 'Lịch Sử Giao Dịch',
+      },
+      heroCard: {
+        totalPoints: 'Tổng Điểm Xanh',
+        pointsUnit: 'pt',
+        co2Reduced: 'Đã giảm lượng CO₂',
+        kgUnit: 'kg',
+      },
+      tiers: {
+        'Green Member': 'Thành viên Xanh',
+        'Green Hero': 'Anh hùng Xanh',
+      },
+      rings: {
+        co2Unit: 'kg CO₂',
+        legendCo2: 'CO₂ Giảm',
+        legendTrees: 'Cây',
+      },
+      chart: {
+        tooltipPoints: 'pt',
+        tooltipCo2: 'kg CO₂',
+      },
+      vouchers: {
+        emptyTitle: 'Chưa có voucher',
+        emptyDescription: 'Bạn chưa lưu voucher nào từ cộng đồng.',
+        emptyAction: 'Khám phá ngay',
+        savedAt: 'Lưu:',
+        dateLocale: 'vi-VN',
+        sponsors: {},
+        titles: {},
+      },
+      transactions: {
+        dateLocale: 'vi-VN',
+        loadMore: 'Xem thêm',
+        recycleDesc: 'Tái chế {n} chai PET tại {station}',
+        redeemVoucherDesc: 'Đổi voucher {name}',
+        redeemRewardDesc: 'Đổi thưởng: {name}',
+        earnFallback: 'Nhận điểm',
+        redeemFallback: 'Đổi điểm',
+        stations: {},
+      },
+    },
   },
   en: {
     common: {
@@ -696,7 +787,7 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
       },
       language: {
         title: 'Language',
-        note: 'Full-app translation is in progress (Done: Settings, Landing, Team, B2B Insight, Map, Marketplace). Other pages will temporarily display in Vietnamese.',
+        note: 'Full-app translation is in progress (Done: Settings, Landing, Team, B2B Insight, Map, Marketplace, Wallet). Other pages will temporarily display in Vietnamese.',
       },
       contact: {
         title: 'Contact Admin',
@@ -843,6 +934,71 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
         copiedButton: 'Copied',
         instruction: 'Show this code to the partner to claim your offer',
         doneButton: 'Awesome!',
+      },
+    },
+    wallet: {
+      page: {
+        carbonReportTitle: 'Carbon Report',
+        weeklyTrendTitle: '7-Day Trend',
+        weeklyTrendSubtitle: 'Accumulated points & CO₂ reduced',
+        savedVouchersTitle: 'Saved Vouchers',
+        transactionHistoryTitle: 'Transaction History',
+      },
+      heroCard: {
+        totalPoints: 'Total Green Points',
+        pointsUnit: 'pts',
+        co2Reduced: 'CO₂ Reduced',
+        kgUnit: 'kg',
+      },
+      tiers: {
+        'Green Member': 'Green Member',
+        'Green Hero': 'Green Hero',
+      },
+      rings: {
+        co2Unit: 'kg CO₂',
+        legendCo2: 'CO₂ Reduced',
+        legendTrees: 'Trees',
+      },
+      chart: {
+        tooltipPoints: 'pts',
+        tooltipCo2: 'kg CO₂',
+      },
+      vouchers: {
+        emptyTitle: 'No vouchers yet',
+        emptyDescription: 'You haven\'t saved any vouchers from the feed.',
+        emptyAction: 'Explore now',
+        savedAt: 'Saved:',
+        dateLocale: 'en-US',
+        sponsors: {
+          'Đối Tác Cà Phê A': 'Coffee Partner A',
+          'Đối Tác Đồ Uống B': 'Beverage Partner B',
+          'Cửa hàng Xanh': 'Green Store',
+          'Đối Tác Chuỗi Tiện Lợi C': 'Convenience Partner C',
+        },
+        titles: {
+          'Giảm 20% Thức Uống': '20% Off Drinks',
+          'Mua 1 Tặng 1 (Flash Sale)': 'Buy 1 Get 1 (Flash Sale)',
+          'Túi Tote Sinh Thái': 'Eco Tote Bag',
+          'Giảm 10.000đ Đơn hàng': '10k VND Off Order',
+        },
+      },
+      transactions: {
+        dateLocale: 'en-US',
+        loadMore: 'Load more',
+        recycleDesc: 'Recycled {n} PET bottles at {station}',
+        redeemVoucherDesc: 'Redeemed voucher {name}',
+        redeemRewardDesc: 'Redeemed reward: {name}',
+        earnFallback: 'Earned points',
+        redeemFallback: 'Redeemed points',
+        stations: {
+          'Trạm Quận 1': 'District 1 Station',
+          'Trạm Bình Thạnh': 'Bình Thạnh Station',
+          'Trạm Gò Vấp': 'Gò Vấp Station',
+          'Trạm Phú Nhuận': 'Phú Nhuận Station',
+          'Trạm Tân Bình': 'Tân Bình Station',
+          'Trạm Quận 3': 'District 3 Station',
+          'Trạm Quận 7': 'District 7 Station',
+        },
       },
     },
   },

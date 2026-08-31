@@ -3,9 +3,22 @@ import { motion } from 'framer-motion';
 import { MOTION_TOKENS } from '@/lib/motion-tokens';
 import { Info, Leaf } from 'lucide-react';
 import { WalletStats } from '@/lib/wallet-calculations';
+import type { TranslationDictionary } from '@/lib/i18n/dictionaries';
 
-export function PointsHeroCard({ stats }: { stats: WalletStats }) {
+type HeroLabels = TranslationDictionary['wallet']['heroCard'];
+type TierLabels = TranslationDictionary['wallet']['tiers'];
+
+export function PointsHeroCard({ 
+  stats,
+  labels,
+  tierLabels,
+}: { 
+  stats: WalletStats;
+  labels: HeroLabels;
+  tierLabels: TierLabels;
+}) {
   const { current } = MEMBER_TIER_INFO;
+  const displayTier = tierLabels[current] || current;
 
   return (
     <motion.div
@@ -20,22 +33,22 @@ export function PointsHeroCard({ stats }: { stats: WalletStats }) {
 
       <div className="relative z-10 flex items-start justify-between">
         <div>
-          <p className="text-sm font-medium text-emerald-50">Tổng Điểm Xanh</p>
+          <p className="text-sm font-medium text-emerald-50">{labels.totalPoints}</p>
           <div className="mt-1 flex items-baseline gap-1">
             <span className="text-4xl font-bold tracking-tight">{stats.totalPoints.toLocaleString()}</span>
-            <span className="text-sm font-medium text-emerald-50">pt</span>
+            <span className="text-sm font-medium text-emerald-50">{labels.pointsUnit}</span>
           </div>
         </div>
         <div className="flex items-center gap-1 rounded-full bg-white/20 px-3 py-1 backdrop-blur-md">
           <Leaf className="h-3.5 w-3.5" />
-          <span className="text-xs font-semibold">{current}</span>
+          <span className="text-xs font-semibold">{displayTier}</span>
         </div>
       </div>
 
       <div className="relative z-10 mt-8 flex items-center justify-between rounded-xl bg-black/10 px-4 py-3 backdrop-blur-sm">
         <div className="flex flex-col">
-          <span className="text-xs font-medium text-emerald-50">Đã giảm lượng CO₂</span>
-          <span className="text-lg font-bold">{stats.co2ReducedKg} kg</span>
+          <span className="text-xs font-medium text-emerald-50">{labels.co2Reduced}</span>
+          <span className="text-lg font-bold">{stats.co2ReducedKg} {labels.kgUnit}</span>
         </div>
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20">
           <Info className="h-4 w-4 text-emerald-50" />

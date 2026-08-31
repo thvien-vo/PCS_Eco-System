@@ -1,8 +1,11 @@
 import { motion } from 'framer-motion';
 import { MOTION_TOKENS } from '@/lib/motion-tokens';
 import { WalletStats } from '@/lib/wallet-calculations';
+import type { TranslationDictionary } from '@/lib/i18n/dictionaries';
 
-export function ActivityRings({ stats }: { stats: WalletStats }) {
+type RingsLabels = TranslationDictionary['wallet']['rings'];
+
+export function ActivityRings({ stats, labels }: { stats: WalletStats; labels: RingsLabels }) {
   const size = 200;
   const strokeWidth = 16;
   const center = size / 2;
@@ -95,8 +98,8 @@ export function ActivityRings({ stats }: { stats: WalletStats }) {
             <span className="block text-2xl font-bold text-foreground">
               {stats.co2ReducedKg}
             </span>
-            <span className="block text-xs font-medium text-muted-foreground">
-              kg CO₂
+            <span className="block text-xs font-medium text-muted-foreground whitespace-pre-wrap px-2 text-balance leading-tight">
+              {labels.co2Unit}
             </span>
           </motion.div>
         </div>
@@ -105,12 +108,12 @@ export function ActivityRings({ stats }: { stats: WalletStats }) {
       {/* Legend */}
       <div className="mt-6 flex w-full justify-center gap-6">
         <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full bg-emerald" />
-          <span className="text-xs font-medium text-muted-foreground">CO₂ Giảm ({maxCo2}kg)</span>
+          <div className="h-3 w-3 rounded-full bg-emerald flex-shrink-0" />
+          <span className="text-xs font-medium text-muted-foreground">{labels.legendCo2} ({maxCo2}kg)</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded-full bg-mint" />
-          <span className="text-xs font-medium text-muted-foreground">Cây ({maxTrees})</span>
+          <div className="h-3 w-3 rounded-full bg-mint flex-shrink-0" />
+          <span className="text-xs font-medium text-muted-foreground">{labels.legendTrees} ({maxTrees})</span>
         </div>
       </div>
     </div>
