@@ -309,6 +309,50 @@ export type TranslationDictionary = {
       stations: Record<string, string>;
     };
   };
+  auth: {
+    page: {
+      title: string;
+      subtitle: string;
+    };
+    tabs: {
+      login: string;
+      signup: string;
+    };
+    fields: {
+      name: string;
+      namePlaceholder: string;
+      email: string;
+      emailPlaceholder: string;
+      password: string;
+      passwordPlaceholder: string;
+    };
+    buttons: {
+      login: string;
+      signup: string;
+      loggingIn: string;
+      signingUp: string;
+      signOut: string;
+    };
+    errors: {
+      missingFields: string;
+      invalidCredentials: string;
+      emailInUse: string;
+      generic: string;
+    };
+    success: {
+      signupDone: string;
+      loginDone: string;
+    };
+    mergePrompt: {
+      title: string;
+      description: string;
+      confirmBtn: string;
+      skipBtn: string;
+      merging: string;
+      mergeSuccess: string;
+      mergeError: string;
+    };
+  };
 };
 
 export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
@@ -644,6 +688,51 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
         earnFallback: 'Nhận điểm',
         redeemFallback: 'Đổi điểm',
         stations: {},
+      },
+    },
+    auth: {
+      page: {
+        title: 'Đăng nhập / Đăng ký',
+        subtitle: 'Đồng bộ hóa tiến trình xanh của bạn trên mọi thiết bị',
+      },
+      tabs: {
+        login: 'Đăng nhập',
+        signup: 'Đăng ký',
+      },
+      fields: {
+        name: 'Họ và tên',
+        namePlaceholder: 'Nhập tên của bạn...',
+        email: 'Email',
+        emailPlaceholder: 'email@gmail.com',
+        password: 'Mật khẩu',
+        passwordPlaceholder: 'Tối thiểu 6 ký tự',
+      },
+      buttons: {
+        login: 'Đăng nhập',
+        signup: 'Tạo tài khoản',
+        loggingIn: 'Đang đăng nhập...',
+        signingUp: 'Đang tạo tài khoản...',
+        signOut: 'Đăng xuất',
+      },
+      errors: {
+        missingFields: 'Vui lòng điền đầy đủ thông tin.',
+        invalidCredentials: 'Email hoặc mật khẩu không đúng.',
+        emailInUse: 'Email này đã được sử dụng.',
+        generic: 'Đã xảy ra lỗi. Vui lòng thử lại.',
+      },
+      success: {
+        signupDone: 'Tạo tài khoản thành công! Vui lòng kiểm tra email để xác nhận.',
+        loginDone: 'Đăng nhập thành công!',
+      },
+      mergePrompt: {
+        title: 'Đồng bộ dữ liệu cục bộ?',
+        description:
+          'Bạn có {points} điểm và {vouchers} voucher đã lưu trên thiết bị này. Bạn có muốn đồng bộ lên tài khoản không?',
+        confirmBtn: 'Đồng bộ ngay',
+        skipBtn: 'Bỏ qua',
+        merging: 'Đang đồng bộ...',
+        mergeSuccess: 'Đồng bộ thành công!',
+        mergeError: 'Đồng bộ thất bại. Dữ liệu cục bộ vẫn được giữ nguyên.',
       },
     },
   },
@@ -999,6 +1088,51 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
           'Trạm Quận 3': 'District 3 Station',
           'Trạm Quận 7': 'District 7 Station',
         },
+      },
+    },
+    auth: {
+      page: {
+        title: 'Login / Sign Up',
+        subtitle: 'Sync your green progress across all devices',
+      },
+      tabs: {
+        login: 'Login',
+        signup: 'Sign Up',
+      },
+      fields: {
+        name: 'Full Name',
+        namePlaceholder: 'Enter your name...',
+        email: 'Email',
+        emailPlaceholder: 'email@gmail.com',
+        password: 'Password',
+        passwordPlaceholder: 'At least 6 characters',
+      },
+      buttons: {
+        login: 'Login',
+        signup: 'Create Account',
+        loggingIn: 'Logging in...',
+        signingUp: 'Creating account...',
+        signOut: 'Sign Out',
+      },
+      errors: {
+        missingFields: 'Please fill in all required fields.',
+        invalidCredentials: 'Invalid email or password.',
+        emailInUse: 'This email is already in use.',
+        generic: 'An error occurred. Please try again.',
+      },
+      success: {
+        signupDone: 'Account created! Please check your email to confirm.',
+        loginDone: 'Logged in successfully!',
+      },
+      mergePrompt: {
+        title: 'Sync local data?',
+        description:
+          'You have {points} points and {vouchers} saved vouchers on this device. Would you like to sync them to your account?',
+        confirmBtn: 'Sync Now',
+        skipBtn: 'Skip',
+        merging: 'Syncing...',
+        mergeSuccess: 'Sync successful!',
+        mergeError: 'Sync failed. Your local data is still intact.',
       },
     },
   },

@@ -1,0 +1,191 @@
+﻿import { createClient } from '@/lib/supabase/client';
+import type { SyncQueueEntry } from '@/types/auth';
+import {
+  peekQueue,
+  removeEntry,
+  incrementRetry,
+  MAX_RETRY_COUNT,
+} from '@/lib/sync-queue';
+
+/**
+ * Process a single SyncQueueEntry against Supabase.
+ * Returns true on success, false on failure.
+ */
+async function processEntry(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+  entry: SyncQueueEntry,
+): Promise<boolean> {
+  try {
+    switch (entry.action) {
+      case 'ADD_TRANSACTION':
+      case 'DEDUCT_POINTS':
+      case 'ADD_POINTS': {
+        // Wallet sync: insert a transaction row (append-only, race-condition-safe).
+        const { error } = await supabase.from('transactions').insert({
+          id: entry.id,
+          user_id: userId,
+          type: entry.payload['type'] as string,
+          amount: entry.payload['amount'] as number,
+          date: entry.createdAt,
+          description: entry.payload['description'] as string,
+        });
+        if (error) throw error;
+        break;
+      }
+
+      case 'LIKE_POST': {
+        const { error } = await supabase
+          .from('user_likes')
+          .insert({ user_id: userId, post_id: entry.payload['postId'] as string })
+          .onConflict('user_id, post_id')
+          // Supabase PostgREST: ignore conflict (idempotent)
+          // Using raw option — equivalent to ON CONFLICT DO NOTHING
+          ;
+        if (error && error.code !== '23505') throw error; // 23505 = unique violation = already liked, fine
+        break;
+      }
+
+      case 'UNLIKE_POST': {
+        const { error } = await supabase
+          .from('user_likes')
+          .delete()
+          .eq('user_id', userId)
+          .eq('post_id', entry.payload['postId'] as string);
+        if (error) throw error;
+        break;
+      }
+
+      case 'SAVE_VOUCHER': {
+        const { error } = await supabase
+          .from('user_saved_vouchers')
+          .insert({
+            user_id: userId,
+            voucher_id: entry.payload['voucherId'] as string,
+          });
+        if (error && error.code !== '23505') throw error;
+        break;
+      }
+
+      case 'MARK_STORY_VIEWED': {
+        // Stories viewed is low-value — best-effort only, no retry on failure.
+        await supabase.from('user_viewed_stories').insert({
+          user_id: userId,
+          story_id: entry.payload['storyId'] as string,
+        });
+        break;
+      }
+
+      default:
+        // Unknown action — drop it.
+        break;
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Flush all pending entries in the IndexedDB queue to Supabase.
+ * Entries are processed sequentially to avoid out-of-order conflicts.
+ * Entries that fail are retried up to MAX_RETRY_COUNT times before being
+ * treated as dead-letters and dropped (logged to console in dev).
+ */
+export async function flushSyncQueue(userId: string): Promise<void> {
+  const supabase = createClient();
+  const queue = await peekQueue();
+
+  for (const entry of queue) {
+    // Only process entries that belong to the current user.
+    if (entry.userId !== userId) continue;
+
+    const success = await processEntry(supabase, userId, entry);
+
+    if (success) {
+      await removeEntry(entry.id);
+    } else {
+      await incrementRetry(entry.id);
+      if (entry.retryCount + 1 >= MAX_RETRY_COUNT) {
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('[SyncService] Dead-letter entry dropped:', entry);
+        }
+        await removeEntry(entry.id);
+      }
+    }
+  }
+}
+
+/**
+ * Bulk upsert local anonymous data to Supabase on first-time login.
+ * Called once after the `isSynced` flag is checked and confirmed false.
+ */
+export async function migrateLocalDataToSupabase(params: {
+  userId: string;
+  points: number;
+  transactions: Array<{
+    id: string;
+    type: string;
+    amount: number;
+    date: string;
+    description: string;
+  }>;
+  savedVouchers: string[];
+  likedPosts: string[];
+}): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+
+  try {
+    // 1. Upsert wallet points.
+    const { error: walletError } = await supabase
+      .from('wallets')
+      .upsert({ id: params.userId, points: params.points });
+    if (walletError) throw walletError;
+
+    // 2. Insert all transactions (ON CONFLICT DO NOTHING via ignoreDuplicates).
+    if (params.transactions.length > 0) {
+      const rows = params.transactions.map((tx) => ({
+        id: tx.id,
+        user_id: params.userId,
+        type: tx.type,
+        amount: tx.amount,
+        date: tx.date,
+        description: tx.description,
+      }));
+      const { error: txError } = await supabase
+        .from('transactions')
+        .upsert(rows, { ignoreDuplicates: true });
+      if (txError) throw txError;
+    }
+
+    // 3. Insert saved vouchers (normalized, idempotent).
+    if (params.savedVouchers.length > 0) {
+      const voucherRows = params.savedVouchers.map((voucherId) => ({
+        user_id: params.userId,
+        voucher_id: voucherId,
+      }));
+      const { error: vError } = await supabase
+        .from('user_saved_vouchers')
+        .upsert(voucherRows, { ignoreDuplicates: true });
+      if (vError) throw vError;
+    }
+
+    // 4. Insert liked posts (normalized, idempotent).
+    if (params.likedPosts.length > 0) {
+      const likeRows = params.likedPosts.map((postId) => ({
+        user_id: params.userId,
+        post_id: postId,
+      }));
+      const { error: lError } = await supabase
+        .from('user_likes')
+        .upsert(likeRows, { ignoreDuplicates: true });
+      if (lError) throw lError;
+    }
+
+    return { success: true };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    return { success: false, error: message };
+  }
+}

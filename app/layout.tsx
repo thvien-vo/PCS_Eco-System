@@ -4,6 +4,9 @@ import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { StoreHydrationProvider } from '@/components/store-hydration-provider';
+import { AuthProvider } from '@/components/shared/auth-provider';
+import { SyncManagerProvider } from '@/components/shared/sync-manager-provider';
+import { createClient } from '@/lib/supabase/server';
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' });
 
@@ -21,11 +24,21 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Read the server-side Supabase session so AuthProvider can hydrate
+  // the initial auth state without a client-side fetch on first load.
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
   return (
     <html lang="vi" suppressHydrationWarning>
       <body className={inter.className}>
@@ -35,9 +48,13 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          <StoreHydrationProvider />
-          <ThemeToggle />
-          {children}
+          <AuthProvider initialUser={user} initialSession={session}>
+            <SyncManagerProvider>
+              <StoreHydrationProvider />
+              <ThemeToggle />
+              {children}
+            </SyncManagerProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
