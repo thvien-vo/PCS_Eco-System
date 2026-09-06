@@ -6,7 +6,7 @@ import { useTranslation } from '@/hooks/use-translation';
 import { useHasMounted } from '@/hooks/use-has-mounted';
 import { Mail, Lock, User, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { motionTokens } from '@/lib/motion-tokens';
+import { MOTION_TOKENS } from '@/lib/motion-tokens';
 import { MergeDataPrompt } from '@/components/auth/merge-data-prompt';
 import { useAuth } from '@/components/shared/auth-provider';
 
@@ -21,7 +21,7 @@ type Tab = 'login' | 'signup';
  * Shows the MergeDataPrompt after a successful login/signup.
  */
 export function AuthForm() {
-  const t = useTranslation();
+  const { t } = useTranslation();
   const hasMounted = useHasMounted();
   const { user } = useAuth();
   const [tab, setTab] = useState<Tab>('login');
@@ -107,7 +107,7 @@ export function AuthForm() {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: motionTokens.duration.base / 1000, ease: motionTokens.easing.standard }}
+          transition={{ duration: MOTION_TOKENS.durations.base, ease: MOTION_TOKENS.easing.standard }}
           className="space-y-4"
           aria-label={tab === 'login' ? t.auth.tabs.login : t.auth.tabs.signup}
         >

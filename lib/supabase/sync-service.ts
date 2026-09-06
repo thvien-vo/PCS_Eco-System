@@ -1,4 +1,4 @@
-﻿import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/client';
 import type { SyncQueueEntry } from '@/types/auth';
 import {
   peekQueue,
@@ -37,11 +37,7 @@ async function processEntry(
       case 'LIKE_POST': {
         const { error } = await supabase
           .from('user_likes')
-          .insert({ user_id: userId, post_id: entry.payload['postId'] as string })
-          .onConflict('user_id, post_id')
-          // Supabase PostgREST: ignore conflict (idempotent)
-          // Using raw option — equivalent to ON CONFLICT DO NOTHING
-          ;
+          .insert({ user_id: userId, post_id: entry.payload['postId'] as string });
         if (error && error.code !== '23505') throw error; // 23505 = unique violation = already liked, fine
         break;
       }

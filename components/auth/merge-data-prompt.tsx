@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { useTranslation } from '@/hooks/use-translation';
@@ -8,7 +8,7 @@ import { useAuth } from '@/components/shared/auth-provider';
 import { migrateLocalDataToSupabase } from '@/lib/supabase/sync-service';
 import { Loader2, CloudUpload, X } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { motionTokens } from '@/lib/motion-tokens';
+import { MOTION_TOKENS } from '@/lib/motion-tokens';
 
 interface MergeDataPromptProps {
   onDone: () => void;
@@ -24,7 +24,7 @@ interface MergeDataPromptProps {
  * All strings are sourced from dictionaries.ts — no hardcoded Vietnamese.
  */
 export function MergeDataPrompt({ onDone }: MergeDataPromptProps) {
-  const t = useTranslation();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const points = useWalletStore((s) => s.points);
   const transactions = useWalletStore((s) => s.transactions);
@@ -74,8 +74,8 @@ export function MergeDataPrompt({ onDone }: MergeDataPromptProps) {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 40 }}
         transition={{
-          duration: motionTokens.duration.slow / 1000,
-          ease: motionTokens.easing.standard,
+          duration: MOTION_TOKENS.durations.slow,
+          ease: MOTION_TOKENS.easing.standard,
         }}
         className="w-full max-w-sm rounded-t-3xl bg-white p-6 shadow-2xl dark:bg-card-dark sm:rounded-3xl"
         role="dialog"
