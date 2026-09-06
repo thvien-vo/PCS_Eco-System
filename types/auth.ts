@@ -1,4 +1,4 @@
-﻿import type { User, Session } from '@supabase/supabase-js';
+import type { User, Session } from '@supabase/supabase-js';
 
 /** Re-exported for use across the app — avoids importing from supabase-js directly in UI code. */
 export type AuthUser = User;
@@ -12,6 +12,8 @@ export type SyncAction =
   | 'LIKE_POST'
   | 'UNLIKE_POST'
   | 'SAVE_VOUCHER'
+  | 'UNSAVE_VOUCHER'
+  | 'UPDATE_PROFILE'
   | 'MARK_STORY_VIEWED';
 
 /** A single entry in the offline IndexedDB sync queue. */

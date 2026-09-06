@@ -1,11 +1,18 @@
 import { createClient } from '@/lib/supabase/client';
 import type { SyncQueueEntry } from '@/types/auth';
+import type { UserProfile } from '@/types/settings';
 import {
   peekQueue,
   removeEntry,
   incrementRetry,
   MAX_RETRY_COUNT,
 } from '@/lib/sync-queue';
+import {
+  insertTransaction,
+  insertSavedVoucher,
+  deleteSavedVoucher,
+  upsertProfile,
+} from '@/lib/supabase/db';
 
 /**
  * Process a single SyncQueueEntry against Supabase.
@@ -18,27 +25,41 @@ async function processEntry(
 ): Promise<boolean> {
   try {
     switch (entry.action) {
+      // ── Wallet ────────────────────────────────────────────────────────────
       case 'ADD_TRANSACTION':
-      case 'DEDUCT_POINTS':
-      case 'ADD_POINTS': {
-        // Wallet sync: insert a transaction row (append-only, race-condition-safe).
-        const { error } = await supabase.from('transactions').insert({
-          id: entry.id,
-          user_id: userId,
-          type: entry.payload['type'] as string,
+      case 'ADD_POINTS':
+      case 'DEDUCT_POINTS': {
+        // Insert the transaction row via DAL (idempotent).
+        const { error } = await insertTransaction(userId, {
+          id: entry.payload['id'] as string ?? entry.id,
+          type: entry.payload['type'] as 'earn' | 'redeem',
           amount: entry.payload['amount'] as number,
-          date: entry.createdAt,
-          description: entry.payload['description'] as string,
+          date: entry.payload['date'] as string ?? entry.createdAt,
+          description: entry.payload['description'] as string ?? '',
         });
-        if (error) throw error;
+        if (error) throw new Error(error);
+
+        // Also keep wallets.points in sync via atomic RPC.
+        if (entry.action === 'ADD_POINTS') {
+          await supabase.rpc('increment_points', {
+            user_uuid: userId,
+            delta: entry.payload['amount'] as number,
+          });
+        } else if (entry.action === 'DEDUCT_POINTS') {
+          await supabase.rpc('decrement_points', {
+            user_uuid: userId,
+            delta: entry.payload['amount'] as number,
+          });
+        }
         break;
       }
 
+      // ── Feed — Likes ──────────────────────────────────────────────────────
       case 'LIKE_POST': {
         const { error } = await supabase
           .from('user_likes')
           .insert({ user_id: userId, post_id: entry.payload['postId'] as string });
-        if (error && error.code !== '23505') throw error; // 23505 = unique violation = already liked, fine
+        if (error && error.code !== '23505') throw error;
         break;
       }
 
@@ -52,19 +73,38 @@ async function processEntry(
         break;
       }
 
+      // ── Feed — Saved Vouchers (NORMALIZED — ID only) ──────────────────────
       case 'SAVE_VOUCHER': {
-        const { error } = await supabase
-          .from('user_saved_vouchers')
-          .insert({
-            user_id: userId,
-            voucher_id: entry.payload['voucherId'] as string,
-          });
-        if (error && error.code !== '23505') throw error;
+        const { error } = await insertSavedVoucher(
+          userId,
+          entry.payload['voucherId'] as string,
+        );
+        if (error) throw new Error(error);
         break;
       }
 
+      case 'UNSAVE_VOUCHER': {
+        const { error } = await deleteSavedVoucher(
+          userId,
+          entry.payload['voucherId'] as string,
+        );
+        if (error) throw new Error(error);
+        break;
+      }
+
+      // ── Profile ───────────────────────────────────────────────────────────
+      case 'UPDATE_PROFILE': {
+        const { error } = await upsertProfile(
+          userId,
+          entry.payload['profile'] as Partial<UserProfile>,
+        );
+        if (error) throw new Error(error);
+        break;
+      }
+
+      // ── Stories ───────────────────────────────────────────────────────────
       case 'MARK_STORY_VIEWED': {
-        // Stories viewed is low-value — best-effort only, no retry on failure.
+        // Best-effort — ignore errors, no retry.
         await supabase.from('user_viewed_stories').insert({
           user_id: userId,
           story_id: entry.payload['storyId'] as string,
@@ -73,7 +113,7 @@ async function processEntry(
       }
 
       default:
-        // Unknown action — drop it.
+        // Unknown action — drop silently.
         break;
     }
 

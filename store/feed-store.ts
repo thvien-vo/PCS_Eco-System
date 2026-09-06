@@ -1,14 +1,16 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { SavedVoucherDetail } from '@/types';
+import { enqueueAction } from '@/lib/sync-queue';
 
 // ---------------------------------------------------------------------------
-// Feed Store — persisted via localStorage with skipHydration: true.
+// FeedStore
 //
-// Hydration pattern: pcs-tech-standards §10(a)
-//   - skipHydration: true prevents SSR mismatch
-//   - StoreHydrationProvider (root layout) calls rehydrate() after mount
-//   - Every consumer component must gate behind useHasMounted() hook
+// Persisted to localStorage (skipHydration: true — pcs-tech-standards §10a).
+//
+// Sync pattern: actions accept an optional `userId`. When provided the mutation
+// is also enqueued in IndexedDB. Anonymous users get identical behaviour with
+// no sync side-effect — zero breaking changes to existing call-sites.
 // ---------------------------------------------------------------------------
 
 interface CommentEntry {
@@ -19,22 +21,25 @@ interface CommentEntry {
 }
 
 interface FeedState {
-  // Like state: Set of post IDs that the current user has liked
+  /** IDs of posts the current user has liked */
   likedPosts: string[];
-  // Comment state: map of postId → CommentEntry[]
+  /** postId → comments */
   commentsByPost: Record<string, CommentEntry[]>;
-  // Saved vouchers (ID list for quick lookup)
+  /** Saved voucher IDs for quick lookup */
   savedVouchers: string[];
-  // Full voucher details so Module 4 can display them
+  /** Full voucher details for Module 4 wallet display (client-only; not synced) */
   savedVoucherDetails: SavedVoucherDetail[];
-  // Viewed stories
+  /** Story IDs the user has already viewed */
   viewedStories: string[];
 
   // --- Actions ---
-  toggleLikePost: (postId: string) => void;
+  toggleLikePost: (postId: string, userId?: string) => void;
   addComment: (postId: string, text: string, author?: string) => void;
-  saveVoucher: (voucher: SavedVoucherDetail) => void;
-  markStoryViewed: (storyId: string) => void;
+  saveVoucher: (voucher: SavedVoucherDetail, userId?: string) => void;
+  unsaveVoucher: (voucherId: string, userId?: string) => void;
+  markStoryViewed: (storyId: string, userId?: string) => void;
+
+  // --- Derived selectors ---
   isPostLiked: (postId: string) => boolean;
   isVoucherSaved: (voucherId: string) => boolean;
   getComments: (postId: string) => CommentEntry[];
@@ -49,12 +54,25 @@ export const useFeedStore = create<FeedState>()(
       savedVoucherDetails: [],
       viewedStories: [],
 
-      toggleLikePost: (postId) =>
+      toggleLikePost: (postId, userId) => {
+        const isLiked = get().likedPosts.includes(postId);
+
         set((state) => ({
-          likedPosts: state.likedPosts.includes(postId)
+          likedPosts: isLiked
             ? state.likedPosts.filter((id) => id !== postId)
             : [...state.likedPosts, postId],
-        })),
+        }));
+
+        if (userId) {
+          void enqueueAction({
+            id: `${isLiked ? 'unlike' : 'like'}-${postId}-${Date.now()}`,
+            action: isLiked ? 'UNLIKE_POST' : 'LIKE_POST',
+            userId,
+            payload: { postId },
+            createdAt: new Date().toISOString(),
+          });
+        }
+      },
 
       addComment: (postId, text, author = 'Bạn') =>
         set((state) => {
@@ -73,32 +91,70 @@ export const useFeedStore = create<FeedState>()(
           };
         }),
 
-      saveVoucher: (voucher) =>
-        set((state) => {
-          // Idempotent: don't save duplicates
-          if (state.savedVouchers.includes(voucher.id)) return state;
-          return {
-            savedVouchers: [...state.savedVouchers, voucher.id],
-            savedVoucherDetails: [...state.savedVoucherDetails, voucher],
-          };
-        }),
+      saveVoucher: (voucher, userId) => {
+        if (get().savedVouchers.includes(voucher.id)) return; // idempotent
 
-      markStoryViewed: (storyId) =>
         set((state) => ({
-          viewedStories: state.viewedStories.includes(storyId)
-            ? state.viewedStories
-            : [...state.viewedStories, storyId],
-        })),
+          savedVouchers: [...state.savedVouchers, voucher.id],
+          savedVoucherDetails: [...state.savedVoucherDetails, voucher],
+        }));
+
+        if (userId) {
+          // Sync only the ID — schema is normalized (user_saved_vouchers stores voucher_id only).
+          void enqueueAction({
+            id: `save-${voucher.id}-${Date.now()}`,
+            action: 'SAVE_VOUCHER',
+            userId,
+            payload: { voucherId: voucher.id },
+            createdAt: new Date().toISOString(),
+          });
+        }
+      },
+
+      unsaveVoucher: (voucherId, userId) => {
+        set((state) => ({
+          savedVouchers: state.savedVouchers.filter((id) => id !== voucherId),
+          savedVoucherDetails: state.savedVoucherDetails.filter(
+            (v) => v.id !== voucherId,
+          ),
+        }));
+
+        if (userId) {
+          void enqueueAction({
+            id: `unsave-${voucherId}-${Date.now()}`,
+            action: 'UNSAVE_VOUCHER',
+            userId,
+            payload: { voucherId },
+            createdAt: new Date().toISOString(),
+          });
+        }
+      },
+
+      markStoryViewed: (storyId, userId) => {
+        if (get().viewedStories.includes(storyId)) return; // idempotent
+
+        set((state) => ({
+          viewedStories: [...state.viewedStories, storyId],
+        }));
+
+        if (userId) {
+          void enqueueAction({
+            id: `story-${storyId}-${Date.now()}`,
+            action: 'MARK_STORY_VIEWED',
+            userId,
+            payload: { storyId },
+            createdAt: new Date().toISOString(),
+          });
+        }
+      },
 
       isPostLiked: (postId) => get().likedPosts.includes(postId),
-
       isVoucherSaved: (voucherId) => get().savedVouchers.includes(voucherId),
-
       getComments: (postId) => get().commentsByPost[postId] ?? [],
     }),
     {
       name: 'pcs-feed-store',
-      skipHydration: true, // Rehydrated manually via StoreHydrationProvider
-    }
-  )
+      skipHydration: true,
+    },
+  ),
 );
