@@ -19,14 +19,19 @@ import { useFeedStore } from '@/store/feed-store';
 import { MOCK_STORIES } from '@/lib/mock-data';
 import { MOTION_TOKENS } from '@/lib/motion-tokens';
 import { useDragScroll } from '@/hooks/use-drag-scroll';
+import { useTranslation } from '@/hooks/use-translation';
+import type { TranslationDictionary } from '@/lib/i18n/dictionaries';
+
+type StoryLabels = TranslationDictionary['feed']['stories'];
 
 interface StoryViewerProps {
   story: (typeof MOCK_STORIES)[number];
   isViewed: boolean;
   onView: () => void;
+  labels: StoryLabels;
 }
 
-function StoryRing({ story, isViewed, onView }: StoryViewerProps) {
+function StoryRing({ story, isViewed, onView, labels }: StoryViewerProps) {
   return (
     <motion.button
       onClick={onView}
@@ -35,7 +40,7 @@ function StoryRing({ story, isViewed, onView }: StoryViewerProps) {
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: MOTION_TOKENS.durations.base, ease: MOTION_TOKENS.easing.enter }}
       whileTap={{ scale: 0.92 }}
-      aria-label={`Xem story của ${story.authorName}`}
+      aria-label={labels.viewStoryAria.replace('{name}', story.authorName)}
     >
       {/* Ring container */}
       <div
@@ -80,6 +85,9 @@ function StoryRing({ story, isViewed, onView }: StoryViewerProps) {
 }
 
 export function GreenStories() {
+  const { t } = useTranslation();
+  const tm = t.feed.stories;
+
   const hasMounted = useHasMounted();
   const { viewedStories, markStoryViewed } = useFeedStore();
   const [activeStory, setActiveStory] = useState<string | null>(null);
@@ -135,7 +143,7 @@ export function GreenStories() {
               <Plus className="h-5 w-5 text-emerald-500" />
             </div>
             <span className="text-[9px] font-medium text-muted-foreground text-center max-w-[56px]">
-              Tin của bạn
+              {tm.yourStory}
             </span>
           </motion.div>
 
@@ -146,6 +154,7 @@ export function GreenStories() {
               story={story}
               isViewed={isViewed(story.id)}
               onView={() => handleStoryClick(story.id)}
+              labels={tm}
             />
           ))}
         </div>
@@ -155,6 +164,9 @@ export function GreenStories() {
       {activeStory && (() => {
         const story = MOCK_STORIES.find((s) => s.id === activeStory);
         if (!story) return null;
+        
+        const stationName = tm.stations[story.stationName] || story.stationName;
+
         return (
           <motion.div
             className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center"
@@ -171,7 +183,7 @@ export function GreenStories() {
               <div className="relative w-full aspect-[9/16] bg-card">
                 <Image
                   src={`https://picsum.photos/seed/story-${story.id}/400/700`}
-                  alt={`Story của ${story.authorName}`}
+                  alt={tm.storyAlt.replace('{name}', story.authorName)}
                   fill
                   className="object-cover"
                   unoptimized
@@ -193,14 +205,14 @@ export function GreenStories() {
                   <div>
                     <p className="text-white text-xs font-semibold">{story.authorName}</p>
                     <p className="text-white/80 text-[10px]">
-                      ♻️ Check-in tại {story.stationName}
+                      {tm.checkInPrefix}{stationName}
                     </p>
                   </div>
                 </div>
 
                 {/* Close hint */}
                 <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/60 text-[10px]">
-                  Chạm để đóng
+                  {tm.tapToClose}
                 </p>
               </div>
             </div>

@@ -309,6 +309,94 @@ export type TranslationDictionary = {
       stations: Record<string, string>;
     };
   };
+  feed: {
+    page: {
+      headerTitle: string;
+      headerSubtitle: string;
+      searchAria: string;
+      notifyAria: string;
+      settingsAria: string;
+      storiesTitle: string;
+      flashSaleTitle: string;
+      feedTitle: string;
+      sortLatest: string;
+      endOfFeedTitle: string;
+      endOfFeedSubtitle: string;
+    };
+    carousel: {
+      title: string;
+      pointsSuffix: string;
+      nextPrefix: string;
+      actions: {
+        scan: string;
+        refer: string;
+        challenge: string;
+        leaderboard: string;
+        wallet: string;
+        gift: string;
+      };
+      tiers: Record<string, string>;
+    };
+    flashSale: {
+      title: string;
+      ended: string;
+      endsIn: string;
+      expired: string;
+    };
+    stories: {
+      yourStory: string;
+      viewStoryAria: string;
+      storyAlt: string;
+      checkInPrefix: string;
+      tapToClose: string;
+      stations: Record<string, string>;
+    };
+    post: {
+      optionsAria: string;
+      imageAlt: string;
+      flashBadge: string;
+      pointsCost: string;
+      savedBadge: string;
+      alreadySavedBadge: string;
+      saveButton: string;
+      saveAria: string;
+      unlikeAria: string;
+      likeAria: string;
+      commentAria: string;
+      giftAria: string;
+      defaultVoucherTitle: string;
+      mockPosts: Record<string, {
+        content: string;
+        timestamp: string;
+        tag?: string;
+      }>;
+    };
+    comments: {
+      title: string;
+      closeAria: string;
+      you: string;
+      justNow: string;
+      minutesAgo: string;
+      hoursAgo: string;
+      emptyTitle: string;
+      emptySubtitle: string;
+      placeholder: string;
+      sendAria: string;
+      mockNames: string[];
+      mockTexts: string[];
+      mockTimes: string[];
+    };
+    friendPicker: {
+      title: string;
+      searchPlaceholder: string;
+      online: string;
+      offline: string;
+      success: string;
+      sendNow: string;
+      chooseFriend: string;
+      closeAria: string;
+    };
+  };
   auth: {
     page: {
       title: string;
@@ -688,6 +776,99 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
         earnFallback: 'Nhận điểm',
         redeemFallback: 'Đổi điểm',
         stations: {},
+      },
+    },
+    feed: {
+      page: {
+        headerTitle: 'Cộng đồng Xanh',
+        headerSubtitle: 'Mạng xã hội tái chế',
+        searchAria: 'Tìm kiếm',
+        notifyAria: 'Thông báo',
+        settingsAria: 'Cài đặt',
+        storiesTitle: 'Tin check-in hôm nay',
+        flashSaleTitle: 'Ưu đãi đặc biệt',
+        feedTitle: 'Bảng tin cộng đồng',
+        sortLatest: 'Mới nhất ▾',
+        endOfFeedTitle: 'Bạn đã xem hết bảng tin!',
+        endOfFeedSubtitle: 'Hãy tái chế thêm để nhận ưu đãi mới nhé 💚',
+      },
+      carousel: {
+        title: 'Thao tác nhanh',
+        pointsSuffix: 'điểm',
+        nextPrefix: 'Kế tiếp',
+        actions: {
+          scan: 'Quét nhựa',
+          refer: 'Giới thiệu',
+          challenge: 'Thử thách',
+          leaderboard: 'Bảng xếp hạng',
+          wallet: 'Ví xanh',
+          gift: 'Tặng quà',
+        },
+        tiers: {
+          'Green Member': 'Thành Viên Xanh',
+          'Green Hero': 'Anh Hùng Xanh',
+        },
+      },
+      flashSale: {
+        title: 'Flash Sale',
+        ended: 'Đã kết thúc',
+        endsIn: 'Kết thúc sau',
+        expired: 'Hết hạn',
+      },
+      stories: {
+        yourStory: 'Tin của bạn',
+        viewStoryAria: 'Xem story của {name}',
+        storyAlt: 'Story của {name}',
+        checkInPrefix: '♻️ Check-in tại ',
+        tapToClose: 'Chạm để đóng',
+        stations: {},
+      },
+      post: {
+        optionsAria: 'Tùy chọn bài viết',
+        imageAlt: 'Ảnh bài viết của {name}',
+        flashBadge: 'Flash',
+        pointsCost: 'điểm xanh',
+        savedBadge: 'Đã lưu!',
+        alreadySavedBadge: 'Đã có',
+        saveButton: 'Lưu mã',
+        saveAria: 'Lưu mã voucher',
+        unlikeAria: 'Bỏ thích',
+        likeAria: 'Thích',
+        commentAria: 'Bình luận',
+        giftAria: 'Tặng quà',
+        defaultVoucherTitle: 'Voucher xanh',
+        mockPosts: {},
+      },
+      comments: {
+        title: 'Bình luận ({n})',
+        closeAria: 'Đóng',
+        you: 'Bạn',
+        justNow: 'Vừa xong',
+        minutesAgo: '{n} phút trước',
+        hoursAgo: '{n} giờ trước',
+        emptyTitle: 'Chưa có bình luận nào',
+        emptySubtitle: 'Hãy là người đầu tiên bình luận!',
+        placeholder: 'Viết bình luận...',
+        sendAria: 'Gửi bình luận',
+        mockNames: ['Minh Châu', 'Đức Anh', 'Thu Hà', 'Quốc Bảo', 'Lan Hương'],
+        mockTexts: [
+          'Tuyệt vời quá! Mình cũng muốn tham gia 🌿',
+          'Cảm ơn đã chia sẻ nhé! Rất hữu ích 💚',
+          'Quán này mình hay đến lắm, voucher hời thật!',
+          'Ủng hộ hành động vì môi trường! ♻️',
+          'Thử thách này hay đó, mình sẽ thử ngay!'
+        ],
+        mockTimes: ['23 phút trước', '1 giờ trước', '2 giờ trước'],
+      },
+      friendPicker: {
+        title: 'Tặng voucher',
+        searchPlaceholder: 'Tìm bạn bè...',
+        online: '🟢 Đang online',
+        offline: '⚫ Offline',
+        success: 'Đã tặng thành công!',
+        sendNow: 'Tặng ngay',
+        chooseFriend: 'Chọn bạn bè để tặng',
+        closeAria: 'Đóng',
       },
     },
     auth: {
@@ -1088,6 +1269,126 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
           'Trạm Quận 3': 'District 3 Station',
           'Trạm Quận 7': 'District 7 Station',
         },
+      },
+    },
+    feed: {
+      page: {
+        headerTitle: 'Green Community',
+        headerSubtitle: 'Recycling Social Network',
+        searchAria: 'Search',
+        notifyAria: 'Notifications',
+        settingsAria: 'Settings',
+        storiesTitle: 'Today\'s check-ins',
+        flashSaleTitle: 'Special Offers',
+        feedTitle: 'Community Feed',
+        sortLatest: 'Latest ▾',
+        endOfFeedTitle: 'You\'ve reached the end!',
+        endOfFeedSubtitle: 'Recycle more to unlock new offers 💚',
+      },
+      carousel: {
+        title: 'Quick Actions',
+        pointsSuffix: 'pts',
+        nextPrefix: 'Next',
+        actions: {
+          scan: 'Scan Plastic',
+          refer: 'Refer Friends',
+          challenge: 'Challenges',
+          leaderboard: 'Leaderboard',
+          wallet: 'Green Wallet',
+          gift: 'Send Gift',
+        },
+        tiers: {
+          'Green Member': 'Green Member',
+          'Green Hero': 'Green Hero',
+        },
+      },
+      flashSale: {
+        title: 'Flash Sale',
+        ended: 'Ended',
+        endsIn: 'Ends in',
+        expired: 'Expired',
+      },
+      stories: {
+        yourStory: 'Your story',
+        viewStoryAria: 'View {name}\'s story',
+        storyAlt: '{name}\'s story',
+        checkInPrefix: '♻️ Checked in at ',
+        tapToClose: 'Tap to close',
+        stations: {
+          'Trạm Quận 1': 'District 1 Station',
+          'Trạm Bình Thạnh': 'Bình Thạnh Station',
+          'Trạm Gò Vấp': 'Gò Vấp Station',
+          'Trạm Quận 3': 'District 3 Station',
+          'Trạm Quận 7': 'District 7 Station',
+        },
+      },
+      post: {
+        optionsAria: 'Post options',
+        imageAlt: '{name}\'s post image',
+        flashBadge: 'Flash',
+        pointsCost: 'green points',
+        savedBadge: 'Saved!',
+        alreadySavedBadge: 'Saved',
+        saveButton: 'Save Code',
+        saveAria: 'Save voucher code',
+        unlikeAria: 'Unlike',
+        likeAria: 'Like',
+        commentAria: 'Comment',
+        giftAria: 'Send Gift',
+        defaultVoucherTitle: 'Green Voucher',
+        mockPosts: {
+          'p1': {
+            content: 'Just successfully recycled 15 PET bottles! Let\'s go guys, only 5 more to complete this week\'s Green Hero challenge ♻️🌍',
+            timestamp: 'Just now',
+            tag: 'District 1 – 200m'
+          },
+          'p2': {
+            content: 'Wow, I just redeemed a drink discount voucher from my points after 2 weeks. Start collecting plastics everyone! Redeeming is super simple, just scan the QR at the nearest PCS station ☕✨',
+            timestamp: '12 mins ago',
+            tag: 'Highlands – 350m'
+          },
+          'p3': {
+            content: 'I collect about 200 green points every week from recycling plastic. This week\'s challenge: 10 plastic bottles a day! Anyone want to join? 💪🏆',
+            timestamp: '28 mins ago',
+            tag: 'The Coffee House – 150m'
+          },
+          'p4': {
+            content: 'Bình Thạnh PCS station just launched a super fast plastic recognition feature! It only takes 3 seconds to know if your bottle is PET. FTIR technology is truly impressive 🔬🌱',
+            timestamp: '1 hour ago',
+            tag: 'Bình Thạnh Station – 80m'
+          }
+        },
+      },
+      comments: {
+        title: 'Comments ({n})',
+        closeAria: 'Close',
+        you: 'You',
+        justNow: 'Just now',
+        minutesAgo: '{n} mins ago',
+        hoursAgo: '{n} hours ago',
+        emptyTitle: 'No comments yet',
+        emptySubtitle: 'Be the first to comment!',
+        placeholder: 'Write a comment...',
+        sendAria: 'Send comment',
+        mockNames: ['Minh Chau', 'Duc Anh', 'Thu Ha', 'Quoc Bao', 'Lan Huong'],
+        mockTexts: [
+          'That\'s awesome! I want to join too 🌿',
+          'Thanks for sharing! Very helpful 💚',
+          'I go to this shop often, such a good deal!',
+          'Supporting action for the environment! ♻️',
+          'This challenge is cool, I\'ll try it right away!'
+        ],
+        mockTimes: ['23 mins ago', '1 hour ago', '2 hours ago'],
+      },
+      friendPicker: {
+        title: 'Send voucher',
+        searchPlaceholder: 'Search friends...',
+        online: '🟢 Online',
+        offline: '⚫ Offline',
+        success: 'Successfully sent!',
+        sendNow: 'Send now',
+        chooseFriend: 'Choose a friend to send',
+        closeAria: 'Close',
       },
     },
     auth: {

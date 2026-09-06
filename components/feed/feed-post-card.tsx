@@ -39,6 +39,7 @@ import { ParticleBurst } from '@/components/shared/particle-burst';
 import { CommentSheet } from '@/components/feed/comment-sheet';
 import { FriendPickerModal } from '@/components/feed/friend-picker-modal';
 import { MOTION_TOKENS } from '@/lib/motion-tokens';
+import { useTranslation } from '@/hooks/use-translation';
 import type { FeedPost } from '@/types';
 
 interface FeedPostCardProps {
@@ -62,6 +63,19 @@ function makeVoucherCode(voucherId: string): string {
 }
 
 export function FeedPostCard({ post }: FeedPostCardProps) {
+  const { t } = useTranslation();
+  const tm = t.feed.post;
+  
+  // Use mapped mock data if available
+  const mockPost = tm.mockPosts[post.id];
+  const displayContent = mockPost?.content || post.content;
+  const displayTimestamp = mockPost?.timestamp || post.timestamp;
+  const displayTag = mockPost?.tag || post.hyperLocalTag;
+
+  // Use voucher titles from feed/vouchers or fallback (for attached vouchers)
+  const sponsorName = t.wallet?.vouchers?.sponsors?.[post.attachedVoucherId ? MOCK_VOUCHERS.find(v => v.id === post.attachedVoucherId)?.sponsorName || '' : ''] || (post.attachedVoucherId ? MOCK_VOUCHERS.find(v => v.id === post.attachedVoucherId)?.sponsorName : '');
+  const voucherTitle = t.wallet?.vouchers?.titles?.[post.attachedVoucherId ? MOCK_VOUCHERS.find(v => v.id === post.attachedVoucherId)?.title || '' : ''] || (post.attachedVoucherId ? MOCK_VOUCHERS.find(v => v.id === post.attachedVoucherId)?.title : '');
+
   const hasMounted = useHasMounted();
   const { toggleLikePost, saveVoucher, likedPosts, savedVouchers } =
     useFeedStore();
@@ -165,15 +179,15 @@ export function FeedPostCard({ post }: FeedPostCardProps) {
             </p>
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-[10px] text-muted-foreground">
-                {post.timestamp}
+                {displayTimestamp}
               </span>
-              {post.hyperLocalTag && (
+              {displayTag && (
                 <>
                   <span className="text-[10px] text-muted-foreground">·</span>
                   <div className="flex items-center gap-0.5">
                     <MapPin className="h-2.5 w-2.5 text-emerald-500 flex-shrink-0" />
                     <span className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400 truncate">
-                      {post.hyperLocalTag}
+                      {displayTag}
                     </span>
                   </div>
                 </>
@@ -182,7 +196,7 @@ export function FeedPostCard({ post }: FeedPostCardProps) {
           </div>
           <button
             className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-card transition-colors"
-            aria-label="Tùy chọn bài viết"
+            aria-label={tm.optionsAria}
           >
             <Share2 className="h-4 w-4" />
           </button>
@@ -191,7 +205,7 @@ export function FeedPostCard({ post }: FeedPostCardProps) {
         {/* ── Content ── */}
         <div className="px-4 pb-3">
           <p className="text-sm text-foreground leading-relaxed line-clamp-3">
-            {post.content}
+            {displayContent}
           </p>
 
           {/* Hashtags */}
@@ -213,7 +227,7 @@ export function FeedPostCard({ post }: FeedPostCardProps) {
         <div className="relative w-full aspect-[4/3] bg-card overflow-hidden">
           <Image
             src={post.imageUrl}
-            alt={`Ảnh bài viết của ${post.author}`}
+            alt={tm.imageAlt.replace('{name}', post.author)}
             fill
             className="object-cover"
             sizes="(max-width: 480px) 100vw, 390px"
@@ -244,19 +258,19 @@ export function FeedPostCard({ post }: FeedPostCardProps) {
                 <div className="flex items-center gap-1 mb-0.5">
                   <Tag className="h-2.5 w-2.5 text-emerald-500 flex-shrink-0" />
                   <span className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400 truncate">
-                    {attachedVoucher.sponsorName}
+                    {sponsorName || attachedVoucher.sponsorName}
                   </span>
                   {attachedVoucher.isFlashSale && (
                     <span className="flex-shrink-0 rounded-full bg-orange-500 px-1.5 py-0.5 text-[8px] font-bold text-white uppercase tracking-wide">
-                      Flash
+                      {tm.flashBadge}
                     </span>
                   )}
                 </div>
                 <p className="text-sm font-bold text-foreground truncate">
-                  {attachedVoucher.title}
+                  {voucherTitle || attachedVoucher.title}
                 </p>
                 <p className="text-[10px] text-muted-foreground">
-                  {attachedVoucher.pointsCost.toLocaleString('vi-VN')} điểm xanh
+                  {attachedVoucher.pointsCost.toLocaleString('vi-VN')} {tm.pointsCost}
                 </p>
               </div>
 
@@ -273,7 +287,7 @@ export function FeedPostCard({ post }: FeedPostCardProps) {
                       transition={{ duration: MOTION_TOKENS.durations.fast }}
                     >
                       <Check className="h-3.5 w-3.5" />
-                      <span className="text-[11px] font-bold">Đã lưu!</span>
+                      <span className="text-[11px] font-bold">{tm.savedBadge}</span>
                     </motion.div>
                   ) : isSaved ? (
                     <motion.div
@@ -283,7 +297,7 @@ export function FeedPostCard({ post }: FeedPostCardProps) {
                       animate={{ opacity: 1 }}
                     >
                       <BookmarkCheck className="h-3.5 w-3.5 text-emerald-500" />
-                      <span className="text-[11px] font-medium">Đã có</span>
+                      <span className="text-[11px] font-medium">{tm.alreadySavedBadge}</span>
                     </motion.div>
                   ) : (
                     <motion.button
@@ -295,10 +309,10 @@ export function FeedPostCard({ post }: FeedPostCardProps) {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       style={{ minWidth: 44, minHeight: 44 }}
-                      aria-label="Lưu mã voucher"
+                      aria-label={tm.saveAria}
                     >
                       <BookmarkPlus className="h-3.5 w-3.5" />
-                      <span className="text-[11px] font-bold">Lưu mã</span>
+                      <span className="text-[11px] font-bold">{tm.saveButton}</span>
                     </motion.button>
                   )}
                 </AnimatePresence>
@@ -315,7 +329,7 @@ export function FeedPostCard({ post }: FeedPostCardProps) {
             className="flex items-center gap-1.5 rounded-xl px-3 py-2 transition-colors hover:bg-card active:scale-95"
             whileTap={{ scale: 0.88 }}
             style={{ minWidth: 44, minHeight: 44 }}
-            aria-label={isLiked ? 'Bỏ thích' : 'Thích'}
+            aria-label={isLiked ? tm.unlikeAria : tm.likeAria}
           >
             <motion.div
               animate={isLiked ? { scale: [1, 1.4, 1] } : {}}
@@ -343,7 +357,7 @@ export function FeedPostCard({ post }: FeedPostCardProps) {
             onClick={() => setCommentOpen(true)}
             className="flex items-center gap-1.5 rounded-xl px-3 py-2 transition-colors hover:bg-card active:scale-95"
             style={{ minWidth: 44, minHeight: 44 }}
-            aria-label="Bình luận"
+            aria-label={tm.commentAria}
           >
             <MessageCircle className="h-5 w-5 text-muted-foreground" />
             <span className="text-xs font-medium text-muted-foreground">
@@ -356,7 +370,7 @@ export function FeedPostCard({ post }: FeedPostCardProps) {
             onClick={() => setGiftOpen(true)}
             className="flex items-center gap-1.5 rounded-xl px-3 py-2 transition-colors hover:bg-card active:scale-95"
             style={{ minWidth: 44, minHeight: 44 }}
-            aria-label="Tặng quà"
+            aria-label={tm.giftAria}
           >
             <Gift className="h-5 w-5 text-muted-foreground" />
             <span className="text-xs font-medium text-muted-foreground">
@@ -376,7 +390,7 @@ export function FeedPostCard({ post }: FeedPostCardProps) {
 
       <FriendPickerModal
         isOpen={giftOpen}
-        voucherTitle={attachedVoucher?.title ?? 'Voucher xanh'}
+        voucherTitle={voucherTitle || attachedVoucher?.title || tm.defaultVoucherTitle}
         onClose={() => setGiftOpen(false)}
       />
     </>

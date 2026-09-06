@@ -13,6 +13,7 @@ import { X, Gift, Check, Search } from 'lucide-react';
 import Image from 'next/image';
 import { MOCK_FRIENDS } from '@/lib/mock-data';
 import { MOTION_TOKENS } from '@/lib/motion-tokens';
+import { useTranslation } from '@/hooks/use-translation';
 
 interface FriendPickerModalProps {
   isOpen: boolean;
@@ -25,6 +26,9 @@ export function FriendPickerModal({
   voucherTitle,
   onClose,
 }: FriendPickerModalProps) {
+  const { t } = useTranslation();
+  const tm = t.feed.friendPicker;
+
   const [selected, setSelected] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const [query, setQuery] = useState('');
@@ -76,7 +80,7 @@ export function FriendPickerModal({
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h2 className="text-base font-bold text-foreground">
-                    Tặng voucher
+                    {tm.title}
                   </h2>
                   <p className="text-xs text-muted-foreground line-clamp-1">
                     {voucherTitle}
@@ -85,7 +89,7 @@ export function FriendPickerModal({
                 <button
                   onClick={onClose}
                   className="flex h-8 w-8 items-center justify-center rounded-full bg-card border border-border text-muted-foreground hover:text-foreground transition-colors"
-                  aria-label="Đóng"
+                  aria-label={tm.closeAria}
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -96,7 +100,7 @@ export function FriendPickerModal({
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
                   className="w-full rounded-xl bg-card border border-border pl-9 pr-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
-                  placeholder="Tìm bạn bè..."
+                  placeholder={tm.searchPlaceholder}
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                 />
@@ -140,7 +144,7 @@ export function FriendPickerModal({
                           {friend.name}
                         </p>
                         <p className="text-[10px] text-muted-foreground">
-                          {friend.isOnline ? '🟢 Đang online' : '⚫ Offline'}
+                          {friend.isOnline ? tm.online : tm.offline}
                         </p>
                       </div>
 
@@ -169,12 +173,12 @@ export function FriendPickerModal({
                 {sent ? (
                   <>
                     <Check className="h-4 w-4" />
-                    Đã tặng thành công!
+                    {tm.success}
                   </>
                 ) : (
                   <>
                     <Gift className="h-4 w-4" />
-                    {selected ? 'Tặng ngay' : 'Chọn bạn bè để tặng'}
+                    {selected ? tm.sendNow : tm.chooseFriend}
                   </>
                 )}
               </motion.button>

@@ -27,8 +27,12 @@ import { FlashSaleBar } from '@/components/feed/flash-sale-bar';
 import { FeedPostCard } from '@/components/feed/feed-post-card';
 import { MOCK_POSTS } from '@/lib/mock-data';
 import { MOTION_TOKENS } from '@/lib/motion-tokens';
+import { useTranslation } from '@/hooks/use-translation';
 
 export default function GreenFeedPage() {
+  const { t } = useTranslation();
+  const tm = t.feed.page;
+
   return (
     <div className="flex flex-col min-h-full bg-background">
       {/* ── Sticky Header ── */}
@@ -36,22 +40,22 @@ export default function GreenFeedPage() {
         <div className="flex items-center justify-between px-4 py-3">
           <div>
             <h1 className="text-base font-bold text-foreground leading-tight">
-              Cộng đồng Xanh
+              {tm.headerTitle}
             </h1>
             <p className="text-[10px] text-muted-foreground">
-              Mạng xã hội tái chế
+              {tm.headerSubtitle}
             </p>
           </div>
           <div className="flex items-center gap-2">
             <button
               className="flex h-9 w-9 items-center justify-center rounded-full bg-card border border-border text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="Tìm kiếm"
+              aria-label={tm.searchAria}
             >
               <Search className="h-4 w-4" />
             </button>
             <button
               className="relative flex h-9 w-9 items-center justify-center rounded-full bg-card border border-border text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="Thông báo"
+              aria-label={tm.notifyAria}
             >
               <Bell className="h-4 w-4" />
               {/* Notification badge */}
@@ -60,7 +64,7 @@ export default function GreenFeedPage() {
             <Link
               href="/settings"
               className="flex h-9 w-9 items-center justify-center rounded-full bg-card border border-border text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="Cài đặt"
+              aria-label={tm.settingsAria}
             >
               <Settings className="h-4 w-4" />
             </Link>
@@ -82,7 +86,7 @@ export default function GreenFeedPage() {
         transition={{ duration: MOTION_TOKENS.durations.base, delay: 0.1 }}
       >
         <p className="px-4 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-          Tin check-in hôm nay
+          {tm.storiesTitle}
         </p>
         <GreenStories />
       </motion.section>
@@ -98,7 +102,7 @@ export default function GreenFeedPage() {
         transition={{ duration: MOTION_TOKENS.durations.base, delay: 0.15 }}
       >
         <p className="px-4 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-          Ưu đãi đặc biệt
+          {tm.flashSaleTitle}
         </p>
         <FlashSaleBar />
       </motion.section>
@@ -110,10 +114,10 @@ export default function GreenFeedPage() {
       <section className="flex-1">
         <div className="flex items-center justify-between px-4 py-3">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Bảng tin cộng đồng
+            {tm.feedTitle}
           </p>
           <button className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
-            Mới nhất ▾
+            {tm.sortLatest}
           </button>
         </div>
 
@@ -140,10 +144,10 @@ export default function GreenFeedPage() {
             <span className="text-xl">🌿</span>
           </div>
           <p className="text-sm font-medium text-foreground">
-            Bạn đã xem hết bảng tin!
+            {tm.endOfFeedTitle}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            Hãy tái chế thêm để nhận ưu đãi mới nhé 💚
+            {tm.endOfFeedSubtitle}
           </p>
         </div>
       </section>

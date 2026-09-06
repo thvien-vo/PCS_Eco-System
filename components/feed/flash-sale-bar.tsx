@@ -18,6 +18,7 @@ import { motion } from 'framer-motion';
 import { Zap, ChevronRight } from 'lucide-react';
 import { FLASH_SALE_ENDS_AT } from '@/lib/mock-data';
 import { MOTION_TOKENS } from '@/lib/motion-tokens';
+import { useTranslation } from '@/hooks/use-translation';
 
 /** Recompute remaining seconds directly from the real wall clock. Never drifts. */
 function computeRemaining(endsAt: number): number {
@@ -50,6 +51,9 @@ function DigitBlock({ value }: { value: string }) {
 }
 
 export function FlashSaleBar() {
+  const { t } = useTranslation();
+  const tm = t.feed.flashSale;
+
   const [remaining, setRemaining] = useState<number>(() =>
     computeRemaining(FLASH_SALE_ENDS_AT)
   );
@@ -102,10 +106,10 @@ export function FlashSaleBar() {
           </motion.div>
           <div>
             <p className="text-white font-bold text-sm leading-tight">
-              Flash Sale
+              {tm.title}
             </p>
             <p className="text-white/80 text-[10px]">
-              {isExpired ? 'Đã kết thúc' : 'Kết thúc sau'}
+              {isExpired ? tm.ended : tm.endsIn}
             </p>
           </div>
         </div>
@@ -113,7 +117,7 @@ export function FlashSaleBar() {
         {/* Right: countdown digits */}
         {isExpired ? (
           <span className="relative text-white/80 text-sm font-medium">
-            Hết hạn
+            {tm.expired}
           </span>
         ) : (
           <div className="relative flex items-center gap-1">

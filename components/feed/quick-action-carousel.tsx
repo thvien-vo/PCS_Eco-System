@@ -21,11 +21,15 @@ import Link from 'next/link';
 import { MEMBER_TIER_INFO } from '@/lib/mock-data';
 import { MOTION_TOKENS } from '@/lib/motion-tokens';
 import { useDragScroll } from '@/hooks/use-drag-scroll';
+import { useTranslation } from '@/hooks/use-translation';
+import type { TranslationDictionary } from '@/lib/i18n/dictionaries';
 
-const QUICK_ACTIONS = [
+type CarouselLabels = TranslationDictionary['feed']['carousel'];
+
+const getQuickActions = (labels: CarouselLabels) => [
   {
     id: 'scan',
-    label: 'Quét nhựa',
+    label: labels.actions.scan,
     icon: ScanLine,
     href: '/kiosk',
     bg: 'from-emerald-500 to-teal-500',
@@ -33,7 +37,7 @@ const QUICK_ACTIONS = [
   },
   {
     id: 'refer',
-    label: 'Giới thiệu',
+    label: labels.actions.refer,
     icon: Users,
     href: '#',
     bg: 'from-cyan-500 to-blue-500',
@@ -41,7 +45,7 @@ const QUICK_ACTIONS = [
   },
   {
     id: 'challenge',
-    label: 'Thử thách',
+    label: labels.actions.challenge,
     icon: Swords,
     href: '/challenge',
     bg: 'from-violet-500 to-purple-600',
@@ -49,7 +53,7 @@ const QUICK_ACTIONS = [
   },
   {
     id: 'leaderboard',
-    label: 'Bảng xếp hạng',
+    label: labels.actions.leaderboard,
     icon: Trophy,
     href: '/challenge',
     bg: 'from-amber-400 to-orange-500',
@@ -57,7 +61,7 @@ const QUICK_ACTIONS = [
   },
   {
     id: 'wallet',
-    label: 'Ví xanh',
+    label: labels.actions.wallet,
     icon: Wallet,
     href: '/wallet',
     bg: 'from-green-500 to-emerald-600',
@@ -65,7 +69,7 @@ const QUICK_ACTIONS = [
   },
   {
     id: 'gift',
-    label: 'Tặng quà',
+    label: labels.actions.gift,
     icon: Gift,
     href: '#',
     bg: 'from-rose-400 to-pink-500',
@@ -73,20 +77,28 @@ const QUICK_ACTIONS = [
   },
 ];
 
-const TIER_LABELS: Record<string, { label: string; icon: typeof Star }> = {
-  'Green Member': { label: 'Thành Viên Xanh', icon: Star },
-  'Green Hero': { label: 'Anh Hùng Xanh', icon: Trophy },
+const getTierMeta = (tier: string, labels: CarouselLabels) => {
+  const map: Record<string, { label: string; icon: typeof Star }> = {
+    'Green Member': { label: labels.tiers['Green Member'] || 'Green Member', icon: Star },
+    'Green Hero': { label: labels.tiers['Green Hero'] || 'Green Hero', icon: Trophy },
+  };
+  return map[tier] || { label: tier, icon: Star };
 };
 
 export function QuickActionCarousel() {
+  const { t } = useTranslation();
+  const tm = t.feed.carousel;
+
+  const QUICK_ACTIONS = getQuickActions(tm);
+  
   const tier = MEMBER_TIER_INFO;
   const progress = Math.min(
     (tier.currentPoints / tier.pointsForNext) * 100,
     100
   );
 
-  const currentTierMeta = TIER_LABELS[tier.current];
-  const nextTierMeta = tier.next ? TIER_LABELS[tier.next] : null;
+  const currentTierMeta = getTierMeta(tier.current, tm);
+  const nextTierMeta = tier.next ? getTierMeta(tier.next, tm) : null;
   const CurrentIcon = currentTierMeta.icon;
 
   /**
@@ -123,13 +135,13 @@ export function QuickActionCarousel() {
                 {currentTierMeta.label}
               </p>
               <p className="text-[10px] text-muted-foreground">
-                {tier.currentPoints.toLocaleString('vi-VN')} điểm
+                {tier.currentPoints.toLocaleString('vi-VN')} {tm.pointsSuffix}
               </p>
             </div>
           </div>
           {nextTierMeta && (
             <div className="text-right">
-              <p className="text-[10px] text-muted-foreground">Kế tiếp</p>
+              <p className="text-[10px] text-muted-foreground">{tm.nextPrefix}</p>
               <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                 {nextTierMeta.label}
               </p>
@@ -159,7 +171,7 @@ export function QuickActionCarousel() {
 
         <div className="flex justify-between mt-1">
           <span className="text-[10px] text-muted-foreground">
-            {tier.currentPoints.toLocaleString('vi-VN')} / {tier.pointsForNext.toLocaleString('vi-VN')} điểm
+            {tier.currentPoints.toLocaleString('vi-VN')} / {tier.pointsForNext.toLocaleString('vi-VN')} {tm.pointsSuffix}
           </span>
           <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
             {Math.round(progress)}%
@@ -170,7 +182,7 @@ export function QuickActionCarousel() {
       {/* ── Quick Action Carousel ── */}
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-0.5">
-          Thao tác nhanh
+          {tm.title}
         </p>
         <div
           ref={dragRef as React.RefObject<HTMLDivElement>}
