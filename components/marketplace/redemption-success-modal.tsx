@@ -22,6 +22,7 @@ interface RedemptionSuccessModalProps {
   isOpen: boolean;
   onClose: () => void;
   labels: ModalLabels;
+  itemTexts?: { title: string; description: string; tag: string };
 }
 
 /** Generate a deterministic-looking but fake redemption code from the item ID */
@@ -35,7 +36,7 @@ function generateFakeCode(itemId: string): string {
   return code;
 }
 
-export function RedemptionSuccessModal({ item, isOpen, onClose, labels }: RedemptionSuccessModalProps) {
+export function RedemptionSuccessModal({ item, isOpen, onClose, labels, itemTexts }: RedemptionSuccessModalProps) {
   const [copied, setCopied] = useState(false);
   const code = item ? generateFakeCode(item.id) : '';
 
@@ -106,7 +107,7 @@ export function RedemptionSuccessModal({ item, isOpen, onClose, labels }: Redemp
               <div className="text-center">
                 <h2 className="text-lg font-bold text-foreground">{labels.title}</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {labels.successPrefix} <span className="font-semibold text-emerald">{item.title}</span>
+                  {labels.successPrefix} <span className="font-semibold text-emerald">{itemTexts?.title || item.title}</span>
                 </p>
               </div>
 
@@ -115,12 +116,12 @@ export function RedemptionSuccessModal({ item, isOpen, onClose, labels }: Redemp
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={item.imageUrl}
-                  alt={item.title}
+                  alt={itemTexts?.title || item.title}
                   className="h-28 w-full object-cover"
                 />
                 <div className="p-3">
                   <p className="text-[10px] text-muted-foreground">{item.partnerName}</p>
-                  <p className="text-sm font-semibold text-foreground">{item.title}</p>
+                  <p className="text-sm font-semibold text-foreground">{itemTexts?.title || item.title}</p>
                   <p className="mt-1 text-[11px] text-muted-foreground">
                     {labels.deductedPrefix}
                     <span className="font-bold text-emerald">

@@ -196,6 +196,7 @@ export default function MarketplacePage() {
         isOpen={isSuccessModalOpen}
         onClose={handleModalClose}
         labels={tm.modal}
+        itemTexts={successItem ? tm.catalogItems?.[successItem.id] : undefined}
       />
 
       <div className="flex min-h-full flex-col">
@@ -271,6 +272,7 @@ export default function MarketplacePage() {
                   isAlreadyRedeemed={redeemedVouchers.includes(item.id)}
                   onRedeem={handleRedeem}
                   labels={tm.card}
+                  itemTexts={tm.catalogItems?.[item.id]}
                 />
               </motion.div>
             ))}

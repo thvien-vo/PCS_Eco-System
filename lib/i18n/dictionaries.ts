@@ -264,6 +264,7 @@ export type TranslationDictionary = {
       instruction: string;
       doneButton: string;
     };
+    catalogItems: Record<string, { title: string; description: string; tag: string }>;
   };
   wallet: {
     page: {
@@ -834,6 +835,53 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
         copiedButton: 'Đã sao chép',
         instruction: 'Xuất trình mã này cho đối tác để nhận ưu đãi',
         doneButton: 'Tuyệt vời!',
+      },
+      catalogItems: {
+        'cat-v1': {
+          title: 'Giảm 20% hóa đơn',
+          description: 'Giảm 20% cho mọi đồ uống tại Highlands Coffee. Áp dụng tất cả chi nhánh toàn quốc.',
+          tag: 'Mã giảm giá',
+        },
+        'cat-v2': {
+          title: 'Mua 1 Tặng 1 – Flash Sale',
+          description: 'Mua 1 bất kỳ đồ uống size L, tặng ngay 1 đồ uống size M. Giới hạn 2 lần/người.',
+          tag: 'Mã giảm giá',
+        },
+        'cat-v3': {
+          title: 'Giảm 15.000đ đơn hàng',
+          description: 'Giảm 15.000đ cho đơn hàng tối thiểu 50.000đ tại bất kỳ cửa hàng Circle K.',
+          tag: 'Mã giảm giá',
+        },
+        'cat-g1': {
+          title: 'Túi Tote Tái Chế',
+          description: 'Túi tote thành phẩm làm từ 5 chai nhựa PET tái chế. Khiến việc mua sắm trở nên xanh hơn mỗi ngày.',
+          tag: 'Quà tặng',
+        },
+        'cat-g2': {
+          title: 'Bình Giữ Nhiệt Inox',
+          description: 'Bình giữ nhiệt 500ml có logo PCS, giữ lạnh 24h và nóng 12h. Chất liệu Inox 304 an toàn cho sức khỏe.',
+          tag: 'Quà tặng',
+        },
+        'cat-g3': {
+          title: 'Bộ Dụng Cụ Cà Phê Organic',
+          description: 'Bộ gồm hộp cà phê hạt rang xay và phễu pha thủ công từ thủy tinh tái chế. Quà ý nghĩa cho người yêu thiên nhiên.',
+          tag: 'Quà tặng',
+        },
+        'cat-c1': {
+          title: 'Hoàn 10.000đ vào Ví MoMo',
+          description: 'Nhận ngay 10.000đ hoàn vào ví điện tử MoMo của bạn trong vòng 24 giờ sau khi đổi điểm.',
+          tag: 'Hoàn tiền',
+        },
+        'cat-c2': {
+          title: 'Hoàn 25.000đ – Flash Deal',
+          description: 'Chương trình đặc biệt: đổi điểm lấy 25.000đ vào ZaloPay với chỉ 450 điểm. Giới hạn 200 lượt/ngày.',
+          tag: 'Hoàn tiền',
+        },
+        'cat-c3': {
+          title: 'Coin Shopee 50.000đ',
+          description: 'Quy đổi điểm xanh lấy 50.000 Shopee Coin dùng cho đơn hàng thương mại điện tử tiếp theo của bạn.',
+          tag: 'Hoàn tiền',
+        },
       },
     },
     wallet: {
@@ -1453,6 +1501,53 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
         instruction: 'Show this code to the partner to claim your offer',
         doneButton: 'Awesome!',
       },
+      catalogItems: {
+        'cat-v1': {
+          title: '20% Off Bill',
+          description: 'Get 20% off all drinks at Highlands Coffee. Valid at all branches nationwide.',
+          tag: 'Discount code',
+        },
+        'cat-v2': {
+          title: 'Buy 1 Get 1 – Flash Sale',
+          description: 'Buy any size L drink, get 1 size M drink free. Limit 2 per person.',
+          tag: 'Discount code',
+        },
+        'cat-v3': {
+          title: '15,000VND Off',
+          description: 'Get 15,000VND off a minimum order of 50,000VND at any Circle K store.',
+          tag: 'Discount code',
+        },
+        'cat-g1': {
+          title: 'Recycled Tote Bag',
+          description: 'Tote bag made from 5 recycled PET plastic bottles. Make shopping greener every day.',
+          tag: 'Gift',
+        },
+        'cat-g2': {
+          title: 'Stainless Steel Thermos',
+          description: '500ml thermos with PCS logo, keeps cold for 24h and hot for 12h. Safe 304 stainless steel.',
+          tag: 'Gift',
+        },
+        'cat-g3': {
+          title: 'Organic Coffee Kit',
+          description: 'Includes roasted coffee beans and a manual pour-over cone from recycled glass. A meaningful gift for nature lovers.',
+          tag: 'Gift',
+        },
+        'cat-c1': {
+          title: '10,000VND MoMo Cashback',
+          description: 'Get 10,000VND cashback into your MoMo e-wallet within 24 hours of redemption.',
+          tag: 'Cashback',
+        },
+        'cat-c2': {
+          title: '25,000VND Cashback – Flash Deal',
+          description: 'Special program: redeem points for 25,000VND into ZaloPay for only 450 points. Limit 200 redemptions/day.',
+          tag: 'Cashback',
+        },
+        'cat-c3': {
+          title: '50,000VND Shopee Coin',
+          description: 'Redeem green points for 50,000 Shopee Coins to use on your next e-commerce order.',
+          tag: 'Cashback',
+        },
+      },
     },
     wallet: {
       page: {
@@ -1495,9 +1590,19 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
         },
         titles: {
           'Giảm 20% Thức Uống': '20% Off Drinks',
+          'Mua 1 Tặng 1': 'Buy 1 Get 1',
           'Mua 1 Tặng 1 (Flash Sale)': 'Buy 1 Get 1 (Flash Sale)',
           'Túi Tote Sinh Thái': 'Eco Tote Bag',
           'Giảm 10.000đ Đơn hàng': '10k VND Off Order',
+          'Giảm 20% hóa đơn': '20% Off Bill',
+          'Mua 1 Tặng 1 – Flash Sale': 'Buy 1 Get 1 – Flash Sale',
+          'Giảm 15.000đ đơn hàng': '15,000VND Off',
+          'Túi Tote Tái Chế': 'Recycled Tote Bag',
+          'Bình Giữ Nhiệt Inox': 'Stainless Steel Thermos',
+          'Bộ Dụng Cụ Cà Phê Organic': 'Organic Coffee Kit',
+          'Hoàn 10.000đ vào Ví MoMo': '10,000VND MoMo Cashback',
+          'Hoàn 25.000đ – Flash Deal': '25,000VND Cashback – Flash Deal',
+          'Coin Shopee 50.000đ': '50,000VND Shopee Coin',
         },
       },
       transactions: {

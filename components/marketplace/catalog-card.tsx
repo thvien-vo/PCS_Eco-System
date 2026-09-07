@@ -36,6 +36,7 @@ interface CatalogCardProps {
   isAlreadyRedeemed: boolean;
   onRedeem: (item: MarketplaceCatalogItem, originPosition: { x: number; y: number }) => void;
   labels: CatalogCardLabels;
+  itemTexts?: { title: string; description: string; tag: string };
 }
 
 const CATEGORY_STYLES: Record<MarketplaceCatalogItem['category'], { bg: string; text: string }> = {
@@ -66,7 +67,7 @@ function FlashBadge({ expiresAt, labels }: { expiresAt: string; labels: CatalogC
   );
 }
 
-export function CatalogCard({ item, currentPoints, isAlreadyRedeemed, onRedeem, labels }: CatalogCardProps) {
+export function CatalogCard({ item, currentPoints, isAlreadyRedeemed, onRedeem, labels, itemTexts }: CatalogCardProps) {
   const router = useRouter();
   const isRedeemingRef = useRef<boolean>(false);
   const [isPressed, setIsPressed] = useState(false);
@@ -133,7 +134,7 @@ export function CatalogCard({ item, currentPoints, isAlreadyRedeemed, onRedeem, 
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={item.imageUrl}
-          alt={item.title}
+          alt={itemTexts?.title || item.title}
           className={cn(
             'h-full w-full object-cover transition-all duration-300',
             !canAfford && 'blur-[3px] brightness-75',
@@ -177,7 +178,7 @@ export function CatalogCard({ item, currentPoints, isAlreadyRedeemed, onRedeem, 
             )}
           >
             <Tag className="h-2.5 w-2.5" />
-            {item.tag}
+            {itemTexts?.tag || item.tag}
           </span>
           {item.isFlashSale && item.expiresAt && <FlashBadge expiresAt={item.expiresAt} labels={labels} />}
         </div>
@@ -185,12 +186,12 @@ export function CatalogCard({ item, currentPoints, isAlreadyRedeemed, onRedeem, 
         {/* Partner + title */}
         <div>
           <p className="text-[10px] font-medium text-muted-foreground">{item.partnerName}</p>
-          <h3 className="text-sm font-bold leading-snug text-foreground line-clamp-2">{item.title}</h3>
+          <h3 className="text-sm font-bold leading-snug text-foreground line-clamp-2">{itemTexts?.title || item.title}</h3>
         </div>
 
         {/* Description */}
         <p className="line-clamp-2 text-[11px] leading-relaxed text-muted-foreground">
-          {item.description}
+          {itemTexts?.description || item.description}
         </p>
 
         {/* Spacer */}
