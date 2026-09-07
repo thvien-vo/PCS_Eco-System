@@ -12,7 +12,7 @@ This file tracks the progress of Phase 2: migrating hardcoded Vietnamese strings
 | **5** | **Module 4** (Wallet) | ✅ Done | `dd9f9ce` |
 | **6** | **Module 3** (Feed) | ✅ Done | `45996c9` |
 | **7** | **Module 5** (Challenge) | ✅ Done | *(pending commit)* |
-| **8** | **Module 7** (Kiosk - **Critical**) | ⏳ In Progress | |
+| **8** | **Module 7** (Kiosk - **Critical**) | ✅ Done | *(pending commit)* |
 
 **Current Translation Disclaimer Text:**
 "Dịch thuật toàn ứng dụng đang được phát triển. Tiếng Anh hiện chỉ áp dụng cho trang Cài đặt này."
