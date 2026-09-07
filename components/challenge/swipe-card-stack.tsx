@@ -18,6 +18,7 @@ import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-mo
 import { Star, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { ChallengeCard } from '@/types';
 import { MOTION_TOKENS } from '@/lib/motion-tokens';
+import { useTranslation } from '@/hooks/use-translation';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 /** Horizontal drag distance (px) required to trigger a swipe action. */
@@ -78,6 +79,10 @@ function SwipeHint({ direction }: { direction: 'left' | 'right' }) {
 
 // ── Main Component ────────────────────────────────────────────────────────────
 export function SwipeCardStack({ cards, onSwipeRight, onSwipeLeft }: SwipeCardStackProps) {
+  const { t } = useTranslation();
+  const tm = t.challenge.swipeCard;
+  const lbm = t.challenge.leaderboard;
+
   /**
    * swipeDirection tracks the direction of the CURRENT drag so the
    * exit animation can fly the card off in the correct direction.
@@ -99,9 +104,9 @@ export function SwipeCardStack({ cards, onSwipeRight, onSwipeLeft }: SwipeCardSt
         <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald/10">
           <Star className="h-8 w-8 text-emerald" strokeWidth={1.5} />
         </div>
-        <p className="text-sm font-semibold text-foreground">Hết thử thách rồi!</p>
+        <p className="text-sm font-semibold text-foreground">{tm.emptyTitle}</p>
         <p className="max-w-[200px] text-xs text-muted-foreground">
-          Bạn đã xem qua tất cả thử thách. Hãy quay lại sau nhé.
+          {tm.emptyBody}
         </p>
       </div>
     );
@@ -109,6 +114,11 @@ export function SwipeCardStack({ cards, onSwipeRight, onSwipeLeft }: SwipeCardSt
 
   const topCard = cards[0];
   const secondCard = cards[1] ?? null;
+
+  // Translate card name and deadline using the leaderboard dictionary maps
+  const topCardName = lbm.challengeNames[topCard.name] || topCard.name;
+  const topCardDeadline = lbm.challengeDeadlines[topCard.deadline] || topCard.deadline;
+  const secondCardName = secondCard ? (lbm.challengeNames[secondCard.name] || secondCard.name) : '';
 
   function handleDragEnd(_: unknown, info: { offset: { x: number } }) {
     if (info.offset.x > SWIPE_THRESHOLD) {
@@ -145,7 +155,7 @@ export function SwipeCardStack({ cards, onSwipeRight, onSwipeLeft }: SwipeCardSt
           transition={MOTION_TOKENS.spring.gentle}
         >
           {/* Queue position badge on background card — shows its queue position (#2) */}
-          <QueuePositionBadge position={2} name={secondCard.name} />
+          <QueuePositionBadge position={2} name={secondCardName} />
         </motion.div>
       )}
 
@@ -178,7 +188,7 @@ export function SwipeCardStack({ cards, onSwipeRight, onSwipeLeft }: SwipeCardSt
           whileTap={{ cursor: 'grabbing' }}
         >
           {/* Queue position badge — top card is always position #1 */}
-          <QueuePositionBadge position={1} name={topCard.name} />
+          <QueuePositionBadge position={1} name={topCardName} />
 
           {/* Card image */}
           <div
@@ -199,7 +209,7 @@ export function SwipeCardStack({ cards, onSwipeRight, onSwipeLeft }: SwipeCardSt
             style={{ opacity: acceptOpacity }}
           >
             <span className="rotate-[-20deg] rounded-xl border-4 border-[var(--kiosk-pass)] px-4 py-2 text-2xl font-black text-[var(--kiosk-pass)]">
-              THAM GIA
+              {tm.stampJoin}
             </span>
           </motion.div>
 
@@ -209,21 +219,21 @@ export function SwipeCardStack({ cards, onSwipeRight, onSwipeLeft }: SwipeCardSt
             style={{ opacity: skipOpacity }}
           >
             <span className="rotate-[20deg] rounded-xl border-4 border-[var(--error-rose)] px-4 py-2 text-2xl font-black text-[var(--error-rose)]">
-              BỎ QUA
+              {tm.stampSkip}
             </span>
           </motion.div>
 
           {/* Card content */}
           <div className="absolute bottom-0 left-0 right-0 p-5">
-            <h3 className="mb-2 text-xl font-bold text-white">{topCard.name}</h3>
+            <h3 className="mb-2 text-xl font-bold text-white">{topCardName}</h3>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1 rounded-full bg-white/20 px-3 py-1 text-xs text-white backdrop-blur-sm">
                 <Clock className="h-3.5 w-3.5" />
-                <span>Còn {topCard.deadline}</span>
+                <span>{tm.deadlinePrefix}{topCardDeadline}</span>
               </div>
               <div className="flex items-center gap-1 rounded-full bg-[var(--neon-mint)]/30 px-3 py-1 text-xs font-bold text-[var(--neon-mint)] backdrop-blur-sm">
                 <Star className="h-3.5 w-3.5" fill="currentColor" />
-                <span>+{topCard.rewardPoints.toLocaleString()} điểm</span>
+                <span>+{topCard.rewardPoints.toLocaleString()}{tm.pointsSuffix}</span>
               </div>
             </div>
           </div>

@@ -40,6 +40,7 @@ import { Leaderboard } from '@/components/challenge/leaderboard';
 import type { ChallengeCard } from '@/types';
 import { MOTION_TOKENS } from '@/lib/motion-tokens';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/hooks/use-translation';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 /** Number of positions to skip before re-inserting a swiped-left card. */
@@ -64,6 +65,9 @@ function ChallengeSkeleton() {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function ChallengePage() {
+  const { t } = useTranslation();
+  const tm = t.challenge.page;
+
   // ── Hydration guard (per pcs-tech-standards §10a) ──────────────────────────
   const hasMounted = useHasMounted();
 
@@ -172,8 +176,8 @@ export default function ChallengePage() {
   }
 
   const mainTabs: { key: MainTab; label: string; icon: React.ReactNode }[] = [
-    { key: 'swipe', label: 'Thử thách', icon: <Layers className="h-4 w-4" /> },
-    { key: 'leaderboard', label: 'Bảng xếp hạng', icon: <Trophy className="h-4 w-4" /> },
+    { key: 'swipe', label: tm.tabSwipe, icon: <Layers className="h-4 w-4" /> },
+    { key: 'leaderboard', label: tm.tabLeaderboard, icon: <Trophy className="h-4 w-4" /> },
   ];
 
   return (
@@ -185,9 +189,9 @@ export default function ChallengePage() {
             <Trophy className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-foreground">Thử thách & Gamification</h1>
+            <h1 className="text-lg font-bold text-foreground">{tm.headerTitle}</h1>
             <p className="text-xs text-muted-foreground">
-              Tích điểm · Vô địch · Nhận phần thưởng
+              {tm.headerSubtitle}
             </p>
           </div>
         </div>
@@ -231,10 +235,10 @@ export default function ChallengePage() {
               {/* In-progress section */}
               <div>
                 <div className="mb-2 flex items-center justify-between">
-                  <h2 className="text-sm font-bold text-foreground">Đang thực hiện</h2>
+                  <h2 className="text-sm font-bold text-foreground">{tm.sectionInProgress}</h2>
                   {inProgressCards.length > 0 && (
                     <span className="rounded-full bg-[var(--neon-mint)]/15 px-2 py-0.5 text-[10px] font-bold text-[var(--neon-mint)]">
-                      {inProgressCards.length} thử thách
+                      {tm.inProgressCount.replace('{n}', inProgressCards.length.toString())}
                     </span>
                   )}
                 </div>
@@ -244,10 +248,10 @@ export default function ChallengePage() {
               {/* Swipe card section */}
               <div>
                 <div className="mb-3 flex items-center justify-between">
-                  <h2 className="text-sm font-bold text-foreground">Khám phá thử thách</h2>
+                  <h2 className="text-sm font-bold text-foreground">{tm.sectionDiscover}</h2>
                   {queue.length > 0 && (
                     <span className="text-xs text-muted-foreground">
-                      {queue.length} thẻ còn lại
+                      {tm.cardsRemaining.replace('{n}', queue.length.toString())}
                     </span>
                   )}
                 </div>
@@ -256,11 +260,11 @@ export default function ChallengePage() {
                 <div className="mb-3 flex items-center justify-center gap-6 text-[11px] text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <span className="inline-block h-2 w-2 rounded-full bg-[var(--error-rose)]" />
-                    Vuốt trái = Bỏ qua
+                    {tm.hintSwipeLeft}
                   </div>
                   <div className="flex items-center gap-1">
                     <span className="inline-block h-2 w-2 rounded-full bg-[var(--kiosk-pass)]" />
-                    Vuốt phải = Tham gia
+                    {tm.hintSwipeRight}
                   </div>
                 </div>
 

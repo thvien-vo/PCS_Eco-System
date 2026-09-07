@@ -42,6 +42,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { RefreshCw } from 'lucide-react';
 import { MOTION_TOKENS } from '@/lib/motion-tokens';
 import { useKioskStore } from '@/store/kiosk-store';
+import { useTranslation } from '@/hooks/use-translation';
 
 const QR_COUNTDOWN_SECONDS = 90;
 const STATION_ID = 'HCM-01'; // Mock station identifier for demo
@@ -59,6 +60,8 @@ interface QrDisplayModuleProps {
 
 export function QrDisplayModule({ renderTarget = 'screen' }: QrDisplayModuleProps) {
   const { phase, sessionToken, triggerScan, openKiosk } = useKioskStore();
+  const { t } = useTranslation();
+  const tm = t.kiosk.qrPhase;
 
   const [displaySeconds, setDisplaySeconds] = useState<number>(QR_COUNTDOWN_SECONDS);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
@@ -250,7 +253,7 @@ export function QrDisplayModule({ renderTarget = 'screen' }: QrDisplayModuleProp
           >
             {displaySeconds}
           </motion.span>
-          <span className="text-sm text-muted-foreground">giây</span>
+          <span className="text-sm text-muted-foreground">{tm.secondsUnit}</span>
         </div>
 
         {/* Countdown progress bar */}
@@ -264,7 +267,7 @@ export function QrDisplayModule({ renderTarget = 'screen' }: QrDisplayModuleProp
           />
         </div>
         <p className="text-xs text-muted-foreground">
-          Mã QR tự làm mới sau {displaySeconds}s
+          {tm.refreshLabel.replace('{n}', displaySeconds.toString())}
         </p>
       </div>
 
@@ -277,11 +280,11 @@ export function QrDisplayModule({ renderTarget = 'screen' }: QrDisplayModuleProp
         whileTap={{ scale: 0.97 }}
         transition={{ duration: MOTION_TOKENS.durations.fast }}
       >
-        📱 Giả lập quét QR
+        {tm.simulateScanButton}
       </motion.button>
 
       <p className="text-center text-[11px] text-muted-foreground">
-        Nhấn để mô phỏng bước khách hàng quét QR tại trạm PCS
+        {tm.simulateScanHint}
       </p>
     </div>
   );

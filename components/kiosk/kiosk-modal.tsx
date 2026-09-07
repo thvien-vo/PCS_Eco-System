@@ -44,51 +44,24 @@ import { useKioskStore } from '@/store/kiosk-store';
 import { useWalletStore } from '@/store/wallet-store';
 import { QrDisplayModule } from '@/components/kiosk/qr-display-module';
 import { ParticleBurst } from '@/components/shared/particle-burst';
+import { useTranslation } from '@/hooks/use-translation';
 import type { ScanResult } from '@/types';
 
-// ── REJECT scenario data (from pcs-domain-knowledge §6) ─────────────────────
-// 4 distinct reasons with their own friendly Vietnamese guidance messages.
+// ── REJECT scenario metadata (from pcs-domain-knowledge §6) ─────────────────
+// `reason` is the stable English union key (types/index.ts) used for state
+// comparisons/lookups — NEVER compared against localized label text.
 // Severity: 'medium' → warning-amber (#F59E0B); 'high' → error-rose (#EF4444)
+// Label/guidance copy is resolved per-locale from t.kiosk.rejectScenarios.
 
-const REJECT_SCENARIOS: Array<{
-  reason: ScanResult['rejectReason'];
-  label: string;
-  guidance: string;
+const REJECT_SCENARIO_META: Array<{
+  reason: NonNullable<ScanResult['rejectReason']>;
   severity: 'medium' | 'high';
   icon: string;
 }> = [
-  {
-    reason: 'Low Confidence',
-    label: 'Độ tin cậy thấp',
-    guidance:
-      'Phổ hồng ngoại không khớp rõ ràng với loại nhựa nào (độ chính xác < 85%). Hãy thử đặt vật phẩm ngay ngắn hơn hoặc xoay mặt nhựa sạch về phía cảm biến.',
-    severity: 'medium',
-    icon: '⚠️',
-  },
-  {
-    reason: 'OOD Material',
-    label: 'Vật liệu ngoài danh mục',
-    guidance:
-      'Vật phẩm có thể là nhựa composite, polycarbonate, ABS hoặc vật liệu không phải nhựa — trạm PCS hiện chỉ nhận PET, PE, PP, PS và PVC. Vui lòng không bỏ vào kiosk.',
-    severity: 'high',
-    icon: '🚫',
-  },
-  {
-    reason: 'Dirty/Wet',
-    label: 'Bề mặt bẩn hoặc ướt',
-    guidance:
-      'Cảm biến FTIR không thể đọc qua lớp bẩn, dầu mỡ hoặc nước đọng. Hãy rửa sạch vật phẩm, lau khô bề mặt và thử lại. Trạm có sẵn vòi khí nén hỗ trợ làm sạch nhanh.',
-    severity: 'medium',
-    icon: '💧',
-  },
-  {
-    reason: 'Mixed/Composite',
-    label: 'Nhựa hỗn hợp / composite',
-    guidance:
-      'Phổ đo cho thấy nhiều lớp polymer chồng nhau không thể phân tách cơ học (ví dụ: màng nhiều lớp, vỉ nhựa-nhôm). Loại này không thể tái chế cơ học — vui lòng bỏ vào thùng rác thông thường.',
-    severity: 'high',
-    icon: '🔀',
-  },
+  { reason: 'Low Confidence', severity: 'medium', icon: '⚠️' },
+  { reason: 'OOD Material', severity: 'high', icon: '🚫' },
+  { reason: 'Dirty/Wet', severity: 'medium', icon: '💧' },
+  { reason: 'Mixed/Composite', severity: 'high', icon: '🔀' },
 ];
 
 // ── PASS scenario data ────────────────────────────────────────────────────────
@@ -105,6 +78,15 @@ const POINTS_AWARDED_PASS = 25;
 export function KioskModal() {
   const { phase, scanResult, setResult, resetKiosk, openKiosk } = useKioskStore();
   const addPoints = useWalletStore((s) => s.addPoints);
+  const { t } = useTranslation();
+  const tm = t.kiosk;
+
+  // Merge stable English metadata with the locale-resolved label/guidance copy.
+  const REJECT_SCENARIOS = REJECT_SCENARIO_META.map((meta) => ({
+    ...meta,
+    label: tm.rejectScenarios[meta.reason].label,
+    guidance: tm.rejectScenarios[meta.reason].guidance,
+  }));
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [burstTrigger, setBurstTrigger] = useState<boolean>(false);
@@ -188,7 +170,7 @@ export function KioskModal() {
   );
 
   const handleReject = useCallback(
-    (scenario: (typeof REJECT_SCENARIOS)[number]) => {
+    (scenario: (typeof REJECT_SCENARIO_META)[number]) => {
       // hasResultedRef guard — STRICTLY IGNORED if already resulted
       if (hasResultedRef.current) return;
       hasResultedRef.current = true;
@@ -271,9 +253,9 @@ export function KioskModal() {
       >
         <div className="flex items-center justify-between">
           <div className="text-left">
-            <p className="text-xs font-medium opacity-80">Trạm PCS · HCM-01</p>
-            <h3 className="text-lg font-bold">Bắt đầu tái chế</h3>
-            <p className="text-xs opacity-70">Quét QR để xác thực vật phẩm</p>
+            <p className="text-xs font-medium opacity-80">{tm.triggerButton.stationLabel}</p>
+            <h3 className="text-lg font-bold">{tm.triggerButton.ctaTitle}</h3>
+            <p className="text-xs opacity-70">{tm.triggerButton.ctaSubtitle}</p>
           </div>
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 text-3xl backdrop-blur-sm">
             ♻️
@@ -310,7 +292,7 @@ export function KioskModal() {
               <div className="absolute left-4 top-4 z-10">
                 <span className="inline-flex items-center gap-1 rounded-full border border-[var(--warning-amber)] bg-[var(--warning-amber)]/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--warning-amber)]">
                   <Zap className="h-2.5 w-2.5" />
-                  Chế độ Mô phỏng
+                  {tm.modal.simulationBadge}
                 </span>
               </div>
 
@@ -320,7 +302,7 @@ export function KioskModal() {
                 type="button"
                 onClick={handleClose}
                 className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-border/60 text-muted-foreground transition-colors hover:bg-border hover:text-foreground"
-                aria-label="Đóng kiosk"
+                aria-label={tm.modal.closeAria}
               >
                 <X className="h-4 w-4" />
               </button>
@@ -342,11 +324,10 @@ export function KioskModal() {
                     >
                       <div className="mb-4 text-center">
                         <h2 className="text-lg font-bold text-foreground">
-                          Quét QR để xác nhận
+                          {tm.qrPhase.title}
                         </h2>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          Đây là mã phiên mô phỏng — trong thực tế, thiết bị của bạn
-                          sẽ kết nối với máy chủ PCS để xác thực.
+                          {tm.qrPhase.subtitle}
                         </p>
                       </div>
                       <QrDisplayModule renderTarget="screen" />
@@ -378,18 +359,17 @@ export function KioskModal() {
 
                       <div className="text-center">
                         <h2 className="text-lg font-bold text-foreground">
-                          Đang phân tích mẫu…
+                          {tm.scanPhase.title}
                         </h2>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          Cảm biến FTIR đang đọc phổ hồng ngoại của vật phẩm.
-                          Người trình bày chọn kết quả bên dưới để tiếp tục demo.
+                          {tm.scanPhase.subtitle}
                         </p>
                       </div>
 
                       {/* Debug controls */}
                       <div className="w-full rounded-2xl border border-border bg-card p-4">
                         <p className="mb-3 text-center text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                          🛠 Debug Controls
+                          {tm.scanPhase.debugLabel}
                         </p>
 
                         {/* PASS button */}
@@ -401,7 +381,7 @@ export function KioskModal() {
                           whileTap={{ scale: 0.97 }}
                           transition={{ duration: MOTION_TOKENS.durations.fast }}
                         >
-                          ✅ PASS — PET · 98.7%
+                          {tm.scanPhase.passButton}
                         </motion.button>
 
                         {/* REJECT buttons (4 distinct reasons) */}
@@ -462,13 +442,13 @@ export function KioskModal() {
                           className="text-2xl font-bold"
                           style={{ color: 'var(--kiosk-pass)' }}
                         >
-                          Chấp nhận! ✨
+                          {tm.passResult.heading}
                         </h2>
                         <p className="mt-1 text-sm font-medium text-foreground">
-                          {scanResult.materialDetected} · {scanResult.confidenceScore}% tin cậy
+                          {scanResult.materialDetected} · {scanResult.confidenceScore}{tm.passResult.confidenceSuffix}
                         </p>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          Vật phẩm phù hợp tiêu chuẩn tái chế cơ học. Cảm ơn bạn!
+                          {tm.passResult.goodItemDesc}
                         </p>
                       </div>
 
@@ -484,17 +464,17 @@ export function KioskModal() {
                       >
                         <span className="text-2xl">🌿</span>
                         <div>
-                          <p className="text-xs text-muted-foreground">Điểm thưởng nhận được</p>
+                          <p className="text-xs text-muted-foreground">{tm.passResult.pointsLabel}</p>
                           <p
                             className="text-2xl font-bold"
                             style={{ color: 'var(--kiosk-pass)' }}
                           >
-                            +{scanResult.pointsAwarded} điểm
+                            +{scanResult.pointsAwarded}{tm.passResult.pointsSuffix}
                           </p>
                         </div>
                       </motion.div>
 
-                      <AutoResetIndicator secondsLeft={autoResetSecondsLeft} variant="pass" />
+                      <AutoResetIndicator secondsLeft={autoResetSecondsLeft} variant="pass" label={tm.autoReset.label} />
 
                       <button
                         id="kiosk-close-pass-btn"
@@ -502,7 +482,7 @@ export function KioskModal() {
                         onClick={handleClose}
                         className="w-full rounded-xl bg-[var(--kiosk-pass)] px-4 py-3 text-sm font-semibold text-white hover:opacity-90"
                       >
-                        Hoàn tất · Đóng
+                        {tm.passResult.closeButton}
                       </button>
                     </motion.div>
                   )}
@@ -561,10 +541,10 @@ export function KioskModal() {
                                 className="text-xl font-bold"
                                 style={{ color }}
                               >
-                                {scenario?.icon} {scenario?.label ?? 'Từ chối'}
+                                {scenario?.icon} {scenario?.label ?? tm.rejectResult.fallbackLabel}
                               </h2>
                               <p className="mt-1 text-xs text-muted-foreground">
-                                Vật phẩm không đạt tiêu chuẩn nhận vào hệ thống tái chế PCS.
+                                {tm.rejectResult.subtitle}
                               </p>
                             </div>
 
@@ -588,6 +568,7 @@ export function KioskModal() {
                             <AutoResetIndicator
                               secondsLeft={autoResetSecondsLeft}
                               variant="reject"
+                              label={tm.autoReset.label}
                             />
 
                             <button
@@ -596,7 +577,7 @@ export function KioskModal() {
                               onClick={handleClose}
                               className="w-full rounded-xl border border-border px-4 py-3 text-sm font-semibold text-foreground hover:bg-card"
                             >
-                              Đóng · Thử vật phẩm khác
+                              {tm.rejectResult.closeButton}
                             </button>
                           </>
                         );
@@ -614,12 +595,16 @@ export function KioskModal() {
 }
 
 // ── AutoResetIndicator — visual 5s countdown for unattended kiosk ─────────────
+// Purely presentational: `secondsLeft` is driven by the numeric setInterval/
+// setTimeout logic in KioskModal, which is entirely locale-independent.
 function AutoResetIndicator({
   secondsLeft,
   variant,
+  label,
 }: {
   secondsLeft: number;
   variant: 'pass' | 'reject';
+  label: string;
 }) {
   const color = variant === 'pass' ? 'var(--kiosk-pass)' : 'var(--warning-amber)';
   const progress = (secondsLeft / 5) * 100;
@@ -628,7 +613,7 @@ function AutoResetIndicator({
     <div className="w-full">
       <div className="flex items-center justify-between">
         <p className="text-[10px] text-muted-foreground">
-          Tự động đóng sau {secondsLeft}s
+          {label.replace('{n}', secondsLeft.toString())}
         </p>
         <span className="text-[10px] font-medium" style={{ color }}>
           {secondsLeft}

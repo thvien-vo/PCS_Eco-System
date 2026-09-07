@@ -397,6 +397,111 @@ export type TranslationDictionary = {
       closeAria: string;
     };
   };
+  challenge: {
+    page: {
+      headerTitle: string;
+      headerSubtitle: string;
+      tabSwipe: string;
+      tabLeaderboard: string;
+      sectionInProgress: string;
+      inProgressCount: string;
+      sectionDiscover: string;
+      cardsRemaining: string;
+      hintSwipeLeft: string;
+      hintSwipeRight: string;
+    };
+    swipeCard: {
+      emptyTitle: string;
+      emptyBody: string;
+      stampJoin: string;
+      stampSkip: string;
+      deadlinePrefix: string;
+      pointsSuffix: string;
+    };
+    confirmModal: {
+      body: string;
+      deadlinePrefix: string;
+      rewardLabel: string;
+      hotBadge: string;
+      cancelButton: string;
+      confirmButton: string;
+    };
+    inProgress: {
+      emptyState: string;
+    };
+    leaderboard: {
+      tabWeekly: string;
+      tabMonthly: string;
+      top3Title: string;
+      fullRankTitle: string;
+      youLabel: string;
+      youPodiumSuffix: string;
+      pointsSuffix: string;
+      badgeUnlockedAria: string;
+      badgeLockedAria: string;
+      badgeLockedTitle: string;
+      challengeNames: Record<string, string>;
+      challengeDeadlines: Record<string, string>;
+      currentUserLabel: string;
+    };
+  };
+  kiosk: {
+    page: {
+      headerTitle: string;
+      headerSubtitle: string;
+      simulationBadge: string;
+      statRecycleLabel: string;
+      statPointsLabel: string;
+      statAccuracyLabel: string;
+      techCardTitle: string;
+      techCardDesc: string;
+      stepsTitle: string;
+      steps: Array<{ label: string; desc: string }>;
+      plasticTitle: string;
+      pvcLabel: string;
+      b2bNote: string;
+    };
+    triggerButton: {
+      stationLabel: string;
+      ctaTitle: string;
+      ctaSubtitle: string;
+    };
+    modal: {
+      simulationBadge: string;
+      closeAria: string;
+    };
+    qrPhase: {
+      title: string;
+      subtitle: string;
+      secondsUnit: string;
+      refreshLabel: string;
+      simulateScanButton: string;
+      simulateScanHint: string;
+    };
+    scanPhase: {
+      title: string;
+      subtitle: string;
+      debugLabel: string;
+      passButton: string;
+    };
+    passResult: {
+      heading: string;
+      confidenceSuffix: string;
+      goodItemDesc: string;
+      pointsLabel: string;
+      pointsSuffix: string;
+      closeButton: string;
+    };
+    rejectResult: {
+      fallbackLabel: string;
+      subtitle: string;
+      closeButton: string;
+    };
+    autoReset: {
+      label: string;
+    };
+    rejectScenarios: Record<string, { label: string; guidance: string }>;
+  };
   auth: {
     page: {
       title: string;
@@ -869,6 +974,149 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
         sendNow: 'Tặng ngay',
         chooseFriend: 'Chọn bạn bè để tặng',
         closeAria: 'Đóng',
+      },
+    },
+    challenge: {
+      page: {
+        headerTitle: 'Thử thách & Gamification',
+        headerSubtitle: 'Tích điểm · Vô địch · Nhận phần thưởng',
+        tabSwipe: 'Thử thách',
+        tabLeaderboard: 'Bảng xếp hạng',
+        sectionInProgress: 'Đang thực hiện',
+        inProgressCount: '{n} thử thách',
+        sectionDiscover: 'Khám phá thử thách',
+        cardsRemaining: '{n} thẻ còn lại',
+        hintSwipeLeft: 'Vuốt trái = Bỏ qua',
+        hintSwipeRight: 'Vuốt phải = Tham gia',
+      },
+      swipeCard: {
+        emptyTitle: 'Hết thử thách rồi!',
+        emptyBody: 'Bạn đã xem qua tất cả thử thách. Hãy quay lại sau nhé.',
+        stampJoin: 'THAM GIA',
+        stampSkip: 'BỎ QUA',
+        deadlinePrefix: 'Còn ',
+        pointsSuffix: ' điểm',
+      },
+      confirmModal: {
+        body: 'Bạn có chắc muốn tham gia thử thách này không?',
+        deadlinePrefix: 'Còn ',
+        rewardLabel: ' điểm thưởng',
+        hotBadge: 'Thử thách nóng',
+        cancelButton: 'Hủy bỏ',
+        confirmButton: 'Tham gia ngay!',
+      },
+      inProgress: {
+        emptyState: 'Chưa có thử thách nào đang thực hiện',
+      },
+      leaderboard: {
+        tabWeekly: 'Tuần này',
+        tabMonthly: 'Tháng này',
+        top3Title: 'Top 3 Huyền Thoại',
+        fullRankTitle: 'Bảng xếp hạng đầy đủ',
+        youLabel: 'Bạn',
+        youPodiumSuffix: '(Bạn)',
+        pointsSuffix: ' điểm',
+        badgeUnlockedAria: 'Huy hiệu hạng {rank}',
+        badgeLockedAria: 'Huy hiệu hạng {rank} — chưa mở khóa',
+        badgeLockedTitle: 'Đạt hạng Top 3 để mở khóa huy hiệu',
+        currentUserLabel: 'Huy hiệu chưa mở khóa',
+        challengeNames: {
+          'Chiến Binh Rác Thải': 'Chiến Binh Rác Thải',
+          'Đổi Sắc Xanh': 'Đổi Sắc Xanh',
+          'Nhà Vô Địch Tái Chế': 'Nhà Vô Địch Tái Chế',
+          'Tuần Lễ Không Rác': 'Tuần Lễ Không Rác',
+          'Hành Tinh Xanh': 'Hành Tinh Xanh',
+          'Siêu Anh Hùng Nhựa': 'Siêu Anh Hùng Nhựa',
+          'Thành Phố Sạch': 'Thành Phố Sạch',
+          'Vòng Tròn Xanh': 'Vòng Tròn Xanh',
+        },
+        challengeDeadlines: {
+          '3 ngày': '3 ngày',
+          '4 ngày': '4 ngày',
+          '5 ngày': '5 ngày',
+          '7 ngày': '7 ngày',
+          '10 ngày': '10 ngày',
+          '14 ngày': '14 ngày',
+        },
+      },
+    },
+    kiosk: {
+      page: {
+        headerTitle: 'Trạm PCS',
+        headerSubtitle: 'Kiosk Tái Chế Thông Minh · HCM-01',
+        simulationBadge: 'Mô phỏng',
+        statRecycleLabel: 'Lượt tái chế hôm nay',
+        statPointsLabel: 'Điểm xanh đã trao',
+        statAccuracyLabel: 'Độ chính xác FTIR',
+        techCardTitle: 'Công nghệ FTIR NIR',
+        techCardDesc: 'Cảm biến phổ hồng ngoại nhận diện loại nhựa (PET · PE · PP · PS · PVC) trong <500ms. Độ chính xác >96% trong điều kiện nhiệt độ 15–35°C.',
+        stepsTitle: 'Quy trình 4 bước',
+        steps: [
+          { label: 'Quét QR', desc: 'Xác thực phiên với mã token duy nhất' },
+          { label: 'Đặt vật phẩm', desc: 'Đưa nhựa vào khoang cảm biến' },
+          { label: 'Phân tích FTIR', desc: 'Nhận diện loại nhựa & độ tinh khiết' },
+          { label: 'Nhận điểm xanh', desc: 'Điểm tự động vào ví của bạn' },
+        ],
+        plasticTitle: 'Loại nhựa được chấp nhận',
+        pvcLabel: 'PVC ⚠️ (hạn chế)',
+        b2bNote: 'Dữ liệu mỗi lần quét sẽ được tổng hợp vào báo cáo dòng nhựa tuần (Module 8 B2B Insight) — giúp Dow và các đối tác MRF tối ưu hoá nguồn nguyên liệu tái chế.',
+      },
+      triggerButton: {
+        stationLabel: 'Trạm PCS · HCM-01',
+        ctaTitle: 'Bắt đầu tái chế',
+        ctaSubtitle: 'Quét QR để xác thực vật phẩm',
+      },
+      modal: {
+        simulationBadge: 'Chế độ Mô phỏng',
+        closeAria: 'Đóng kiosk',
+      },
+      qrPhase: {
+        title: 'Quét QR để xác nhận',
+        subtitle: 'Đây là mã phiên mô phỏng — trong thực tế, thiết bị của bạn sẽ kết nối với máy chủ PCS để xác thực.',
+        secondsUnit: 'giây',
+        refreshLabel: 'Mã QR tự làm mới sau {n}s',
+        simulateScanButton: '📱 Giả lập quét QR',
+        simulateScanHint: 'Nhấn để mô phỏng bước khách hàng quét QR tại trạm PCS',
+      },
+      scanPhase: {
+        title: 'Đang phân tích mẫu…',
+        subtitle: 'Cảm biến FTIR đang đọc phổ hồng ngoại của vật phẩm. Người trình bày chọn kết quả bên dưới để tiếp tục demo.',
+        debugLabel: '🛠 Debug Controls',
+        passButton: '✅ PASS — PET · 98.7%',
+      },
+      passResult: {
+        heading: 'Chấp nhận! ✨',
+        confidenceSuffix: '% tin cậy',
+        goodItemDesc: 'Vật phẩm phù hợp tiêu chuẩn tái chế cơ học. Cảm ơn bạn!',
+        pointsLabel: 'Điểm thưởng nhận được',
+        pointsSuffix: ' điểm',
+        closeButton: 'Hoàn tất · Đóng',
+      },
+      rejectResult: {
+        fallbackLabel: 'Từ chối',
+        subtitle: 'Vật phẩm không đạt tiêu chuẩn nhận vào hệ thống tái chế PCS.',
+        closeButton: 'Đóng · Thử vật phẩm khác',
+      },
+      autoReset: {
+        label: 'Tự động đóng sau {n}s',
+      },
+      rejectScenarios: {
+        'Low Confidence': {
+          label: 'Độ tin cậy thấp',
+          guidance: 'Phổ hồng ngoại không khớp rõ ràng với loại nhựa nào (độ chính xác < 85%). Hãy thử đặt vật phẩm ngay ngắn hơn hoặc xoay mặt nhựa sạch về phía cảm biến.',
+        },
+        'OOD Material': {
+          label: 'Vật liệu ngoài danh mục',
+          guidance: 'Vật phẩm có thể là nhựa composite, polycarbonate, ABS hoặc vật liệu không phải nhựa — trạm PCS hiện chỉ nhận PET, PE, PP, PS và PVC. Vui lòng không bỏ vào kiosk.',
+        },
+        'Dirty/Wet': {
+          label: 'Bề mặt bẩn hoặc ướt',
+          guidance: 'Cảm biến FTIR không thể đọc qua lớp bẩn, dầu mỡ hoặc nước đọng. Hãy rửa sạch vật phẩm, lau khô bề mặt và thử lại. Trạm có sẵn vòi khí nén hỗ trợ làm sạch nhanh.',
+        },
+        'Mixed/Composite': {
+          label: 'Nhựa hỗn hợp / composite',
+          guidance: 'Phổ đo cho thấy nhiều lớp polymer chồng nhau không thể phân tách cơ học (ví dụ: màng nhiều lớp, vỉ nhựa-nhôm). Loại này không thể tái chế cơ học — vui lòng bỏ vào thùng rác thông thường.',
+        },
       },
     },
     auth: {
@@ -1389,6 +1637,149 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
         sendNow: 'Send now',
         chooseFriend: 'Choose a friend to send',
         closeAria: 'Close',
+      },
+    },
+    challenge: {
+      page: {
+        headerTitle: 'Challenges & Gamification',
+        headerSubtitle: 'Earn points · Dominate · Claim rewards',
+        tabSwipe: 'Challenges',
+        tabLeaderboard: 'Leaderboard',
+        sectionInProgress: 'In Progress',
+        inProgressCount: '{n} challenges',
+        sectionDiscover: 'Discover Challenges',
+        cardsRemaining: '{n} cards left',
+        hintSwipeLeft: 'Swipe left = Skip',
+        hintSwipeRight: 'Swipe right = Join',
+      },
+      swipeCard: {
+        emptyTitle: 'No more challenges!',
+        emptyBody: 'You\'ve seen all challenges. Check back later.',
+        stampJoin: 'JOIN',
+        stampSkip: 'SKIP',
+        deadlinePrefix: '',
+        pointsSuffix: ' pts',
+      },
+      confirmModal: {
+        body: 'Are you sure you want to join this challenge?',
+        deadlinePrefix: '',
+        rewardLabel: ' bonus pts',
+        hotBadge: 'Hot Challenge',
+        cancelButton: 'Cancel',
+        confirmButton: 'Join Now!',
+      },
+      inProgress: {
+        emptyState: 'No challenges in progress yet',
+      },
+      leaderboard: {
+        tabWeekly: 'This week',
+        tabMonthly: 'This month',
+        top3Title: 'Legendary Top 3',
+        fullRankTitle: 'Full Leaderboard',
+        youLabel: 'You',
+        youPodiumSuffix: '(You)',
+        pointsSuffix: ' pts',
+        badgeUnlockedAria: 'Rank {rank} badge',
+        badgeLockedAria: 'Rank {rank} badge — locked',
+        badgeLockedTitle: 'Reach Top 3 to unlock your badge',
+        currentUserLabel: 'Badge not yet unlocked',
+        challengeNames: {
+          'Chiến Binh Rác Thải': 'Waste Warrior',
+          'Đổi Sắc Xanh': 'Go Green',
+          'Nhà Vô Địch Tái Chế': 'Recycling Champion',
+          'Tuần Lễ Không Rác': 'Zero Waste Week',
+          'Hành Tinh Xanh': 'Green Planet',
+          'Siêu Anh Hùng Nhựa': 'Plastic Superhero',
+          'Thành Phố Sạch': 'Clean City',
+          'Vòng Tròn Xanh': 'Green Circle',
+        },
+        challengeDeadlines: {
+          '3 ngày': '3 days',
+          '4 ngày': '4 days',
+          '5 ngày': '5 days',
+          '7 ngày': '7 days',
+          '10 ngày': '10 days',
+          '14 ngày': '14 days',
+        },
+      },
+    },
+    kiosk: {
+      page: {
+        headerTitle: 'PCS Station',
+        headerSubtitle: 'Smart Recycling Kiosk · HCM-01',
+        simulationBadge: 'Simulation',
+        statRecycleLabel: 'Recycled today',
+        statPointsLabel: 'Green points awarded',
+        statAccuracyLabel: 'FTIR accuracy',
+        techCardTitle: 'FTIR NIR Technology',
+        techCardDesc: 'Infrared spectroscopy sensor identifies plastic type (PET · PE · PP · PS · PVC) in <500ms. >96% accuracy at 15–35°C.',
+        stepsTitle: '4-Step Process',
+        steps: [
+          { label: 'Scan QR', desc: 'Authenticate the session with a unique token' },
+          { label: 'Place item', desc: 'Insert the plastic into the sensor chamber' },
+          { label: 'FTIR analysis', desc: 'Identify plastic type & purity' },
+          { label: 'Earn green points', desc: 'Points are added to your wallet automatically' },
+        ],
+        plasticTitle: 'Accepted plastic types',
+        pvcLabel: 'PVC ⚠️ (limited)',
+        b2bNote: 'Each scan is aggregated into the weekly plastic flow report (Module 8 B2B Insight) — helping Dow and MRF partners optimise recycled feedstock sourcing.',
+      },
+      triggerButton: {
+        stationLabel: 'PCS Station · HCM-01',
+        ctaTitle: 'Start recycling',
+        ctaSubtitle: 'Scan the QR code to verify your item',
+      },
+      modal: {
+        simulationBadge: 'Simulation Mode',
+        closeAria: 'Close kiosk',
+      },
+      qrPhase: {
+        title: 'Scan QR to confirm',
+        subtitle: 'This is a simulated session code — in production, your device would connect to the PCS server for authentication.',
+        secondsUnit: 's',
+        refreshLabel: 'QR code refreshes in {n}s',
+        simulateScanButton: '📱 Simulate QR scan',
+        simulateScanHint: 'Tap to simulate the customer scanning the QR code at the PCS station',
+      },
+      scanPhase: {
+        title: 'Analyzing sample…',
+        subtitle: 'The FTIR sensor is reading the infrared spectrum of the item. The presenter selects a result below to continue the demo.',
+        debugLabel: '🛠 Debug Controls',
+        passButton: '✅ PASS — PET · 98.7%',
+      },
+      passResult: {
+        heading: 'Accepted! ✨',
+        confidenceSuffix: '% confidence',
+        goodItemDesc: 'This item meets mechanical recycling standards. Thank you!',
+        pointsLabel: 'Points earned',
+        pointsSuffix: ' pts',
+        closeButton: 'Done · Close',
+      },
+      rejectResult: {
+        fallbackLabel: 'Rejected',
+        subtitle: 'This item does not meet the standards for the PCS recycling system.',
+        closeButton: 'Close · Try another item',
+      },
+      autoReset: {
+        label: 'Closing automatically in {n}s',
+      },
+      rejectScenarios: {
+        'Low Confidence': {
+          label: 'Low confidence',
+          guidance: 'The infrared spectrum does not clearly match any plastic type (confidence < 85%). Try repositioning the item or turning a clean plastic face toward the sensor.',
+        },
+        'OOD Material': {
+          label: 'Out-of-category material',
+          guidance: 'This item may be composite plastic, polycarbonate, ABS, or a non-plastic material — the PCS station currently only accepts PET, PE, PP, PS and PVC. Please do not place it in the kiosk.',
+        },
+        'Dirty/Wet': {
+          label: 'Dirty or wet surface',
+          guidance: 'The FTIR sensor cannot read through dirt, grease, or standing water. Please rinse the item, dry the surface, and try again. The station has a compressed-air jet available for a quick clean.',
+        },
+        'Mixed/Composite': {
+          label: 'Mixed / composite plastic',
+          guidance: 'The measured spectrum shows multiple overlapping polymer layers that cannot be mechanically separated (e.g. multilayer film, plastic-foil blister packs). This type cannot be mechanically recycled — please dispose of it in general waste.',
+        },
       },
     },
     auth: {

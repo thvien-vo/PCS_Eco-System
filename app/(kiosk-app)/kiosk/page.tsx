@@ -15,26 +15,45 @@ import { motion } from 'framer-motion';
 import { Cpu, Leaf, Zap, BarChart3 } from 'lucide-react';
 import { MOTION_TOKENS } from '@/lib/motion-tokens';
 import { KioskModal } from '@/components/kiosk/kiosk-modal';
-
-const STATS = [
-  { label: 'Lượt tái chế hôm nay', value: '142', icon: '♻️' },
-  { label: 'Điểm xanh đã trao', value: '3.550', icon: '🌿' },
-  { label: 'Độ chính xác FTIR', value: '96.4%', icon: '🔬' },
-];
+import { useTranslation } from '@/hooks/use-translation';
+import { useHasMounted } from '@/hooks/use-has-mounted';
+import { LoadingSkeleton } from '@/components/shared/loading-skeleton';
 
 export default function KioskPage() {
+  const { t } = useTranslation();
+  const tm = t.kiosk.page;
+
+  // ── Hydration guard (per pcs-tech-standards §10a / §13) ─────────────────────
+  // useTranslation reads the persisted locale store — must gate behind hasMounted.
+  const hasMounted = useHasMounted();
+
+  if (!hasMounted) {
+    return (
+      <div className="flex flex-col gap-4 p-4">
+        <LoadingSkeleton type="card" />
+        <LoadingSkeleton type="card" />
+      </div>
+    );
+  }
+
+  const STATS = [
+    { label: tm.statRecycleLabel, value: '142', icon: '♻️' },
+    { label: tm.statPointsLabel, value: '3.550', icon: '🌿' },
+    { label: tm.statAccuracyLabel, value: '96.4%', icon: '🔬' },
+  ];
+
   return (
     <div className="flex min-h-full flex-col gap-4 p-4 pb-6">
       {/* ── Header ── */}
       <div className="flex items-center justify-between pt-2">
         <div>
-          <h1 className="text-xl font-bold text-foreground">Trạm PCS</h1>
-          <p className="text-xs text-muted-foreground">Kiosk Tái Chế Thông Minh · HCM-01</p>
+          <h1 className="text-xl font-bold text-foreground">{tm.headerTitle}</h1>
+          <p className="text-xs text-muted-foreground">{tm.headerSubtitle}</p>
         </div>
         {/* Simulation Mode badge — visible at all times on this page */}
         <span className="inline-flex items-center gap-1 rounded-full border border-[var(--warning-amber)] bg-[var(--warning-amber)]/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--warning-amber)]">
           <Zap className="h-2.5 w-2.5" />
-          Mô phỏng
+          {tm.simulationBadge}
         </span>
       </div>
 
@@ -76,11 +95,10 @@ export default function KioskPage() {
           </div>
           <div>
             <h2 className="text-sm font-semibold text-foreground">
-              Công nghệ FTIR NIR
+              {tm.techCardTitle}
             </h2>
             <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-              Cảm biến phổ hồng ngoại nhận diện loại nhựa (PET · PE · PP · PS · PVC)
-              trong &lt;500ms. Độ chính xác &gt;96% trong điều kiện nhiệt độ 15–35°C.
+              {tm.techCardDesc}
             </p>
           </div>
         </div>
@@ -97,17 +115,12 @@ export default function KioskPage() {
         }}
         className="rounded-2xl bg-card p-4 shadow-card"
       >
-        <h2 className="mb-3 text-sm font-semibold text-foreground">Quy trình 4 bước</h2>
+        <h2 className="mb-3 text-sm font-semibold text-foreground">{tm.stepsTitle}</h2>
         <div className="flex flex-col gap-2.5">
-          {[
-            { step: '1', label: 'Quét QR', desc: 'Xác thực phiên với mã token duy nhất' },
-            { step: '2', label: 'Đặt vật phẩm', desc: 'Đưa nhựa vào khoang cảm biến' },
-            { step: '3', label: 'Phân tích FTIR', desc: 'Nhận diện loại nhựa & độ tinh khiết' },
-            { step: '4', label: 'Nhận điểm xanh', desc: 'Điểm tự động vào ví của bạn' },
-          ].map((s) => (
-            <div key={s.step} className="flex items-start gap-3">
+          {tm.steps.map((s, i) => (
+            <div key={s.label} className="flex items-start gap-3">
               <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[var(--primary-emerald)]/15 text-xs font-bold text-[var(--primary-emerald)]">
-                {s.step}
+                {i + 1}
               </div>
               <div>
                 <span className="text-xs font-semibold text-foreground">{s.label}</span>
@@ -131,7 +144,7 @@ export default function KioskPage() {
       >
         <div className="mb-2 flex items-center gap-2">
           <Leaf className="h-4 w-4 text-[var(--primary-emerald)]" />
-          <h2 className="text-sm font-semibold text-foreground">Loại nhựa được chấp nhận</h2>
+          <h2 className="text-sm font-semibold text-foreground">{tm.plasticTitle}</h2>
         </div>
         <div className="flex flex-wrap gap-2">
           {['PET ♻️1', 'HDPE ♻️2', 'PP ♻️5', 'LDPE ♻️4', 'PS ♻️6'].map((label) => (
@@ -143,7 +156,7 @@ export default function KioskPage() {
             </span>
           ))}
           <span className="rounded-lg bg-[var(--error-rose)]/10 px-2.5 py-1 text-xs font-semibold text-[var(--error-rose)]">
-            PVC ⚠️ (hạn chế)
+            {tm.pvcLabel}
           </span>
         </div>
       </motion.div>
@@ -162,9 +175,7 @@ export default function KioskPage() {
         <div className="flex items-start gap-2">
           <BarChart3 className="mt-0.5 h-4 w-4 flex-shrink-0 text-[var(--primary-emerald)]" />
           <p className="text-xs leading-relaxed text-muted-foreground">
-            Dữ liệu mỗi lần quét sẽ được tổng hợp vào báo cáo dòng nhựa tuần
-            (Module 8 B2B Insight) — giúp Dow và các đối tác MRF tối ưu hoá
-            nguồn nguyên liệu tái chế.
+            {tm.b2bNote}
           </p>
         </div>
       </motion.div>

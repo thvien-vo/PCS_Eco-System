@@ -31,6 +31,7 @@ import { cn } from '@/lib/utils';
 import { MOCK_LEADERBOARD } from '@/lib/mock-data';
 import type { LeaderboardEntry } from '@/types';
 import { MOTION_TOKENS } from '@/lib/motion-tokens';
+import { useTranslation } from '@/hooks/use-translation';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type LeaderboardTab = 'weekly' | 'monthly';
@@ -76,7 +77,17 @@ function buildLiveLeaderboard(liveUserPoints: number): LeaderboardEntry[] {
  *
  * This approach is intentional: zero runtime cost, no canvas, works on all devices.
  */
-function Badge({ rank, locked = false }: { rank: 1 | 2 | 3; locked?: boolean }) {
+function Badge({
+  rank,
+  locked = false,
+  unlockedAria,
+  lockedAria,
+}: {
+  rank: 1 | 2 | 3;
+  locked?: boolean;
+  unlockedAria: string;
+  lockedAria: string;
+}) {
   const configs = {
     1: {
       label: '🥇',
@@ -99,6 +110,9 @@ function Badge({ rank, locked = false }: { rank: 1 | 2 | 3; locked?: boolean }) 
   } as const;
 
   const cfg = configs[rank];
+  const ariaLabel = locked
+    ? lockedAria.replace('{rank}', rank.toString())
+    : unlockedAria.replace('{rank}', rank.toString());
 
   return (
     /**
@@ -113,7 +127,7 @@ function Badge({ rank, locked = false }: { rank: 1 | 2 | 3; locked?: boolean }) 
         filter: locked ? 'grayscale(1)' : 'none',
         opacity: locked ? 0.3 : 1,
       }}
-      aria-label={locked ? `Huy hiệu hạng ${rank} — chưa mở khóa` : `Huy hiệu hạng ${rank}`}
+      aria-label={ariaLabel}
     >
       <div
         style={{
@@ -151,9 +165,11 @@ function Badge({ rank, locked = false }: { rank: 1 | 2 | 3; locked?: boolean }) 
 function PodiumCard({
   entry,
   elevated,
+  tm,
 }: {
   entry: LeaderboardEntry;
   elevated: boolean;
+  tm: ReturnType<typeof useTranslation>['t']['challenge']['leaderboard'];
 }) {
   const rank = entry.rank as 1 | 2 | 3;
 
@@ -172,7 +188,12 @@ function PodiumCard({
       )}
       style={{ flex: elevated ? '1 1 36%' : '1 1 30%' }}
     >
-      <Badge rank={rank} locked={false} />
+      <Badge
+        rank={rank}
+        locked={false}
+        unlockedAria={tm.badgeUnlockedAria}
+        lockedAria={tm.badgeLockedAria}
+      />
       <div className="text-center">
         <p
           className={cn(
@@ -180,13 +201,13 @@ function PodiumCard({
             entry.isCurrentUser ? 'text-[var(--neon-mint)]' : 'text-foreground'
           )}
         >
-          {entry.username}
+          {entry.isCurrentUser ? tm.youLabel : entry.username}
           {entry.isCurrentUser && (
-            <span className="ml-0.5 text-[9px] font-normal text-[var(--neon-mint)]/80"> (Bạn)</span>
+            <span className="ml-0.5 text-[9px] font-normal text-[var(--neon-mint)]/80"> {tm.youPodiumSuffix}</span>
           )}
         </p>
         <p className="mt-0.5 text-[10px] font-semibold text-muted-foreground">
-          {entry.points.toLocaleString('vi-VN')} điểm
+          {entry.points.toLocaleString('vi-VN')}{tm.pointsSuffix}
         </p>
       </div>
     </motion.div>
@@ -200,7 +221,13 @@ function PodiumCard({
  * animate to their new vertical positions via Framer Motion's FLIP algorithm.
  * Transition uses MOTION_TOKENS.spring.gentle (no inline numbers) per §4.
  */
-function RankRow({ entry }: { entry: LeaderboardEntry }) {
+function RankRow({
+  entry,
+  tm,
+}: {
+  entry: LeaderboardEntry;
+  tm: ReturnType<typeof useTranslation>['t']['challenge']['leaderboard'];
+}) {
   const isLocked = entry.rank > 3;
 
   return (
@@ -235,10 +262,10 @@ function RankRow({ entry }: { entry: LeaderboardEntry }) {
             entry.isCurrentUser ? 'text-[var(--neon-mint)]' : 'text-foreground'
           )}
         >
-          {entry.username}
+          {entry.isCurrentUser ? tm.youLabel : entry.username}
           {entry.isCurrentUser && (
             <span className="ml-1.5 rounded-full bg-[var(--neon-mint)]/15 px-1.5 py-0.5 text-[10px] font-normal text-[var(--neon-mint)]">
-              Bạn
+              {tm.youLabel}
             </span>
           )}
         </p>
@@ -260,8 +287,8 @@ function RankRow({ entry }: { entry: LeaderboardEntry }) {
             filter: 'grayscale(1)',
             opacity: 0.3,
           }}
-          aria-label="Huy hiệu chưa mở khóa"
-          title="Đạt hạng Top 3 để mở khóa huy hiệu"
+          aria-label={tm.currentUserLabel}
+          title={tm.badgeLockedTitle}
         >
           <Medal
             className="h-7 w-7 text-foreground"
@@ -275,6 +302,9 @@ function RankRow({ entry }: { entry: LeaderboardEntry }) {
 
 // ── Main Export ───────────────────────────────────────────────────────────────
 export function Leaderboard({ liveUserPoints, activeTab, onTabChange }: LeaderboardProps) {
+  const { t } = useTranslation();
+  const tm = t.challenge.leaderboard;
+
   const entries = buildLiveLeaderboard(liveUserPoints);
   const top3 = entries.slice(0, 3) as [LeaderboardEntry, LeaderboardEntry, LeaderboardEntry];
   const rest = entries.slice(3);
@@ -287,8 +317,8 @@ export function Leaderboard({ liveUserPoints, activeTab, onTabChange }: Leaderbo
   ];
 
   const tabs: { key: LeaderboardTab; label: string }[] = [
-    { key: 'weekly', label: 'Tuần này' },
-    { key: 'monthly', label: 'Tháng này' },
+    { key: 'weekly', label: tm.tabWeekly },
+    { key: 'monthly', label: tm.tabMonthly },
   ];
 
   return (
@@ -322,7 +352,7 @@ export function Leaderboard({ liveUserPoints, activeTab, onTabChange }: Leaderbo
       <div>
         <div className="mb-3 flex items-center gap-2">
           <Crown className="h-4 w-4 text-[var(--warning-amber)]" fill="currentColor" />
-          <h3 className="text-sm font-bold text-foreground">Top 3 Huyền Thoại</h3>
+          <h3 className="text-sm font-bold text-foreground">{tm.top3Title}</h3>
         </div>
         {/*
          * Flexbox podium — NOT a vertical list (per Senior Engineer requirement #2).
@@ -330,9 +360,9 @@ export function Leaderboard({ liveUserPoints, activeTab, onTabChange }: Leaderbo
          * if the composition of top-3 changes.
          */}
         <motion.div layout className="flex items-end gap-2">
-          <PodiumCard entry={podiumOrder[0]} elevated={false} />
-          <PodiumCard entry={podiumOrder[1]} elevated={true} />
-          <PodiumCard entry={podiumOrder[2]} elevated={false} />
+          <PodiumCard entry={podiumOrder[0]} elevated={false} tm={tm} />
+          <PodiumCard entry={podiumOrder[1]} elevated={true} tm={tm} />
+          <PodiumCard entry={podiumOrder[2]} elevated={false} tm={tm} />
         </motion.div>
       </div>
 
@@ -340,7 +370,7 @@ export function Leaderboard({ liveUserPoints, activeTab, onTabChange }: Leaderbo
       <div>
         <div className="mb-2 flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          <h3 className="text-sm font-semibold text-muted-foreground">Bảng xếp hạng đầy đủ</h3>
+          <h3 className="text-sm font-semibold text-muted-foreground">{tm.fullRankTitle}</h3>
         </div>
         {/*
          * AnimatePresence wraps the list so entries can animate in/out if they
@@ -350,7 +380,7 @@ export function Leaderboard({ liveUserPoints, activeTab, onTabChange }: Leaderbo
         <AnimatePresence>
           <motion.div layout className="flex flex-col gap-2">
             {rest.map((entry) => (
-              <RankRow key={entry.username} entry={entry} />
+              <RankRow key={entry.username} entry={entry} tm={tm} />
             ))}
           </motion.div>
         </AnimatePresence>
