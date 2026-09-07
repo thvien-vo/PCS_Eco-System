@@ -38,6 +38,7 @@
     "autoprefixer": "^10.5.4",
     "eslint": "^9",
     "eslint-config-next": "16.2.12",
+    "pg": "^8.23.0",
     "postcss": "^8.5.25",
     "prettier": "^3.0.0",
     "prettier-plugin-tailwindcss": "^0.6.0",
