@@ -1,4 +1,4 @@
-﻿-- ==========================================================================
+-- ==========================================================================
 -- PCS Eco-System — Supabase Schema & RLS Policies
 -- ==========================================================================
 -- Run this SQL in the Supabase Dashboard → SQL Editor (or via supabase CLI).
@@ -24,14 +24,17 @@ CREATE TABLE IF NOT EXISTS profiles (
 
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "profiles: select own" ON profiles;
 CREATE POLICY "profiles: select own"
   ON profiles FOR SELECT
   USING (id = auth.uid());
 
+DROP POLICY IF EXISTS "profiles: insert own" ON profiles;
 CREATE POLICY "profiles: insert own"
   ON profiles FOR INSERT
   WITH CHECK (id = auth.uid());
 
+DROP POLICY IF EXISTS "profiles: update own" ON profiles;
 CREATE POLICY "profiles: update own"
   ON profiles FOR UPDATE
   USING (id = auth.uid())
@@ -51,10 +54,12 @@ CREATE TABLE IF NOT EXISTS wallets (
 
 ALTER TABLE wallets ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "wallets: select own" ON wallets;
 CREATE POLICY "wallets: select own"
   ON wallets FOR SELECT
   USING (id = auth.uid());
 
+DROP POLICY IF EXISTS "wallets: insert own" ON wallets;
 CREATE POLICY "wallets: insert own"
   ON wallets FOR INSERT
   WITH CHECK (id = auth.uid());
@@ -100,10 +105,12 @@ CREATE INDEX IF NOT EXISTS transactions_user_id_idx ON transactions (user_id);
 
 ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "transactions: select own" ON transactions;
 CREATE POLICY "transactions: select own"
   ON transactions FOR SELECT
   USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "transactions: insert own" ON transactions;
 CREATE POLICY "transactions: insert own"
   ON transactions FOR INSERT
   WITH CHECK (user_id = auth.uid());
@@ -124,14 +131,17 @@ CREATE TABLE IF NOT EXISTS user_likes (
 
 ALTER TABLE user_likes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "user_likes: select own" ON user_likes;
 CREATE POLICY "user_likes: select own"
   ON user_likes FOR SELECT
   USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "user_likes: insert own" ON user_likes;
 CREATE POLICY "user_likes: insert own"
   ON user_likes FOR INSERT
   WITH CHECK (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "user_likes: delete own" ON user_likes;
 CREATE POLICY "user_likes: delete own"
   ON user_likes FOR DELETE
   USING (user_id = auth.uid());
@@ -149,14 +159,17 @@ CREATE TABLE IF NOT EXISTS user_saved_vouchers (
 
 ALTER TABLE user_saved_vouchers ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "user_saved_vouchers: select own" ON user_saved_vouchers;
 CREATE POLICY "user_saved_vouchers: select own"
   ON user_saved_vouchers FOR SELECT
   USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "user_saved_vouchers: insert own" ON user_saved_vouchers;
 CREATE POLICY "user_saved_vouchers: insert own"
   ON user_saved_vouchers FOR INSERT
   WITH CHECK (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "user_saved_vouchers: delete own" ON user_saved_vouchers;
 CREATE POLICY "user_saved_vouchers: delete own"
   ON user_saved_vouchers FOR DELETE
   USING (user_id = auth.uid());
@@ -173,10 +186,12 @@ CREATE TABLE IF NOT EXISTS user_viewed_stories (
 
 ALTER TABLE user_viewed_stories ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "user_viewed_stories: select own" ON user_viewed_stories;
 CREATE POLICY "user_viewed_stories: select own"
   ON user_viewed_stories FOR SELECT
   USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "user_viewed_stories: insert own" ON user_viewed_stories;
 CREATE POLICY "user_viewed_stories: insert own"
   ON user_viewed_stories FOR INSERT
   WITH CHECK (user_id = auth.uid());
