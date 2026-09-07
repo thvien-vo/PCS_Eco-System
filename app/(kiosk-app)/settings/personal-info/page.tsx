@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Check } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
 import { useProfileStore } from '@/store/profile-store';
+import { useAuth } from '@/components/shared/auth-provider';
 import { useHasMounted } from '@/hooks/use-has-mounted';
 import { cn } from '@/lib/utils';
 import { MOTION_TOKENS } from '@/lib/motion-tokens';
@@ -19,7 +20,8 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export default function PersonalInfoPage() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { profile, setProfile } = useProfileStore();
+  const { user } = useAuth();
+  const { profile, setProfile, hydrateFromSupabase } = useProfileStore();
   const hasMounted = useHasMounted();
 
   const [form, setForm] = useState({
@@ -29,6 +31,21 @@ export default function PersonalInfoPage() {
   });
   const [errors, setErrors] = useState<Partial<typeof form>>({});
   const [saved, setSaved] = useState(false);
+
+  // Pull the profile down from Supabase on login — reaches a returning
+  // user's data set on a different device (per pcs-tech-standards §10a
+  // hydration guard: only after hasMounted, never during SSR/first paint).
+  useEffect(() => {
+    if (hasMounted && user?.id) {
+      void hydrateFromSupabase(user.id);
+    }
+  }, [hasMounted, user?.id, hydrateFromSupabase]);
+
+  // Keep the form in sync with the store — covers both the async
+  // hydrateFromSupabase merge above and rehydration from localStorage.
+  useEffect(() => {
+    setForm({ name: profile.name, phone: profile.phone, email: profile.email });
+  }, [profile.name, profile.phone, profile.email]);
 
   if (!hasMounted) {
     return (
@@ -63,12 +80,15 @@ export default function PersonalInfoPage() {
   const handleSave = () => {
     if (!validate()) return;
     const trimmedName = form.name.trim();
-    setProfile({
-      name: trimmedName,
-      phone: form.phone.trim(),
-      email: form.email.trim(),
-      avatarUrl: `https://picsum.photos/seed/${encodeURIComponent(trimmedName)}/200/200`,
-    });
+    setProfile(
+      {
+        name: trimmedName,
+        phone: form.phone.trim(),
+        email: form.email.trim(),
+        avatarUrl: `https://picsum.photos/seed/${encodeURIComponent(trimmedName)}/200/200`,
+      },
+      user?.id,
+    );
     setSaved(true);
     setTimeout(() => setSaved(false), 2200);
   };
