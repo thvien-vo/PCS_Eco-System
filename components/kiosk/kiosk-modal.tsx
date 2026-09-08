@@ -45,6 +45,7 @@ import { useWalletStore } from '@/store/wallet-store';
 import { QrDisplayModule } from '@/components/kiosk/qr-display-module';
 import { ParticleBurst } from '@/components/shared/particle-burst';
 import { useTranslation } from '@/hooks/use-translation';
+import { ModalPortal } from '@/components/shared/modal-portal';
 import type { ScanResult } from '@/types';
 
 // ── REJECT scenario metadata (from pcs-domain-knowledge §6) ─────────────────
@@ -264,332 +265,329 @@ export function KioskModal() {
       </motion.button>
 
       {/* ── Modal overlay ── */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: MOTION_TOKENS.durations.base }}
-            className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center"
-            onClick={(e) => {
-              // Close on backdrop click
-              if (e.target === e.currentTarget) handleClose();
-            }}
-          >
+      <ModalPortal>
+        <AnimatePresence>
+          {isOpen && (
             <motion.div
-              initial={{ y: 60, opacity: 0, scale: 0.97 }}
-              animate={{ y: 0, opacity: 1, scale: 1 }}
-              exit={{ y: 60, opacity: 0, scale: 0.97 }}
-              transition={{
-                duration: MOTION_TOKENS.durations.slow,
-                ease: MOTION_TOKENS.easing.enter,
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: MOTION_TOKENS.durations.base }}
+              className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center"
+              onClick={(e) => {
+                // Close on backdrop click
+                if (e.target === e.currentTarget) handleClose();
               }}
-              className="relative w-full max-w-[390px] overflow-hidden rounded-t-3xl bg-background pb-8 sm:rounded-3xl"
-              onClick={(e) => e.stopPropagation()}
             >
-              {/* ── SIMULATION MODE badge — ALWAYS visible, per spec ── */}
-              <div className="absolute left-4 top-4 z-10">
-                <span className="inline-flex items-center gap-1 rounded-full border border-[var(--warning-amber)] bg-[var(--warning-amber)]/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--warning-amber)]">
-                  <Zap className="h-2.5 w-2.5" />
-                  {tm.modal.simulationBadge}
-                </span>
-              </div>
-
-              {/* ── Close button — ALWAYS visible, per spec ── */}
-              <button
-                id="kiosk-close-btn"
-                type="button"
-                onClick={handleClose}
-                className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-border/60 text-muted-foreground transition-colors hover:bg-border hover:text-foreground"
-                aria-label={tm.modal.closeAria}
+              <motion.div
+                initial={{ y: 60, opacity: 0, scale: 0.97 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                exit={{ y: 60, opacity: 0, scale: 0.97 }}
+                transition={{
+                  duration: MOTION_TOKENS.durations.slow,
+                  ease: MOTION_TOKENS.easing.enter,
+                }}
+                className="relative w-full max-w-[390px] overflow-hidden rounded-t-3xl bg-background pb-8 sm:rounded-3xl"
+                onClick={(e) => e.stopPropagation()}
               >
-                <X className="h-4 w-4" />
-              </button>
+                {/* ── SIMULATION MODE badge — ALWAYS visible, per spec ── */}
+                <div className="absolute left-4 top-4 z-10">
+                  <span className="bg-[var(--warning-amber)]/10 inline-flex items-center gap-1 rounded-full border border-[var(--warning-amber)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[var(--warning-amber)]">
+                    <Zap className="h-2.5 w-2.5" />
+                    {tm.modal.simulationBadge}
+                  </span>
+                </div>
 
-              {/* ── Modal content (phase-driven) ── */}
-              <div className="mt-0 px-5 pt-14">
-                <AnimatePresence mode="wait">
-                  {/* ── QR_DISPLAY phase ── */}
-                  {phase === 'QR_DISPLAY' && (
-                    <motion.div
-                      key="qr-display"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{
-                        duration: MOTION_TOKENS.durations.base,
-                        ease: MOTION_TOKENS.easing.standard,
-                      }}
-                    >
-                      <div className="mb-4 text-center">
-                        <h2 className="text-lg font-bold text-foreground">
-                          {tm.qrPhase.title}
-                        </h2>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {tm.qrPhase.subtitle}
-                        </p>
-                      </div>
-                      <QrDisplayModule renderTarget="screen" />
-                    </motion.div>
-                  )}
+                {/* ── Close button — ALWAYS visible, per spec ── */}
+                <button
+                  id="kiosk-close-btn"
+                  type="button"
+                  onClick={handleClose}
+                  className="bg-border/60 absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-border hover:text-foreground"
+                  aria-label={tm.modal.closeAria}
+                >
+                  <X className="h-4 w-4" />
+                </button>
 
-                  {/* ── SIMULATED_SCAN phase ── */}
-                  {phase === 'SIMULATED_SCAN' && (
-                    <motion.div
-                      key="simulated-scan"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{
-                        duration: MOTION_TOKENS.durations.base,
-                        ease: MOTION_TOKENS.easing.standard,
-                      }}
-                      className="flex flex-col items-center gap-5 py-4"
-                    >
-                      {/* Scanning animation */}
-                      <div className="relative flex h-24 w-24 items-center justify-center">
-                        <motion.div
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
-                          className="absolute inset-0 rounded-full border-4 border-transparent border-t-[var(--primary-emerald)]"
-                        />
-                        <span className="text-4xl">🔬</span>
-                      </div>
-
-                      <div className="text-center">
-                        <h2 className="text-lg font-bold text-foreground">
-                          {tm.scanPhase.title}
-                        </h2>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {tm.scanPhase.subtitle}
-                        </p>
-                      </div>
-
-                      {/* Debug controls */}
-                      <div className="w-full rounded-2xl border border-border bg-card p-4">
-                        <p className="mb-3 text-center text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                          {tm.scanPhase.debugLabel}
-                        </p>
-
-                        {/* PASS button */}
-                        <motion.button
-                          id="kiosk-pass-btn"
-                          type="button"
-                          onClick={handlePass}
-                          className="mb-2 w-full rounded-xl bg-[var(--kiosk-pass)] px-4 py-3 text-sm font-bold text-white hover:opacity-90 active:scale-[0.98]"
-                          whileTap={{ scale: 0.97 }}
-                          transition={{ duration: MOTION_TOKENS.durations.fast }}
-                        >
-                          {tm.scanPhase.passButton}
-                        </motion.button>
-
-                        {/* REJECT buttons (4 distinct reasons) */}
-                        <div className="flex flex-col gap-2">
-                          {REJECT_SCENARIOS.map((scenario) => (
-                            <motion.button
-                              key={scenario.reason}
-                              id={`kiosk-reject-btn-${scenario.reason?.toLowerCase().replace(/[\s/]/g, '-')}`}
-                              type="button"
-                              onClick={() => handleReject(scenario)}
-                              className={`w-full rounded-xl px-4 py-2.5 text-left text-xs font-medium text-white hover:opacity-90 active:scale-[0.98] ${
-                                scenario.severity === 'high'
-                                  ? 'bg-[var(--error-rose)]'
-                                  : 'bg-[var(--warning-amber)]'
-                              }`}
-                              whileTap={{ scale: 0.97 }}
-                              transition={{ duration: MOTION_TOKENS.durations.fast }}
-                            >
-                              {scenario.icon} REJECT · {scenario.label}
-                            </motion.button>
-                          ))}
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {/* ── RESULT_PASS phase ── */}
-                  {phase === 'RESULT_PASS' && scanResult && (
-                    <motion.div
-                      key="result-pass"
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      transition={{
-                        duration: MOTION_TOKENS.durations.slow,
-                        ease: MOTION_TOKENS.easing.enter,
-                      }}
-                      className="flex flex-col items-center gap-4 py-4"
-                    >
-                      {/* Success icon */}
+                {/* ── Modal content (phase-driven) ── */}
+                <div className="mt-0 px-5 pt-14">
+                  <AnimatePresence mode="wait">
+                    {/* ── QR_DISPLAY phase ── */}
+                    {phase === 'QR_DISPLAY' && (
                       <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{
-                          ...MOTION_TOKENS.spring.bouncy,
-                          delay: 0.1,
-                        }}
-                        className="flex h-20 w-20 items-center justify-center rounded-full bg-[var(--kiosk-pass)]/15"
-                      >
-                        <CheckCircle2
-                          className="h-12 w-12"
-                          style={{ color: 'var(--kiosk-pass)' }}
-                        />
-                      </motion.div>
-
-                      <div className="text-center">
-                        <h2
-                          className="text-2xl font-bold"
-                          style={{ color: 'var(--kiosk-pass)' }}
-                        >
-                          {tm.passResult.heading}
-                        </h2>
-                        <p className="mt-1 text-sm font-medium text-foreground">
-                          {scanResult.materialDetected} · {scanResult.confidenceScore}{tm.passResult.confidenceSuffix}
-                        </p>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {tm.passResult.goodItemDesc}
-                        </p>
-                      </div>
-
-                      {/* Points awarded */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
+                        key="qr-display"
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
                         transition={{
                           duration: MOTION_TOKENS.durations.base,
-                          delay: 0.3,
+                          ease: MOTION_TOKENS.easing.standard,
                         }}
-                        className="flex items-center gap-2 rounded-2xl bg-[var(--kiosk-pass)]/10 px-6 py-3"
                       >
-                        <span className="text-2xl">🌿</span>
-                        <div>
-                          <p className="text-xs text-muted-foreground">{tm.passResult.pointsLabel}</p>
-                          <p
-                            className="text-2xl font-bold"
-                            style={{ color: 'var(--kiosk-pass)' }}
-                          >
-                            +{scanResult.pointsAwarded}{tm.passResult.pointsSuffix}
+                        <div className="mb-4 text-center">
+                          <h2 className="text-lg font-bold text-foreground">{tm.qrPhase.title}</h2>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {tm.qrPhase.subtitle}
                           </p>
                         </div>
+                        <QrDisplayModule renderTarget="screen" />
                       </motion.div>
+                    )}
 
-                      <AutoResetIndicator secondsLeft={autoResetSecondsLeft} variant="pass" label={tm.autoReset.label} />
-
-                      <button
-                        id="kiosk-close-pass-btn"
-                        type="button"
-                        onClick={handleClose}
-                        className="w-full rounded-xl bg-[var(--kiosk-pass)] px-4 py-3 text-sm font-semibold text-white hover:opacity-90"
+                    {/* ── SIMULATED_SCAN phase ── */}
+                    {phase === 'SIMULATED_SCAN' && (
+                      <motion.div
+                        key="simulated-scan"
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{
+                          duration: MOTION_TOKENS.durations.base,
+                          ease: MOTION_TOKENS.easing.standard,
+                        }}
+                        className="flex flex-col items-center gap-5 py-4"
                       >
-                        {tm.passResult.closeButton}
-                      </button>
-                    </motion.div>
-                  )}
+                        {/* Scanning animation */}
+                        <div className="relative flex h-24 w-24 items-center justify-center">
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
+                            className="absolute inset-0 rounded-full border-4 border-transparent border-t-[var(--primary-emerald)]"
+                          />
+                          <span className="text-4xl">🔬</span>
+                        </div>
 
-                  {/* ── RESULT_REJECT phase ── */}
-                  {phase === 'RESULT_REJECT' && scanResult && (
-                    <motion.div
-                      key="result-reject"
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      transition={{
-                        duration: MOTION_TOKENS.durations.slow,
-                        ease: MOTION_TOKENS.easing.enter,
-                      }}
-                      className="flex flex-col items-center gap-4 py-4"
-                    >
-                      {/* Find the matching scenario for the reject reason */}
-                      {(() => {
-                        const scenario = REJECT_SCENARIOS.find(
-                          (s) => s.reason === scanResult.rejectReason
-                        );
-                        const isHigh = scenario?.severity === 'high';
-                        const color = isHigh
-                          ? 'var(--error-rose)'
-                          : 'var(--warning-amber)';
+                        <div className="text-center">
+                          <h2 className="text-lg font-bold text-foreground">
+                            {tm.scanPhase.title}
+                          </h2>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {tm.scanPhase.subtitle}
+                          </p>
+                        </div>
 
-                        return (
-                          <>
-                            {/* Reject icon */}
-                            <motion.div
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                              transition={{
-                                ...MOTION_TOKENS.spring.bouncy,
-                                delay: 0.1,
-                              }}
-                              className="flex h-20 w-20 items-center justify-center rounded-full"
-                              style={{ backgroundColor: `color-mix(in srgb, ${color} 15%, transparent)` }}
-                            >
-                              {isHigh ? (
-                                <XCircle
-                                  className="h-12 w-12"
-                                  style={{ color }}
-                                />
-                              ) : (
-                                <AlertTriangle
-                                  className="h-12 w-12"
-                                  style={{ color }}
-                                />
-                              )}
-                            </motion.div>
+                        {/* Debug controls */}
+                        <div className="w-full rounded-2xl border border-border bg-card p-4">
+                          <p className="mb-3 text-center text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            {tm.scanPhase.debugLabel}
+                          </p>
 
-                            <div className="text-center">
-                              <h2
-                                className="text-xl font-bold"
-                                style={{ color }}
+                          {/* PASS button */}
+                          <motion.button
+                            id="kiosk-pass-btn"
+                            type="button"
+                            onClick={handlePass}
+                            className="mb-2 w-full rounded-xl bg-[var(--kiosk-pass)] px-4 py-3 text-sm font-bold text-white hover:opacity-90 active:scale-[0.98]"
+                            whileTap={{ scale: 0.97 }}
+                            transition={{ duration: MOTION_TOKENS.durations.fast }}
+                          >
+                            {tm.scanPhase.passButton}
+                          </motion.button>
+
+                          {/* REJECT buttons (4 distinct reasons) */}
+                          <div className="flex flex-col gap-2">
+                            {REJECT_SCENARIOS.map((scenario) => (
+                              <motion.button
+                                key={scenario.reason}
+                                id={`kiosk-reject-btn-${scenario.reason?.toLowerCase().replace(/[\s/]/g, '-')}`}
+                                type="button"
+                                onClick={() => handleReject(scenario)}
+                                className={`w-full rounded-xl px-4 py-2.5 text-left text-xs font-medium text-white hover:opacity-90 active:scale-[0.98] ${
+                                  scenario.severity === 'high'
+                                    ? 'bg-[var(--error-rose)]'
+                                    : 'bg-[var(--warning-amber)]'
+                                }`}
+                                whileTap={{ scale: 0.97 }}
+                                transition={{ duration: MOTION_TOKENS.durations.fast }}
                               >
-                                {scenario?.icon} {scenario?.label ?? tm.rejectResult.fallbackLabel}
-                              </h2>
-                              <p className="mt-1 text-xs text-muted-foreground">
-                                {tm.rejectResult.subtitle}
-                              </p>
-                            </div>
+                                {scenario.icon} REJECT · {scenario.label}
+                              </motion.button>
+                            ))}
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
 
-                            {/* Unique guidance message per reject reason */}
-                            <motion.div
-                              initial={{ opacity: 0, y: 8 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{
-                                duration: MOTION_TOKENS.durations.base,
-                                delay: 0.2,
-                              }}
-                              className="w-full rounded-2xl border p-4 text-sm leading-relaxed text-foreground"
-                              style={{
-                                borderColor: `color-mix(in srgb, ${color} 40%, transparent)`,
-                                backgroundColor: `color-mix(in srgb, ${color} 6%, transparent)`,
-                              }}
+                    {/* ── RESULT_PASS phase ── */}
+                    {phase === 'RESULT_PASS' && scanResult && (
+                      <motion.div
+                        key="result-pass"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={{
+                          duration: MOTION_TOKENS.durations.slow,
+                          ease: MOTION_TOKENS.easing.enter,
+                        }}
+                        className="flex flex-col items-center gap-4 py-4"
+                      >
+                        {/* Success icon */}
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{
+                            ...MOTION_TOKENS.spring.bouncy,
+                            delay: 0.1,
+                          }}
+                          className="bg-[var(--kiosk-pass)]/15 flex h-20 w-20 items-center justify-center rounded-full"
+                        >
+                          <CheckCircle2
+                            className="h-12 w-12"
+                            style={{ color: 'var(--kiosk-pass)' }}
+                          />
+                        </motion.div>
+
+                        <div className="text-center">
+                          <h2 className="text-2xl font-bold" style={{ color: 'var(--kiosk-pass)' }}>
+                            {tm.passResult.heading}
+                          </h2>
+                          <p className="mt-1 text-sm font-medium text-foreground">
+                            {scanResult.materialDetected} · {scanResult.confidenceScore}
+                            {tm.passResult.confidenceSuffix}
+                          </p>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {tm.passResult.goodItemDesc}
+                          </p>
+                        </div>
+
+                        {/* Points awarded */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{
+                            duration: MOTION_TOKENS.durations.base,
+                            delay: 0.3,
+                          }}
+                          className="bg-[var(--kiosk-pass)]/10 flex items-center gap-2 rounded-2xl px-6 py-3"
+                        >
+                          <span className="text-2xl">🌿</span>
+                          <div>
+                            <p className="text-xs text-muted-foreground">
+                              {tm.passResult.pointsLabel}
+                            </p>
+                            <p
+                              className="text-2xl font-bold"
+                              style={{ color: 'var(--kiosk-pass)' }}
                             >
-                              {scenario?.guidance}
-                            </motion.div>
+                              +{scanResult.pointsAwarded}
+                              {tm.passResult.pointsSuffix}
+                            </p>
+                          </div>
+                        </motion.div>
 
-                            <AutoResetIndicator
-                              secondsLeft={autoResetSecondsLeft}
-                              variant="reject"
-                              label={tm.autoReset.label}
-                            />
+                        <AutoResetIndicator
+                          secondsLeft={autoResetSecondsLeft}
+                          variant="pass"
+                          label={tm.autoReset.label}
+                        />
 
-                            <button
-                              id="kiosk-close-reject-btn"
-                              type="button"
-                              onClick={handleClose}
-                              className="w-full rounded-xl border border-border px-4 py-3 text-sm font-semibold text-foreground hover:bg-card"
-                            >
-                              {tm.rejectResult.closeButton}
-                            </button>
-                          </>
-                        );
-                      })()}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+                        <button
+                          id="kiosk-close-pass-btn"
+                          type="button"
+                          onClick={handleClose}
+                          className="w-full rounded-xl bg-[var(--kiosk-pass)] px-4 py-3 text-sm font-semibold text-white hover:opacity-90"
+                        >
+                          {tm.passResult.closeButton}
+                        </button>
+                      </motion.div>
+                    )}
+
+                    {/* ── RESULT_REJECT phase ── */}
+                    {phase === 'RESULT_REJECT' && scanResult && (
+                      <motion.div
+                        key="result-reject"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={{
+                          duration: MOTION_TOKENS.durations.slow,
+                          ease: MOTION_TOKENS.easing.enter,
+                        }}
+                        className="flex flex-col items-center gap-4 py-4"
+                      >
+                        {/* Find the matching scenario for the reject reason */}
+                        {(() => {
+                          const scenario = REJECT_SCENARIOS.find(
+                            (s) => s.reason === scanResult.rejectReason
+                          );
+                          const isHigh = scenario?.severity === 'high';
+                          const color = isHigh ? 'var(--error-rose)' : 'var(--warning-amber)';
+
+                          return (
+                            <>
+                              {/* Reject icon */}
+                              <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{
+                                  ...MOTION_TOKENS.spring.bouncy,
+                                  delay: 0.1,
+                                }}
+                                className="flex h-20 w-20 items-center justify-center rounded-full"
+                                style={{
+                                  backgroundColor: `color-mix(in srgb, ${color} 15%, transparent)`,
+                                }}
+                              >
+                                {isHigh ? (
+                                  <XCircle className="h-12 w-12" style={{ color }} />
+                                ) : (
+                                  <AlertTriangle className="h-12 w-12" style={{ color }} />
+                                )}
+                              </motion.div>
+
+                              <div className="text-center">
+                                <h2 className="text-xl font-bold" style={{ color }}>
+                                  {scenario?.icon}{' '}
+                                  {scenario?.label ?? tm.rejectResult.fallbackLabel}
+                                </h2>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                  {tm.rejectResult.subtitle}
+                                </p>
+                              </div>
+
+                              {/* Unique guidance message per reject reason */}
+                              <motion.div
+                                initial={{ opacity: 0, y: 8 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{
+                                  duration: MOTION_TOKENS.durations.base,
+                                  delay: 0.2,
+                                }}
+                                className="w-full rounded-2xl border p-4 text-sm leading-relaxed text-foreground"
+                                style={{
+                                  borderColor: `color-mix(in srgb, ${color} 40%, transparent)`,
+                                  backgroundColor: `color-mix(in srgb, ${color} 6%, transparent)`,
+                                }}
+                              >
+                                {scenario?.guidance}
+                              </motion.div>
+
+                              <AutoResetIndicator
+                                secondsLeft={autoResetSecondsLeft}
+                                variant="reject"
+                                label={tm.autoReset.label}
+                              />
+
+                              <button
+                                id="kiosk-close-reject-btn"
+                                type="button"
+                                onClick={handleClose}
+                                className="w-full rounded-xl border border-border px-4 py-3 text-sm font-semibold text-foreground hover:bg-card"
+                              >
+                                {tm.rejectResult.closeButton}
+                              </button>
+                            </>
+                          );
+                        })()}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
+      </ModalPortal>
     </>
   );
 }
