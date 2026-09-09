@@ -34,6 +34,7 @@ import { cn } from '@/lib/utils';
 import type { MarketplaceCatalogItem, CatalogCategory } from '@/types';
 import { useTranslation } from '@/hooks/use-translation';
 import { useHasMounted } from '@/hooks/use-has-mounted';
+import { useAuth } from '@/components/shared/auth-provider';
 
 type FilterTab = 'all' | CatalogCategory;
 
@@ -44,6 +45,7 @@ export default function MarketplacePage() {
   const { t } = useTranslation();
   const tm = t.marketplace;
   const hasMounted = useHasMounted();
+  const { user } = useAuth();
 
   // ── Wallet store — real points from persisted Zustand store ──────────────
   const points = useWalletStore((s) => s.points);
@@ -117,6 +119,7 @@ export default function MarketplacePage() {
       const success = deductPoints(
         item.pointsCost,
         `Đổi thưởng: ${item.title} (${item.partnerName})`,
+        user?.id,
       );
       if (!success) return; // Shouldn't happen if card guard is correct, but belt-and-suspenders
 
@@ -131,7 +134,7 @@ export default function MarketplacePage() {
       setSuccessItem(item);
       setIsSuccessModalOpen(true);
     },
-    [deductPoints, addRedeemedVoucher],
+    [deductPoints, addRedeemedVoucher, user?.id],
   );
 
   const handleBurstComplete = useCallback(() => {

@@ -45,6 +45,7 @@ import { useWalletStore } from '@/store/wallet-store';
 import { QrDisplayModule } from '@/components/kiosk/qr-display-module';
 import { ParticleBurst } from '@/components/shared/particle-burst';
 import { useTranslation } from '@/hooks/use-translation';
+import { useAuth } from '@/components/shared/auth-provider';
 import { ModalPortal } from '@/components/shared/modal-portal';
 import type { ScanResult } from '@/types';
 
@@ -79,6 +80,7 @@ const POINTS_AWARDED_PASS = 25;
 export function KioskModal() {
   const { phase, scanResult, setResult, resetKiosk, openKiosk } = useKioskStore();
   const addPoints = useWalletStore((s) => s.addPoints);
+  const { user } = useAuth();
   const { t } = useTranslation();
   const tm = t.kiosk;
 
@@ -160,14 +162,15 @@ export function KioskModal() {
       hasResultedRef.current = true; // lock immediately — before any async
 
       setResult(PASS_RESULT);
-      addPoints(POINTS_AWARDED_PASS, 'Thu gom nhựa tại trạm PCS HCM-01 (PET, 98.7%)');
+      console.log('[KioskModal DEBUG] Before addPoints — user?.id =', user?.id);
+      addPoints(POINTS_AWARDED_PASS, 'Thu gom nhựa tại trạm PCS HCM-01 (PET, 98.7%)', user?.id);
 
       // Fire particle burst from the button position
       const rect = e.currentTarget.getBoundingClientRect();
       setBurstOrigin({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
       setBurstTrigger(true);
     },
-    [setResult, addPoints]
+    [setResult, addPoints, user?.id]
   );
 
   const handleReject = useCallback(

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Transaction } from '@/types';
 import { enqueueAction } from '@/lib/sync-queue';
+import { fetchWalletPoints, fetchTransactions } from '@/lib/supabase/db';
 
 // ---------------------------------------------------------------------------
 // WalletStore
@@ -38,6 +39,19 @@ interface WalletState {
    * Safe under React Strict Mode double-invocation.
    */
   seedDemoTransactions: (mockTxs: Transaction[]) => void;
+
+  /**
+   * Pull the user's wallet points + transaction history down from Supabase
+   * and merge into local state — used on login so points/history earned on
+   * another device reach this device.
+   *
+   * Deliberately a merge, not a blind overwrite: transactions are unioned by
+   * id (remote rows the local log doesn't have yet are appended), and points
+   * is the MAX of local vs. remote — a locally-earned balance that hasn't
+   * flushed through the sync queue yet must never be wiped by a stale remote
+   * read racing against it.
+   */
+  hydrateFromSupabase: (userId: string) => Promise<void>;
 }
 
 export const useWalletStore = create<WalletState>()(
@@ -49,6 +63,7 @@ export const useWalletStore = create<WalletState>()(
       hasSeededDemoData: false,
 
       addPoints: (amount, description, userId) => {
+        console.log('[WalletStore.addPoints DEBUG] userId =', userId, 'amount =', amount);
         const id = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
         const date = new Date().toISOString();
 
@@ -61,6 +76,7 @@ export const useWalletStore = create<WalletState>()(
         }));
 
         if (userId) {
+          console.log('[WalletStore.addPoints DEBUG] Calling enqueueAction for ADD_POINTS', {id, userId});
           // Fire-and-forget — render is synchronous, queue is async.
           void enqueueAction({
             id,
@@ -69,6 +85,8 @@ export const useWalletStore = create<WalletState>()(
             payload: { id, type: 'earn', amount, date, description },
             createdAt: date,
           });
+        } else {
+          console.log('[WalletStore.addPoints DEBUG] userId is falsy, NOT calling enqueueAction');
         }
       },
 
@@ -121,6 +139,29 @@ export const useWalletStore = create<WalletState>()(
             points: state.points + addedPoints,
           };
         }),
+
+      hydrateFromSupabase: async (userId) => {
+        const [remotePoints, remoteTransactions] = await Promise.all([
+          fetchWalletPoints(userId),
+          fetchTransactions(userId),
+        ]);
+
+        // No wallet row yet (e.g. never migrated/synced) — keep local as-is.
+        if (remotePoints === null) return;
+
+        set((state) => {
+          const localIds = new Set(state.transactions.map((tx) => tx.id));
+          const newFromRemote = remoteTransactions.filter((tx) => !localIds.has(tx.id));
+          const mergedTransactions = [...newFromRemote, ...state.transactions].sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+          );
+
+          return {
+            points: Math.max(state.points, remotePoints),
+            transactions: mergedTransactions,
+          };
+        });
+      },
     }),
     {
       name: 'pcs-wallet-store',

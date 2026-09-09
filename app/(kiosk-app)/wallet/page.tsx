@@ -6,6 +6,7 @@ import { useHasMounted } from '@/hooks/use-has-mounted';
 import { computeWalletStats } from '@/lib/wallet-calculations';
 import { MOCK_TRANSACTIONS } from '@/lib/mock-data';
 import { useTranslation } from '@/hooks/use-translation';
+import { useAuth } from '@/components/shared/auth-provider';
 
 import { WalletSkeleton } from '@/components/wallet/wallet-skeleton';
 import { PointsHeroCard } from '@/components/wallet/points-hero-card';
@@ -16,7 +17,8 @@ import { TransactionList } from '@/components/wallet/transaction-list';
 
 export default function WalletPage() {
   const hasMounted = useHasMounted();
-  const { transactions, points, seedDemoTransactions } = useWalletStore();
+  const { transactions, points, seedDemoTransactions, hydrateFromSupabase } = useWalletStore();
+  const { user } = useAuth();
   const { t } = useTranslation();
   const tm = t.wallet;
 
@@ -26,6 +28,15 @@ export default function WalletPage() {
       seedDemoTransactions(MOCK_TRANSACTIONS);
     }
   }, [hasMounted, seedDemoTransactions]);
+
+  // Pull points + transaction history down from Supabase on login — reaches
+  // a returning user's balance/history synced from another device (per
+  // pcs-tech-standards §10a hydration guard: only after hasMounted).
+  useEffect(() => {
+    if (hasMounted && user?.id) {
+      void hydrateFromSupabase(user.id);
+    }
+  }, [hasMounted, user?.id, hydrateFromSupabase]);
 
   const stats = useMemo(() => computeWalletStats(transactions, points), [transactions, points]);
 

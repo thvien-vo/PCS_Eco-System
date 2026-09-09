@@ -40,6 +40,11 @@ CREATE POLICY "profiles: update own"
   USING (id = auth.uid())
   WITH CHECK (id = auth.uid());
 
+-- Table-level GRANT is required in addition to RLS policies: Postgres checks
+-- GRANTs before evaluating RLS, so without this, INSERT/SELECT/UPDATE fail
+-- with "permission denied for table" even when the RLS policy is correct.
+GRANT SELECT, INSERT, UPDATE ON profiles TO authenticated;
+
 -- --------------------------------------------------------------------------
 -- 2. wallets
 --    Stores the derived points total for quick reads.
@@ -66,22 +71,37 @@ CREATE POLICY "wallets: insert own"
 
 -- NOTE: UPDATE is intentionally NOT granted to users directly.
 -- All point mutations go through the RPC functions below.
+GRANT SELECT, INSERT ON wallets TO authenticated;
 
 -- Atomic increment (used by ADD_POINTS sync action)
+-- SECURITY DEFINER: runs as postgres, but MUST verify auth.uid() = user_uuid
+-- to prevent privilege escalation (any user modifying any other user's points).
 CREATE OR REPLACE FUNCTION increment_points(user_uuid UUID, delta INTEGER)
 RETURNS VOID
 LANGUAGE plpgsql SECURITY DEFINER AS $$
 BEGIN
+  -- Defense-in-depth: ensure caller is authorized to modify this user's points
+  IF auth.uid() != user_uuid THEN
+    RAISE EXCEPTION 'Unauthorized: cannot modify other users'' points';
+  END IF;
+
   UPDATE wallets SET points = points + delta, updated_at = NOW()
   WHERE id = user_uuid;
 END;
 $$;
 
 -- Atomic decrement — prevents points going below 0
+-- SECURITY DEFINER: runs as postgres, but MUST verify auth.uid() = user_uuid
+-- to prevent privilege escalation (any user modifying any other user's points).
 CREATE OR REPLACE FUNCTION decrement_points(user_uuid UUID, delta INTEGER)
 RETURNS VOID
 LANGUAGE plpgsql SECURITY DEFINER AS $$
 BEGIN
+  -- Defense-in-depth: ensure caller is authorized to modify this user's points
+  IF auth.uid() != user_uuid THEN
+    RAISE EXCEPTION 'Unauthorized: cannot modify other users'' points';
+  END IF;
+
   UPDATE wallets SET points = GREATEST(0, points - delta), updated_at = NOW()
   WHERE id = user_uuid;
 END;
@@ -116,6 +136,7 @@ CREATE POLICY "transactions: insert own"
   WITH CHECK (user_id = auth.uid());
 
 -- No UPDATE or DELETE policies — this table is immutable by design.
+GRANT SELECT, INSERT ON transactions TO authenticated;
 
 -- --------------------------------------------------------------------------
 -- 4. user_likes  (NORMALIZED — replaces jsonb array; idempotent INSERT)
@@ -146,6 +167,8 @@ CREATE POLICY "user_likes: delete own"
   ON user_likes FOR DELETE
   USING (user_id = auth.uid());
 
+GRANT SELECT, INSERT, DELETE ON user_likes TO authenticated;
+
 -- --------------------------------------------------------------------------
 -- 5. user_saved_vouchers  (NORMALIZED — replaces jsonb array)
 --    Primary key (user_id, voucher_id) guarantees idempotency.
@@ -174,6 +197,8 @@ CREATE POLICY "user_saved_vouchers: delete own"
   ON user_saved_vouchers FOR DELETE
   USING (user_id = auth.uid());
 
+GRANT SELECT, INSERT, DELETE ON user_saved_vouchers TO authenticated;
+
 -- --------------------------------------------------------------------------
 -- 6. user_viewed_stories  (BEST-EFFORT — low-value, no retry on fail)
 -- --------------------------------------------------------------------------
@@ -195,6 +220,8 @@ DROP POLICY IF EXISTS "user_viewed_stories: insert own" ON user_viewed_stories;
 CREATE POLICY "user_viewed_stories: insert own"
   ON user_viewed_stories FOR INSERT
   WITH CHECK (user_id = auth.uid());
+
+GRANT SELECT, INSERT ON user_viewed_stories TO authenticated;
 
 -- --------------------------------------------------------------------------
 -- 7. Auto-create profile row on new user sign-up
