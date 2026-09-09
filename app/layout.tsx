@@ -22,6 +22,14 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'vi_VN',
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'PCS Eco-System',
+  },
+  icons: {
+    apple: '/apple-touch-icon.png',
+  },
 };
 
 export default async function RootLayout({
