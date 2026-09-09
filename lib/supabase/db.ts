@@ -144,14 +144,6 @@ export async function insertTransaction(
 ): Promise<{ error: string | null }> {
   const supabase = createClient();
 
-  // DEBUG: Verify session is available before INSERT
-  const { data: sessionData } = await supabase.auth.getSession();
-  console.log('[insertTransaction DEBUG] session check:', {
-    sessionUserId: sessionData?.session?.user?.id,
-    paramUserId: userId,
-    sessionMatch: sessionData?.session?.user?.id === userId,
-  });
-
   const { error } = await supabase.from('transactions').insert({
     id: tx.id,
     user_id: userId,
@@ -159,10 +151,6 @@ export async function insertTransaction(
     amount: tx.amount,
     date: tx.date,
     description: tx.description,
-  });
-  console.log('[insertTransaction DEBUG] insert result:', {
-    error: error?.message,
-    errorCode: error?.code,
   });
   // 23505 = unique_violation — already synced, not an error.
   if (error && error.code !== '23505') return { error: error.message };

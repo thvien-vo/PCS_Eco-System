@@ -63,7 +63,6 @@ export const useWalletStore = create<WalletState>()(
       hasSeededDemoData: false,
 
       addPoints: (amount, description, userId) => {
-        console.log('[WalletStore.addPoints DEBUG] userId =', userId, 'amount =', amount);
         const id = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
         const date = new Date().toISOString();
 
@@ -76,7 +75,6 @@ export const useWalletStore = create<WalletState>()(
         }));
 
         if (userId) {
-          console.log('[WalletStore.addPoints DEBUG] Calling enqueueAction for ADD_POINTS', {id, userId});
           // Fire-and-forget — render is synchronous, queue is async.
           void enqueueAction({
             id,
@@ -85,8 +83,6 @@ export const useWalletStore = create<WalletState>()(
             payload: { id, type: 'earn', amount, date, description },
             createdAt: date,
           });
-        } else {
-          console.log('[WalletStore.addPoints DEBUG] userId is falsy, NOT calling enqueueAction');
         }
       },
 

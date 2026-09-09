@@ -162,7 +162,6 @@ export function KioskModal() {
       hasResultedRef.current = true; // lock immediately — before any async
 
       setResult(PASS_RESULT);
-      console.log('[KioskModal DEBUG] Before addPoints — user?.id =', user?.id);
       addPoints(POINTS_AWARDED_PASS, 'Thu gom nhựa tại trạm PCS HCM-01 (PET, 98.7%)', user?.id);
 
       // Fire particle burst from the button position

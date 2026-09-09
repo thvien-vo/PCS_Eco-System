@@ -29,7 +29,6 @@ async function processEntry(
       case 'ADD_TRANSACTION':
       case 'ADD_POINTS':
       case 'DEDUCT_POINTS': {
-        console.log('[SyncService.processEntry DEBUG]', entry.action, 'entry:', entry);
         // Insert the transaction row via DAL (idempotent).
         const { error } = await insertTransaction(userId, {
           id: entry.payload['id'] as string ?? entry.id,
@@ -38,23 +37,19 @@ async function processEntry(
           date: entry.payload['date'] as string ?? entry.createdAt,
           description: entry.payload['description'] as string ?? '',
         });
-        console.log('[SyncService.processEntry DEBUG] insertTransaction result — error:', error);
         if (error) throw new Error(error);
 
         // Also keep wallets.points in sync via atomic RPC.
         if (entry.action === 'ADD_POINTS') {
-          console.log('[SyncService.processEntry DEBUG] Calling increment_points RPC');
-          const rpcResult = await supabase.rpc('increment_points', {
+          await supabase.rpc('increment_points', {
             user_uuid: userId,
             delta: entry.payload['amount'] as number,
           });
-          console.log('[SyncService.processEntry DEBUG] increment_points RPC result:', rpcResult);
         } else if (entry.action === 'DEDUCT_POINTS') {
-          const rpcResult = await supabase.rpc('decrement_points', {
+          await supabase.rpc('decrement_points', {
             user_uuid: userId,
             delta: entry.payload['amount'] as number,
           });
-          console.log('[SyncService.processEntry DEBUG] decrement_points RPC result:', rpcResult);
         }
         break;
       }
@@ -135,27 +130,14 @@ async function processEntry(
  * treated as dead-letters and dropped (logged to console in dev).
  */
 export async function flushSyncQueue(userId: string): Promise<void> {
-  console.log('[flushSyncQueue DEBUG] starting flush for user', userId);
   const supabase = createClient();
-
-  // Verify session exists before processing queue
-  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-  console.log('[flushSyncQueue DEBUG] auth session check:', {
-    hasSession: !!sessionData?.session,
-    sessionUserId: sessionData?.session?.user?.id,
-    sessionError,
-  });
-
   const queue = await peekQueue();
-  console.log('[flushSyncQueue DEBUG] queue entries count:', queue.length);
 
   for (const entry of queue) {
     // Only process entries that belong to the current user.
     if (entry.userId !== userId) {
-      console.log('[flushSyncQueue DEBUG] skipping entry for different user:', entry.userId);
       continue;
     }
-    console.log('[flushSyncQueue DEBUG] processing entry:', entry);
 
     const success = await processEntry(supabase, userId, entry);
 

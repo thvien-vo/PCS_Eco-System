@@ -20,24 +20,18 @@ export function useSyncManager() {
 
   useEffect(() => {
     if (!user) {
-      console.log('[useSyncManager DEBUG] user not logged in, skipping sync');
       return;
     }
 
-    console.log('[useSyncManager DEBUG] mounted, user.id =', user.id);
-
     async function flush() {
       if (!user || isFlushing.current) {
-        console.log('[useSyncManager.flush DEBUG] already flushing or no user, returning');
         return;
       }
-      console.log('[useSyncManager.flush DEBUG] starting flush for user', user.id);
       isFlushing.current = true;
       try {
         await flushSyncQueue(user.id);
-        console.log('[useSyncManager.flush DEBUG] flush completed successfully');
-      } catch (err) {
-        console.log('[useSyncManager.flush DEBUG] flush error:', err);
+      } catch {
+        // Sync errors are non-fatal — the queue entry stays and retries later.
       } finally {
         isFlushing.current = false;
       }
@@ -45,11 +39,9 @@ export function useSyncManager() {
 
     // Attempt a flush immediately on mount (catches queued actions from a
     // previous offline session that ended with the tab still open).
-    console.log('[useSyncManager DEBUG] calling flush on mount');
     flush();
 
     const handleOnline = () => {
-      console.log('[useSyncManager DEBUG] "online" event fired, calling flush');
       flush();
     };
     window.addEventListener('online', handleOnline);
