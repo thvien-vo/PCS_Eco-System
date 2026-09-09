@@ -30,6 +30,18 @@
  * │ clearInterval is the FIRST call in the useEffect return function.         │
  * │ This fires on unmount AND whenever the `phase` dependency changes,        │
  * │ which includes the user closing the modal from QR_DISPLAY (Edge Case 1). │
+ * ├───────────────────────────────────────────────────────────────────────────┤
+ * │ CAMERA CLEANUP                                                            │
+ * │ QrCameraScanner (live camera input, alternative to Simulate Scan) is     │
+ * │ only ever mounted while `cameraMode === 'active'`. A dedicated effect    │
+ * │ (separate from the countdown effect, same pattern) sets cameraMode back  │
+ * │ to 'closed' the INSTANT `phase` leaves QR_DISPLAY — scan success, modal  │
+ * │ close, or the 5s auto-reset all go through this. That state flip         │
+ * │ unmounts QrCameraScanner immediately, running its own Html5Qrcode        │
+ * │ .stop()/.clear() cleanup right away, rather than waiting for the slower  │
+ * │ AnimatePresence exit-animation unmount of this whole module — so a       │
+ * │ modal close mid-scan can never leave a video track open ("camera in     │
+ * │ use" browser-tab indicator).                                             │
  * └───────────────────────────────────────────────────────────────────────────┘
  *
  * Per pcs-tech-standards §4: all animation values from MOTION_TOKENS.
@@ -39,10 +51,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, Camera } from 'lucide-react';
 import { MOTION_TOKENS } from '@/lib/motion-tokens';
 import { useKioskStore } from '@/store/kiosk-store';
 import { useTranslation } from '@/hooks/use-translation';
+import { QrCameraScanner } from '@/components/kiosk/qr-camera-scanner';
 
 const QR_COUNTDOWN_SECONDS = 90;
 const STATION_ID = 'HCM-01'; // Mock station identifier for demo
@@ -65,6 +78,15 @@ export function QrDisplayModule({ renderTarget = 'screen' }: QrDisplayModuleProp
 
   const [displaySeconds, setDisplaySeconds] = useState<number>(QR_COUNTDOWN_SECONDS);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  /**
+   * cameraMode drives the alternative live-camera input method:
+   *   'closed' — default; shows the Simulate + Camera-scan buttons.
+   *   'active' — camera viewfinder is mounted (permission requested/granted).
+   *   'error'  — start() rejected (permission denied, no device, or the page
+   *              isn't served over a secure/HTTPS context) — falls back to
+   *              a friendly message plus the Simulate button.
+   */
+  const [cameraMode, setCameraMode] = useState<'closed' | 'active' | 'error'>('closed');
 
   // ── Refs — NEVER stale inside interval/timeout closures ──────────────────
   /**
@@ -95,14 +117,17 @@ export function QrDisplayModule({ renderTarget = 'screen' }: QrDisplayModuleProp
   }, [openKiosk]);
 
   /**
-   * handleSimulateScan — presenter presses "Simulate Scan" debug button.
+   * handleScanTransition — the ONE state-machine transition path shared by
+   * BOTH scan input methods (Simulate button AND live camera decode).
+   * Requirement: a real camera scan must feed the EXACT SAME transition the
+   * simulate button already triggers, not a parallel one.
    *
    * ORDER IS CRITICAL:
    *   1. Set isScanningRef.current = true  ← FIRST — wins any in-flight tick
    *   2. clearInterval                     ← belt-and-suspenders cleanup
    *   3. triggerScan()                     ← state machine transition
    */
-  const handleSimulateScan = useCallback(() => {
+  const handleScanTransition = useCallback(() => {
     // 1. Authoritative lock — any interval tick in the same JS event loop sees this
     isScanningRef.current = true;
 
@@ -116,15 +141,59 @@ export function QrDisplayModule({ renderTarget = 'screen' }: QrDisplayModuleProp
     triggerScan();
   }, [triggerScan]);
 
+  /** Presenter presses "Simulate QR scan" debug button. */
+  const handleSimulateScan = useCallback(() => {
+    handleScanTransition();
+  }, [handleScanTransition]);
+
+  /** Presenter presses "Scan QR with Camera" — requests permission, opens the viewfinder. */
+  const handleOpenCamera = useCallback(() => {
+    setCameraMode('active');
+  }, []);
+
+  /** Presenter cancels the live camera view and returns to the button choices. */
+  const handleCancelCamera = useCallback(() => {
+    setCameraMode('closed');
+  }, []);
+
+  /**
+   * A real QR code was decoded by the camera. The decoded string itself
+   * carries no meaning in this simulation (same as the Simulate button —
+   * neither reads QR content), so it is intentionally unused: only the
+   * transition matters, and it must be the SAME one triggerScan() drives.
+   */
+  const handleCameraScanSuccess = useCallback(() => {
+    setCameraMode('closed');
+    handleScanTransition();
+  }, [handleScanTransition]);
+
+  /** start() rejected — permission denied, no camera device, or insecure context. */
+  const handleCameraFailure = useCallback(() => {
+    setCameraMode('error');
+  }, []);
+
+  // ── Camera teardown on any exit from QR_DISPLAY ───────────────────────────
+  // Deliberately a SEPARATE effect from the countdown one below: this fires the
+  // instant `phase` changes away from QR_DISPLAY (scan success, modal close,
+  // auto-reset), unmounting QrCameraScanner — and therefore running its
+  // stop()/clear() cleanup — immediately, rather than waiting for the slower
+  // AnimatePresence exit-animation unmount of this whole module.
+  useEffect(() => {
+    if (phase !== 'QR_DISPLAY') {
+      setCameraMode('closed');
+    }
+  }, [phase]);
+
   // ── Main countdown useEffect ──────────────────────────────────────────────
   useEffect(() => {
     // Only run while in QR_DISPLAY
     if (phase !== 'QR_DISPLAY') return;
 
-    // Reset the scanning lock and countdown when entering QR_DISPLAY
+    // Reset the scanning lock, countdown, and camera view when entering QR_DISPLAY
     isScanningRef.current = false;
     countdownValueRef.current = QR_COUNTDOWN_SECONDS;
     setDisplaySeconds(QR_COUNTDOWN_SECONDS);
+    setCameraMode('closed');
 
     const id = setInterval(() => {
       // ── RACE CONDITION CHECK (per approved spec) ──────────────────────────
@@ -271,21 +340,88 @@ export function QrDisplayModule({ renderTarget = 'screen' }: QrDisplayModuleProp
         </p>
       </div>
 
-      {/* ── "Simulate Scan" debug button ── */}
-      <motion.button
-        id="kiosk-simulate-scan-btn"
-        type="button"
-        onClick={handleSimulateScan}
-        className="w-full rounded-xl bg-[var(--primary-emerald)] px-4 py-3 text-sm font-semibold text-white hover:bg-[var(--emerald-hover)] active:scale-[0.98]"
-        whileTap={{ scale: 0.97 }}
-        transition={{ duration: MOTION_TOKENS.durations.fast }}
-      >
-        {tm.simulateScanButton}
-      </motion.button>
+      {/* ── Scan input methods ── */}
+      {cameraMode === 'closed' && (
+        <>
+          {/* "Simulate Scan" debug button — stays for demo narration flexibility
+              when a live camera isn't practical mid-pitch. */}
+          <motion.button
+            id="kiosk-simulate-scan-btn"
+            type="button"
+            onClick={handleSimulateScan}
+            className="w-full rounded-xl bg-[var(--primary-emerald)] px-4 py-3 text-sm font-semibold text-white hover:bg-[var(--emerald-hover)] active:scale-[0.98]"
+            whileTap={{ scale: 0.97 }}
+            transition={{ duration: MOTION_TOKENS.durations.fast }}
+          >
+            {tm.simulateScanButton}
+          </motion.button>
 
-      <p className="text-center text-[11px] text-muted-foreground">
-        {tm.simulateScanHint}
-      </p>
+          {/* Real camera QR scan — alternative input, same triggerScan() transition */}
+          <motion.button
+            id="kiosk-camera-scan-btn"
+            type="button"
+            onClick={handleOpenCamera}
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--primary-emerald)] px-4 py-3 text-sm font-semibold text-[var(--primary-emerald)] hover:bg-[var(--primary-emerald)]/5 active:scale-[0.98]"
+            whileTap={{ scale: 0.97 }}
+            transition={{ duration: MOTION_TOKENS.durations.fast }}
+          >
+            <Camera className="h-4 w-4" />
+            {tm.cameraScanButton}
+          </motion.button>
+
+          <p className="text-center text-[11px] text-muted-foreground">
+            {tm.simulateScanHint}
+          </p>
+        </>
+      )}
+
+      {cameraMode === 'active' && (
+        <div className="flex w-full flex-col items-center gap-3">
+          <QrCameraScanner
+            onScanSuccess={handleCameraScanSuccess}
+            onFailure={handleCameraFailure}
+          />
+          <p className="text-center text-[11px] text-muted-foreground">
+            {tm.cameraViewfinderHint}
+          </p>
+          <button
+            id="kiosk-camera-cancel-btn"
+            type="button"
+            onClick={handleCancelCamera}
+            className="w-full rounded-xl border border-border px-4 py-3 text-sm font-semibold text-foreground hover:bg-card"
+          >
+            {tm.cameraCancelButton}
+          </button>
+        </div>
+      )}
+
+      {cameraMode === 'error' && (
+        <div className="flex w-full flex-col items-center gap-3">
+          <div className="w-full rounded-2xl border border-[var(--error-rose)]/40 bg-[var(--error-rose)]/5 p-4 text-center">
+            <p className="text-sm font-semibold text-[var(--error-rose)]">
+              {tm.cameraPermissionDeniedTitle}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {tm.cameraPermissionDeniedMessage}
+            </p>
+          </div>
+
+          <motion.button
+            id="kiosk-simulate-scan-btn"
+            type="button"
+            onClick={handleSimulateScan}
+            className="w-full rounded-xl bg-[var(--primary-emerald)] px-4 py-3 text-sm font-semibold text-white hover:bg-[var(--emerald-hover)] active:scale-[0.98]"
+            whileTap={{ scale: 0.97 }}
+            transition={{ duration: MOTION_TOKENS.durations.fast }}
+          >
+            {tm.simulateScanButton}
+          </motion.button>
+
+          <p className="text-center text-[11px] text-muted-foreground">
+            {tm.cameraFallbackHint}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

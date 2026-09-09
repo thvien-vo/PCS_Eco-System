@@ -478,6 +478,12 @@ export type TranslationDictionary = {
       refreshLabel: string;
       simulateScanButton: string;
       simulateScanHint: string;
+      cameraScanButton: string;
+      cameraViewfinderHint: string;
+      cameraCancelButton: string;
+      cameraPermissionDeniedTitle: string;
+      cameraPermissionDeniedMessage: string;
+      cameraFallbackHint: string;
     };
     scanPhase: {
       title: string;
@@ -1125,6 +1131,13 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
         refreshLabel: 'Mã QR tự làm mới sau {n}s',
         simulateScanButton: '📱 Giả lập quét QR',
         simulateScanHint: 'Nhấn để mô phỏng bước khách hàng quét QR tại trạm PCS',
+        cameraScanButton: '📷 Quét QR bằng Camera',
+        cameraViewfinderHint: 'Đưa mã QR vào khung hình camera để quét',
+        cameraCancelButton: 'Hủy quét camera',
+        cameraPermissionDeniedTitle: 'Không thể truy cập camera',
+        cameraPermissionDeniedMessage:
+          'Vui lòng cấp quyền camera cho trình duyệt, hoặc đảm bảo trang được truy cập qua kết nối HTTPS. Bạn vẫn có thể tiếp tục demo bằng nút giả lập bên dưới.',
+        cameraFallbackHint: 'Dùng nút "Giả lập quét QR" bên dưới để tiếp tục',
       },
       scanPhase: {
         title: 'Đang phân tích mẫu…',
@@ -1845,6 +1858,13 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
         refreshLabel: 'QR code refreshes in {n}s',
         simulateScanButton: '📱 Simulate QR scan',
         simulateScanHint: 'Tap to simulate the customer scanning the QR code at the PCS station',
+        cameraScanButton: '📷 Scan QR with Camera',
+        cameraViewfinderHint: 'Point the camera at a QR code to scan it',
+        cameraCancelButton: 'Cancel camera scan',
+        cameraPermissionDeniedTitle: 'Camera access unavailable',
+        cameraPermissionDeniedMessage:
+          'Please grant camera permission in your browser, or make sure the page is loaded over HTTPS. You can still continue the demo using the simulate button below.',
+        cameraFallbackHint: 'Use the "Simulate QR scan" button below to continue',
       },
       scanPhase: {
         title: 'Analyzing sample…',
