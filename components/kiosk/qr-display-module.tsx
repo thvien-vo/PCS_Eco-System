@@ -175,7 +175,12 @@ export function QrDisplayModule({ renderTarget = 'screen' }: QrDisplayModuleProp
     (decodedText: string) => {
       setCameraMode('closed');
 
+      // TEMP DEBUG — remove after confirming the raw decoded QR string
+      // against REMOTE_STATION_QR_PATTERN. See CLAUDE.md session notes.
+      console.log('[kiosk][qr-camera] raw decodedText:', JSON.stringify(decodedText));
+
       const match = decodedText.match(REMOTE_STATION_QR_PATTERN);
+      console.log('[kiosk][qr-camera] regex match result:', match);
       if (match) {
         const [, stationId, sessionSuffix] = match;
         connectToRemoteKiosk(stationId, `pcs-station-${stationId}-session-${sessionSuffix}`);
