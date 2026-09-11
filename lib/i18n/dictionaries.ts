@@ -498,6 +498,7 @@ export type TranslationDictionary = {
       pointsLabel: string;
       pointsSuffix: string;
       closeButton: string;
+      localDescription: string;
     };
     rejectResult: {
       fallbackLabel: string;
@@ -508,6 +509,26 @@ export type TranslationDictionary = {
       label: string;
     };
     rejectScenarios: Record<string, { label: string; guidance: string }>;
+    remote: {
+      connectingTitle: string;
+      connectingSubtitle: string;
+      connectionErrorTitle: string;
+      connectionErrorMessage: string;
+      retryButton: string;
+      fallbackButton: string;
+      awaitingTitle: string;
+      awaitingSubtitle: string;
+      tallyBottlesLabel: string;
+      tallyPointsLabel: string;
+      completeButton: string;
+      processingTitle: string;
+      processingSubtitle: string;
+      sessionEndedTitle: string;
+      sessionEndedSummary: string;
+      sessionEndedCloseButton: string;
+      transactionDescription: string;
+      guestName: string;
+    };
   };
   auth: {
     page: {
@@ -1152,6 +1173,7 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
         pointsLabel: 'Điểm thưởng nhận được',
         pointsSuffix: ' điểm',
         closeButton: 'Hoàn tất · Đóng',
+        localDescription: 'Thu gom nhựa tại trạm PCS HCM-01 (PET, 98.7%)',
       },
       rejectResult: {
         fallbackLabel: 'Từ chối',
@@ -1178,6 +1200,31 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
           label: 'Nhựa hỗn hợp / composite',
           guidance: 'Phổ đo cho thấy nhiều lớp polymer chồng nhau không thể phân tách cơ học (ví dụ: màng nhiều lớp, vỉ nhựa-nhôm). Loại này không thể tái chế cơ học — vui lòng bỏ vào thùng rác thông thường.',
         },
+        Unknown: {
+          label: 'Không xác định',
+          guidance: 'Trạm không thể phân loại vật phẩm này vì lý do không xác định. Vui lòng thử lại với vật phẩm khác hoặc liên hệ nhân viên hỗ trợ.',
+        },
+      },
+      remote: {
+        connectingTitle: 'Đang kết nối tới trạm…',
+        connectingSubtitle: 'Đang thiết lập kết nối trực tiếp với trạm PCS vật lý.',
+        connectionErrorTitle: 'Không thể kết nối tới trạm',
+        connectionErrorMessage:
+          'Kiểm tra kết nối mạng của trạm hoặc thử lại. Bạn cũng có thể tiếp tục bằng chế độ mô phỏng.',
+        retryButton: 'Thử kết nối lại',
+        fallbackButton: 'Dùng chế độ mô phỏng',
+        awaitingTitle: 'Sẵn sàng cho chai tiếp theo',
+        awaitingSubtitle: 'Đặt chai nhựa vào khoang cảm biến của trạm để tiếp tục.',
+        tallyBottlesLabel: 'Số chai đã xử lý',
+        tallyPointsLabel: 'Điểm xanh phiên này',
+        completeButton: 'Hoàn tất phiên',
+        processingTitle: 'Đang xử lý…',
+        processingSubtitle: 'Trạm đang phân tích chai vừa đưa vào.',
+        sessionEndedTitle: 'Đã kết thúc phiên',
+        sessionEndedSummary: 'Bạn đã xử lý {bottles} chai và nhận {points} điểm xanh trong phiên này.',
+        sessionEndedCloseButton: 'Đóng',
+        transactionDescription: 'Thu gom nhựa tại trạm PCS {station} (chai #{n})',
+        guestName: 'Khách PCS',
       },
     },
     auth: {
@@ -1879,6 +1926,7 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
         pointsLabel: 'Points earned',
         pointsSuffix: ' pts',
         closeButton: 'Done · Close',
+        localDescription: 'Plastic collected at PCS station HCM-01 (PET, 98.7%)',
       },
       rejectResult: {
         fallbackLabel: 'Rejected',
@@ -1905,6 +1953,31 @@ export const dictionaries: Record<'vi' | 'en', TranslationDictionary> = {
           label: 'Mixed / composite plastic',
           guidance: 'The measured spectrum shows multiple overlapping polymer layers that cannot be mechanically separated (e.g. multilayer film, plastic-foil blister packs). This type cannot be mechanically recycled — please dispose of it in general waste.',
         },
+        Unknown: {
+          label: 'Unknown',
+          guidance: 'The station could not classify this item for an unspecified reason. Please try again with a different item or contact station support.',
+        },
+      },
+      remote: {
+        connectingTitle: 'Connecting to station…',
+        connectingSubtitle: 'Establishing a live connection to the physical PCS station.',
+        connectionErrorTitle: 'Could not connect to the station',
+        connectionErrorMessage:
+          "Check the station's network connection, or try again. You can also continue using simulation mode.",
+        retryButton: 'Retry connection',
+        fallbackButton: 'Use simulation mode',
+        awaitingTitle: 'Ready for the next bottle',
+        awaitingSubtitle: 'Place a bottle in the station sensor chamber to continue.',
+        tallyBottlesLabel: 'Bottles processed',
+        tallyPointsLabel: 'Points this session',
+        completeButton: 'Complete session',
+        processingTitle: 'Processing…',
+        processingSubtitle: 'The station is analyzing the bottle you just inserted.',
+        sessionEndedTitle: 'Session ended',
+        sessionEndedSummary: 'You processed {bottles} bottle(s) and earned {points} green points this session.',
+        sessionEndedCloseButton: 'Close',
+        transactionDescription: 'Plastic collected at PCS station {station} (bottle #{n})',
+        guestName: 'PCS Guest',
       },
     },
     auth: {

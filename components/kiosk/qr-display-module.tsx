@@ -60,6 +60,14 @@ import { QrCameraScanner } from '@/components/kiosk/qr-camera-scanner';
 const QR_COUNTDOWN_SECONDS = 90;
 const STATION_ID = 'HCM-01'; // Mock station identifier for demo
 
+// A camera scan matching this shape is a DIFFERENT physical kiosk's
+// (pcs-kiosk-app's) on-screen QR — this app's own QR_DISPLAY token happens to
+// use the identical string shape, but that token is only ever shown on
+// screen for something else to scan, never read back by this app's own
+// camera. Any other decoded text keeps today's behavior (generic successful
+// scan → local mock).
+const REMOTE_STATION_QR_PATTERN = /^pcs-station-([A-Za-z0-9]+)-session-([A-Za-z0-9]+)$/;
+
 interface QrDisplayModuleProps {
   /**
    * Where to render the QR output.
@@ -72,7 +80,7 @@ interface QrDisplayModuleProps {
 }
 
 export function QrDisplayModule({ renderTarget = 'screen' }: QrDisplayModuleProps) {
-  const { phase, sessionToken, triggerScan, openKiosk } = useKioskStore();
+  const { phase, sessionToken, triggerScan, openKiosk, connectToRemoteKiosk } = useKioskStore();
   const { t } = useTranslation();
   const tm = t.kiosk.qrPhase;
 
@@ -157,15 +165,27 @@ export function QrDisplayModule({ renderTarget = 'screen' }: QrDisplayModuleProp
   }, []);
 
   /**
-   * A real QR code was decoded by the camera. The decoded string itself
-   * carries no meaning in this simulation (same as the Simulate button —
-   * neither reads QR content), so it is intentionally unused: only the
-   * transition matters, and it must be the SAME one triggerScan() drives.
+   * A real QR code was decoded by the camera. If it matches a pcs-kiosk-app
+   * station QR, branch into the remote WebSocket-handshake flow (bypassing
+   * the local mock's SIMULATED_SCAN entirely). Any other decoded text keeps
+   * the original behavior: the content is unused, only the transition
+   * matters, and it must be the SAME one triggerScan() drives.
    */
-  const handleCameraScanSuccess = useCallback(() => {
-    setCameraMode('closed');
-    handleScanTransition();
-  }, [handleScanTransition]);
+  const handleCameraScanSuccess = useCallback(
+    (decodedText: string) => {
+      setCameraMode('closed');
+
+      const match = decodedText.match(REMOTE_STATION_QR_PATTERN);
+      if (match) {
+        const [, stationId, sessionSuffix] = match;
+        connectToRemoteKiosk(stationId, `pcs-station-${stationId}-session-${sessionSuffix}`);
+        return;
+      }
+
+      handleScanTransition();
+    },
+    [handleScanTransition, connectToRemoteKiosk],
+  );
 
   /** start() rejected — permission denied, no camera device, or insecure context. */
   const handleCameraFailure = useCallback(() => {

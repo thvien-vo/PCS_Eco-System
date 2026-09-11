@@ -174,7 +174,13 @@ export interface ScanResult {
   status: 'PASS' | 'REJECT';
   confidenceScore: number;
   materialDetected?: 'PET' | 'PE' | 'PP' | 'PS' | 'PVC' | 'OOD';
-  rejectReason?: 'Low Confidence' | 'OOD Material' | 'Dirty/Wet' | 'Mixed/Composite' | 'Too Small';
+  rejectReason?:
+    | 'Low Confidence'
+    | 'OOD Material'
+    | 'Dirty/Wet'
+    | 'Mixed/Composite'
+    | 'Too Small'
+    | 'Unknown';
   pointsAwarded: number;
 }
 

@@ -43,11 +43,19 @@ import { MOTION_TOKENS } from '@/lib/motion-tokens';
 import { useKioskStore } from '@/store/kiosk-store';
 import { useWalletStore } from '@/store/wallet-store';
 import { QrDisplayModule } from '@/components/kiosk/qr-display-module';
+import { RemoteKioskWaiting } from '@/components/kiosk/remote-kiosk-waiting';
 import { ParticleBurst } from '@/components/shared/particle-burst';
 import { useTranslation } from '@/hooks/use-translation';
 import { useAuth } from '@/components/shared/auth-provider';
+import { useKioskRelaySocket } from '@/hooks/use-kiosk-relay-socket';
 import { ModalPortal } from '@/components/shared/modal-portal';
 import type { ScanResult } from '@/types';
+
+const REMOTE_ACTIVE_PHASES = [
+  'WS_CONNECTING',
+  'WS_AWAITING_BOTTLE',
+  'WS_PROCESSING',
+] as const;
 
 // ── REJECT scenario metadata (from pcs-domain-knowledge §6) ─────────────────
 // `reason` is the stable English union key (types/index.ts) used for state
@@ -64,6 +72,7 @@ const REJECT_SCENARIO_META: Array<{
   { reason: 'OOD Material', severity: 'high', icon: '🚫' },
   { reason: 'Dirty/Wet', severity: 'medium', icon: '💧' },
   { reason: 'Mixed/Composite', severity: 'high', icon: '🔀' },
+  { reason: 'Unknown', severity: 'medium', icon: '❓' },
 ];
 
 // ── PASS scenario data ────────────────────────────────────────────────────────
@@ -74,15 +83,39 @@ const PASS_RESULT: ScanResult = {
   pointsAwarded: 25,
 };
 
-const AUTO_RESET_MS = 5000; // 5 seconds (confirmed in QA turn)
+const AUTO_RESET_MS = 5000; // 5 seconds (confirmed in QA turn) — LOCAL-MOCK path only
 const POINTS_AWARDED_PASS = 25;
+const REMOTE_RESULT_DISPLAY_MS = 4000; // brief per-bottle flash before looping back to WS_AWAITING_BOTTLE
+const SESSION_ENDED_DISPLAY_MS = 4000; // brief summary before returning to IDLE
 
 export function KioskModal() {
-  const { phase, scanResult, setResult, resetKiosk, openKiosk } = useKioskStore();
+  const {
+    phase,
+    scanResult,
+    setResult,
+    resetKiosk,
+    openKiosk,
+    sessionMode,
+    remoteSession,
+    bottlesProcessed,
+    pointsThisSession,
+    advanceAfterBottleResult,
+    endRemoteSession,
+    fallbackToSimulate,
+  } = useKioskStore();
   const addPoints = useWalletStore((s) => s.addPoints);
   const { user } = useAuth();
   const { t } = useTranslation();
   const tm = t.kiosk;
+
+  const userDisplayName =
+    (user?.user_metadata as { display_name?: string } | undefined)?.display_name ||
+    user?.email ||
+    tm.remote.guestName;
+  const { connectionError, retryConnection } = useKioskRelaySocket({
+    userId: user?.id ?? null,
+    userName: userDisplayName,
+  });
 
   // Merge stable English metadata with the locale-resolved label/guidance copy.
   const REJECT_SCENARIOS = REJECT_SCENARIO_META.map((meta) => ({
@@ -154,22 +187,25 @@ export function KioskModal() {
     setIsOpen(false);
   }, [resetKiosk]);
 
-  // ── RESULT button handlers ────────────────────────────────────────────────
+  // ── RESULT button handlers (LOCAL-MOCK path only) ─────────────────────────
+  // addPoints() and the particle burst are NOT triggered here — they're
+  // driven by the phase-transition effect below, which is the single path
+  // both the local PASS button AND a remote-station "accept" message go
+  // through, so there is never a duplicate/divergent award path (see
+  // approved plan step 10). This handler only sets the click-based burst
+  // origin (a remote accept has no button to originate from) and performs
+  // the state-machine transition.
   const handlePass = useCallback(
     (e: React.MouseEvent<HTMLButtonElement>) => {
       // hasResultedRef guard — STRICTLY IGNORED if already resulted (QA confirmation #3)
       if (hasResultedRef.current) return;
       hasResultedRef.current = true; // lock immediately — before any async
 
-      setResult(PASS_RESULT);
-      addPoints(POINTS_AWARDED_PASS, 'Thu gom nhựa tại trạm PCS HCM-01 (PET, 98.7%)', user?.id);
-
-      // Fire particle burst from the button position
       const rect = e.currentTarget.getBoundingClientRect();
       setBurstOrigin({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 });
-      setBurstTrigger(true);
+      setResult(PASS_RESULT);
     },
-    [setResult, addPoints, user?.id]
+    [setResult]
   );
 
   const handleReject = useCallback(
@@ -188,9 +224,40 @@ export function KioskModal() {
     [setResult]
   );
 
-  // ── 5s auto-reset (Edge Case 7) ───────────────────────────────────────────
+  // ── Unified PASS award side-effects (local button OR remote accept) ──────
+  // Fires once per distinct scanResult the moment phase becomes RESULT_PASS,
+  // regardless of whether that transition came from the local PASS button
+  // (setResult called synchronously inside handlePass, above) or a remote
+  // "accept" bottle_result (setResult called from useKioskRelaySocket).
+  // lastAwardedResultRef guards against double-firing across re-renders.
+  const lastAwardedResultRef = useRef<ScanResult | null>(null);
+  useEffect(() => {
+    if (phase !== 'RESULT_PASS' || !scanResult) return;
+    if (lastAwardedResultRef.current === scanResult) return;
+    lastAwardedResultRef.current = scanResult;
+
+    const description =
+      sessionMode === 'remote'
+        ? tm.remote.transactionDescription
+            .replace('{station}', remoteSession?.stationId ?? '')
+            .replace('{n}', String(bottlesProcessed))
+        : tm.passResult.localDescription;
+
+    addPoints(scanResult.pointsAwarded || POINTS_AWARDED_PASS, description, user?.id);
+
+    // A remote accept has no click to originate the burst from — center it.
+    if (sessionMode === 'remote' && typeof window !== 'undefined') {
+      setBurstOrigin({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+    }
+    setBurstTrigger(true);
+  }, [phase, scanResult, sessionMode, remoteSession, bottlesProcessed, tm, addPoints, user?.id]);
+
+  // ── 5s auto-reset (Edge Case 7) — LOCAL-MOCK path only ────────────────────
+  // Remote sessions never auto-reset the whole modal after one bottle; see
+  // the per-bottle loop-back effect and the WS_SESSION_ENDED effect below.
   useEffect(() => {
     if (phase !== 'RESULT_PASS' && phase !== 'RESULT_REJECT') return;
+    if (sessionMode === 'remote') return;
 
     // Reset the visual countdown
     setAutoResetSecondsLeft(5);
@@ -218,6 +285,29 @@ export function KioskModal() {
       clearTimeout(timeoutId);
       clearInterval(intervalId);
     };
+  }, [phase, sessionMode, handleClose]);
+
+  // ── Remote per-bottle loop-back — brief flash, then back to WS_AWAITING_BOTTLE
+  useEffect(() => {
+    if (sessionMode !== 'remote') return;
+    if (phase !== 'RESULT_PASS' && phase !== 'RESULT_REJECT') return;
+
+    const timeoutId = setTimeout(() => {
+      advanceAfterBottleResult();
+    }, REMOTE_RESULT_DISPLAY_MS);
+
+    return () => clearTimeout(timeoutId);
+  }, [phase, sessionMode, advanceAfterBottleResult]);
+
+  // ── Remote session end — brief summary, then full close ───────────────────
+  useEffect(() => {
+    if (phase !== 'WS_SESSION_ENDED') return;
+
+    const timeoutId = setTimeout(() => {
+      handleClose();
+    }, SESSION_ENDED_DISPLAY_MS);
+
+    return () => clearTimeout(timeoutId);
   }, [phase, handleClose]);
 
   // Reset hasResultedRef when phase returns to SIMULATED_SCAN (shouldn't happen
@@ -410,6 +500,66 @@ export function KioskModal() {
                       </motion.div>
                     )}
 
+                    {/* ── Remote handshake phases (WS_CONNECTING / WS_AWAITING_BOTTLE /
+                        WS_PROCESSING) — one shared key so the multi-bottle loop between
+                        them doesn't re-trigger the enter/exit transition each bottle ── */}
+                    {(REMOTE_ACTIVE_PHASES as readonly string[]).includes(phase) && (
+                      <motion.div
+                        key="remote-waiting"
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{
+                          duration: MOTION_TOKENS.durations.base,
+                          ease: MOTION_TOKENS.easing.standard,
+                        }}
+                      >
+                        <RemoteKioskWaiting
+                          connectionError={connectionError}
+                          onRetryConnection={retryConnection}
+                          onFallbackToSimulate={fallbackToSimulate}
+                          onComplete={endRemoteSession}
+                        />
+                      </motion.div>
+                    )}
+
+                    {/* ── WS_SESSION_ENDED phase — brief summary before full close ── */}
+                    {phase === 'WS_SESSION_ENDED' && (
+                      <motion.div
+                        key="session-ended"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={{
+                          duration: MOTION_TOKENS.durations.slow,
+                          ease: MOTION_TOKENS.easing.enter,
+                        }}
+                        className="flex flex-col items-center gap-4 py-4"
+                      >
+                        <div className="bg-[var(--kiosk-pass)]/15 flex h-20 w-20 items-center justify-center rounded-full">
+                          <CheckCircle2 className="h-12 w-12" style={{ color: 'var(--kiosk-pass)' }} />
+                        </div>
+                        <div className="text-center">
+                          <h2 className="text-xl font-bold text-foreground">
+                            {tm.remote.sessionEndedTitle}
+                          </h2>
+                          <p className="mt-1 text-sm text-muted-foreground">
+                            {tm.remote.sessionEndedSummary
+                              .replace('{bottles}', String(bottlesProcessed))
+                              .replace('{points}', String(pointsThisSession))}
+                          </p>
+                        </div>
+                        <button
+                          id="kiosk-session-ended-close-btn"
+                          type="button"
+                          onClick={handleClose}
+                          className="w-full rounded-xl bg-[var(--kiosk-pass)] px-4 py-3 text-sm font-semibold text-white hover:opacity-90"
+                        >
+                          {tm.remote.sessionEndedCloseButton}
+                        </button>
+                      </motion.div>
+                    )}
+
                     {/* ── RESULT_PASS phase ── */}
                     {phase === 'RESULT_PASS' && scanResult && (
                       <motion.div
@@ -477,20 +627,28 @@ export function KioskModal() {
                           </div>
                         </motion.div>
 
-                        <AutoResetIndicator
-                          secondsLeft={autoResetSecondsLeft}
-                          variant="pass"
-                          label={tm.autoReset.label}
-                        />
+                        {/* Remote sessions auto-advance to the next bottle (see the
+                            loop-back effect above) instead of closing the modal —
+                            the countdown indicator and Close button below are the
+                            LOCAL-MOCK path's terminal-reset UI only. */}
+                        {sessionMode === 'local' && (
+                          <>
+                            <AutoResetIndicator
+                              secondsLeft={autoResetSecondsLeft}
+                              variant="pass"
+                              label={tm.autoReset.label}
+                            />
 
-                        <button
-                          id="kiosk-close-pass-btn"
-                          type="button"
-                          onClick={handleClose}
-                          className="w-full rounded-xl bg-[var(--kiosk-pass)] px-4 py-3 text-sm font-semibold text-white hover:opacity-90"
-                        >
-                          {tm.passResult.closeButton}
-                        </button>
+                            <button
+                              id="kiosk-close-pass-btn"
+                              type="button"
+                              onClick={handleClose}
+                              className="w-full rounded-xl bg-[var(--kiosk-pass)] px-4 py-3 text-sm font-semibold text-white hover:opacity-90"
+                            >
+                              {tm.passResult.closeButton}
+                            </button>
+                          </>
+                        )}
                       </motion.div>
                     )}
 
@@ -564,20 +722,24 @@ export function KioskModal() {
                                 {scenario?.guidance}
                               </motion.div>
 
-                              <AutoResetIndicator
-                                secondsLeft={autoResetSecondsLeft}
-                                variant="reject"
-                                label={tm.autoReset.label}
-                              />
+                              {sessionMode === 'local' && (
+                                <>
+                                  <AutoResetIndicator
+                                    secondsLeft={autoResetSecondsLeft}
+                                    variant="reject"
+                                    label={tm.autoReset.label}
+                                  />
 
-                              <button
-                                id="kiosk-close-reject-btn"
-                                type="button"
-                                onClick={handleClose}
-                                className="w-full rounded-xl border border-border px-4 py-3 text-sm font-semibold text-foreground hover:bg-card"
-                              >
-                                {tm.rejectResult.closeButton}
-                              </button>
+                                  <button
+                                    id="kiosk-close-reject-btn"
+                                    type="button"
+                                    onClick={handleClose}
+                                    className="w-full rounded-xl border border-border px-4 py-3 text-sm font-semibold text-foreground hover:bg-card"
+                                  >
+                                    {tm.rejectResult.closeButton}
+                                  </button>
+                                </>
+                              )}
                             </>
                           );
                         })()}
