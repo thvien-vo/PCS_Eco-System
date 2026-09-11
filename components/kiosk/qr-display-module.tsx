@@ -66,7 +66,7 @@ const STATION_ID = 'HCM-01'; // Mock station identifier for demo
 // screen for something else to scan, never read back by this app's own
 // camera. Any other decoded text keeps today's behavior (generic successful
 // scan → local mock).
-const REMOTE_STATION_QR_PATTERN = /^pcs-station-([A-Za-z0-9]+)-session-([A-Za-z0-9]+)$/;
+const REMOTE_STATION_QR_PATTERN = /^pcs-station-([A-Za-z0-9-]+)-session-([A-Za-z0-9-]+)$/;
 
 interface QrDisplayModuleProps {
   /**
@@ -175,12 +175,7 @@ export function QrDisplayModule({ renderTarget = 'screen' }: QrDisplayModuleProp
     (decodedText: string) => {
       setCameraMode('closed');
 
-      // TEMP DEBUG — remove after confirming the raw decoded QR string
-      // against REMOTE_STATION_QR_PATTERN. See CLAUDE.md session notes.
-      console.log('[kiosk][qr-camera] raw decodedText:', JSON.stringify(decodedText));
-
       const match = decodedText.match(REMOTE_STATION_QR_PATTERN);
-      console.log('[kiosk][qr-camera] regex match result:', match);
       if (match) {
         const [, stationId, sessionSuffix] = match;
         connectToRemoteKiosk(stationId, `pcs-station-${stationId}-session-${sessionSuffix}`);
