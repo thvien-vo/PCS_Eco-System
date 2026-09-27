@@ -11,7 +11,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) to view the app.
 <br>
-Demo App on Vercel: [PCS_Eco-System](https://pcs-eco-system-git-main-thanh-vien.vercel.app)
+Demo App on Vercel: [PCS_Eco-System](https://pcs-eco-system.vercel.app/map)
 
 ## Available Scripts
 
